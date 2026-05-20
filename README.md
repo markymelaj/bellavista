@@ -3,7 +3,7 @@
 Plataforma web para Camping y Minimarket Bellavista.  
 Hub QR → sitio del camping → minimarket con pedidos por WhatsApp.
 
-**URL de producción:** https://campingbellavista.vercel.app
+**URL de producción:** https://bellavista-topaz.vercel.app
 
 ---
 
@@ -41,10 +41,10 @@ Con `cleanUrls: true` en `vercel.json`, las páginas son accesibles sin `.html`:
 
 | Archivo          | URL limpia                                        |
 |------------------|---------------------------------------------------|
-| `index.html`     | `campingbellavista.vercel.app`                   |
-| `camping.html`   | `campingbellavista.vercel.app/camping`           |
-| `minimarket.html`| `campingbellavista.vercel.app/minimarket`        |
-| `qr.html`        | `campingbellavista.vercel.app/qr`                |
+| `index.html`     | `bellavista-topaz.vercel.app`                   |
+| `camping.html`   | `bellavista-topaz.vercel.app/camping`           |
+| `minimarket.html`| `bellavista-topaz.vercel.app/minimarket`        |
+| `qr.html`        | `bellavista-topaz.vercel.app/qr`                |
 
 ---
 
@@ -74,11 +74,11 @@ evaluando si Eleventa expone API/webhook en el plan activo.
 
 El código QR ya está generado en `qr.html`. Para imprimirlo:
 
-1. Ir a `campingbellavista.vercel.app/qr`
+1. Ir a `bellavista-topaz.vercel.app/qr`
 2. Clic en **Imprimir** o **Descargar PNG (800px)**
 3. El PNG descargado es de 800×800px — suficiente para imprimir hasta A4
 
-El QR apunta a `https://campingbellavista.vercel.app` (la raíz).  
+El QR apunta a `https://bellavista-topaz.vercel.app` (la raíz).  
 **No cambies el dominio una vez impreso el QR físico.**
 
 ---
