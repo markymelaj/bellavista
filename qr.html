@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Bellavista — Imprimir</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📱</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:    #0a160c;
+      --forest: #152218;
+      --moss:   #2e5c38;
+      --sage:   #5a9060;
+      --amber:  #c87e30;
+      --cream:  #f0e8d8;
+      --f-display: 'Cormorant Garamond', Georgia, serif;
+      --f-body:    'Jost', system-ui, sans-serif;
+    }
+
+    body {
+      background: #fff;
+      font-family: var(--f-body);
+      color: var(--ink);
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== SCREEN VIEW ===== */
+    .screen-header {
+      background: var(--forest);
+      padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .screen-header a {
+      font-size: 0.6rem; font-weight: 400;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(240,232,216,0.45); text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .screen-header a:hover { color: var(--cream); }
+
+    .screen-header span {
+      font-family: var(--f-display);
+      font-size: 1.1rem; font-weight: 400;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--cream);
+    }
+
+    .screen-actions {
+      display: flex; gap: 0.75rem; flex-wrap: wrap;
+      padding: 1.2rem 2rem;
+      background: #f8f5f0;
+      border-bottom: 1px solid #e8e0d0;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 1.2rem;
+      border-radius: 3px; border: none; cursor: pointer;
+      font-family: var(--f-body);
+      font-size: 0.62rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+
+    .btn-print {
+      background: var(--forest); color: var(--cream);
+    }
+
+    .btn-download {
+      background: var(--amber); color: #fff;
+    }
+
+    .btn-back {
+      background: transparent; color: rgba(26,14,6,0.5);
+      border: 1px solid rgba(26,14,6,0.18);
+    }
+
+    /* ===== PRINTABLE CARD ===== */
+    .card-wrapper {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 3rem 2rem;
+      background: #fff;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 480px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    /* Card header — dark brand */
+    .card-header {
+      background: var(--ink);
+      padding: 2rem 2rem 1.5rem;
+    }
+
+    .card-wordmark {
+      font-family: var(--f-display);
+      font-weight: 300; font-size: 2.8rem;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--cream); line-height: 1;
+    }
+
+    .card-tagline {
+      margin-top: 0.4rem;
+      font-size: 0.58rem; font-weight: 400;
+      letter-spacing: 0.38em; text-transform: uppercase;
+      color: rgba(240,232,216,0.45);
+    }
+
+    .card-rule {
+      width: 1.5rem; height: 1px;
+      background: var(--moss); margin: 1rem auto 0;
+    }
+
+    /* QR area */
+    .card-qr {
+      background: #fff;
+      padding: 2rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .card-qr img {
+      width: 240px; height: 240px;
+      display: block;
+    }
+
+    /* Card footer */
+    .card-footer {
+      background: #f8f5f0;
+      padding: 1.2rem 1.5rem 1.5rem;
+      border-top: 1px solid #e8e0d0;
+    }
+
+    .card-cta {
+      font-size: 0.68rem; font-weight: 500;
+      letter-spacing: 0.08em;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .card-url {
+      font-size: 0.6rem; font-weight: 300;
+      letter-spacing: 0.12em;
+      color: rgba(26,14,6,0.4);
+      text-decoration: none;
+    }
+
+    .card-services {
+      display: flex; justify-content: center; gap: 1.2rem;
+      margin-top: 1rem; flex-wrap: wrap;
+    }
+
+    .card-service {
+      font-size: 0.55rem; font-weight: 500;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(26,14,6,0.35);
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+
+    /* ===== PRINT STYLES ===== */
+    @media print {
+      .screen-header,
+      .screen-actions { display: none !important; }
+
+      body { background: #fff; }
+
+      .card-wrapper {
+        min-height: 100vh;
+        padding: 1cm;
+        align-items: flex-start;
+        justify-content: center;
+      }
+
+      .card {
+        max-width: 14cm;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+      }
+
+      .card-qr img {
+        width: 7cm; height: 7cm;
+      }
+    }
+
+    @page {
+      margin: 0.5cm;
+      size: A4 portrait;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen-only header -->
+  <div class="screen-header">
+    <a href="index.html">&larr; Volver al hub</a>
+    <span>Bellavista</span>
+    <a href="camping.html">Camping</a>
+  </div>
+
+  <!-- Screen-only action buttons -->
+  <div class="screen-actions">
+    <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir</button>
+    <a class="btn btn-download" href="https://api.qrserver.com/v1/create-qr-code/?size=800x800&data=https%3A%2F%2Fcampingbellavista.vercel.app&ecc=H&margin=2" download="qr-bellavista.png" target="_blank">⬇️ Descargar PNG (800px)</a>
+    <a class="btn btn-back" href="index.html">← Hub Bellavista</a>
+  </div>
+
+  <!-- Printable card -->
+  <div class="card-wrapper">
+    <div class="card">
+
+      <div class="card-header">
+        <h1 class="card-wordmark">Bellavista</h1>
+        <p class="card-tagline">Salto del Laja &middot; Biob&iacute;o &middot; Chile</p>
+        <div class="card-rule"></div>
+      </div>
+
+      <div class="card-qr">
+        <img
+          src="https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=https%3A%2F%2Fcampingbellavista.vercel.app&ecc=H&margin=2&color=0a160c&bgcolor=ffffff"
+          alt="QR Bellavista — campingbellavista.vercel.app"
+          width="240" height="240"
+          loading="eager"
+        />
+      </div>
+
+      <div class="card-footer">
+        <p class="card-cta">Escanea para ver todo lo que tenemos</p>
+        <a class="card-url" href="https://campingbellavista.vercel.app">campingbellavista.vercel.app</a>
+        <div class="card-services">
+          <span class="card-service">🏕️ Camping</span>
+          <span class="card-service">🛒 Minimarket</span>
+          <span class="card-service">✨ Más pronto</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

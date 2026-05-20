@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Camping Bellavista — Salto del Laja, Biob&iacute;o, Chile</title>
+  <meta name="description" content="Camping Bellavista: kayak, pesca deportiva, caminatas y acceso al río Laja. Km 10,5 Camino a Paraguay, Salto del Laja, Biobío. Acepta mascotas." />
+  <meta name="geo.position" content="-37.202726;-72.263092" />
+  <link rel="canonical" href="https://campingbellavista.vercel.app/camping" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏕️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:       #0a160c;
+      --deep:      #0f1e11;
+      --forest:    #152218;
+      --pine:      #1e3a24;
+      --moss:      #2e5c38;
+      --sage:      #5a9060;
+      --mist:      #9ec4a0;
+      --river:     #3d7585;
+      --amber:     #c87e30;
+      --honey:     #d4a055;
+      --cream:     #f0e8d8;
+      --parchment: #e4d8c0;
+      --f-display: 'Cormorant Garamond', Georgia, serif;
+      --f-body:    'Jost', system-ui, sans-serif;
+      --wa: #25d366;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--ink);
+      color: var(--cream);
+      font-family: var(--f-body);
+      overflow-x: hidden;
+    }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 9999; opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ===================== NAV ===================== */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.4rem 2.5rem;
+      transition: background 0.4s ease, padding 0.4s ease;
+    }
+
+    .nav.scrolled {
+      background: rgba(10,22,12,0.95);
+      backdrop-filter: blur(12px);
+      padding: 1rem 2.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .nav-logo {
+      font-family: var(--f-display);
+      font-weight: 400; font-size: 1.3rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--cream); text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex; gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.62rem; font-weight: 400;
+      letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(240,232,216,0.6);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--cream); }
+
+    .nav-wa {
+      display: flex; align-items: center; gap: 0.45rem;
+      padding: 0.55rem 1.1rem;
+      background: var(--wa); border-radius: 3px;
+      font-size: 0.6rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: #fff; text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .nav-wa:hover { opacity: 0.88; }
+
+    .nav-back {
+      font-size: 0.6rem; font-weight: 400;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(240,232,216,0.35);
+      text-decoration: none; transition: color 0.2s;
+    }
+
+    .nav-back:hover { color: var(--cream); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav { padding: 1.2rem 1.4rem; }
+      .nav.scrolled { padding: 0.9rem 1.4rem; }
+    }
+
+    /* ===================== HERO ===================== */
+    .hero {
+      position: relative;
+      height: 100svh; min-height: 600px;
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 2.5rem 4rem;
+      overflow: hidden;
+    }
+
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: url('https://bellavista.saltosdellaja.com/img/bellavista-7.webp') center/cover no-repeat;
+      transform: scale(1.04);
+      animation: slowzoom 18s ease-in-out alternate infinite;
+    }
+
+    @keyframes slowzoom {
+      from { transform: scale(1.04); }
+      to   { transform: scale(1.10); }
+    }
+
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        to top,
+        rgba(5,12,6,0.92) 0%,
+        rgba(5,12,6,0.5) 40%,
+        rgba(5,12,6,0.2) 70%,
+        transparent 100%
+      );
+    }
+
+    .hero-content { position: relative; z-index: 2; max-width: 800px; }
+
+    .hero-eyebrow {
+      font-size: 0.62rem; font-weight: 400;
+      letter-spacing: 0.38em; text-transform: uppercase;
+      color: var(--sage); margin-bottom: 1rem;
+    }
+
+    .hero-title {
+      font-family: var(--f-display);
+      font-style: italic; font-weight: 300;
+      font-size: clamp(4rem, 10vw, 8.5rem);
+      line-height: 0.92;
+      color: var(--cream);
+      letter-spacing: -0.01em;
+    }
+
+    .hero-tagline {
+      margin-top: 1.2rem;
+      font-size: 0.7rem; font-weight: 300;
+      letter-spacing: 0.35em; text-transform: uppercase;
+      color: rgba(240,232,216,0.55);
+    }
+
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 1.8rem;
+      background: var(--wa);
+      font-size: 0.65rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: #fff; text-decoration: none; border-radius: 3px;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover { opacity: 0.88; }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.85rem 1.8rem;
+      border: 1px solid rgba(240,232,216,0.25);
+      font-size: 0.65rem; font-weight: 400;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(240,232,216,0.7); text-decoration: none; border-radius: 3px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-ghost:hover { border-color: rgba(240,232,216,0.55); color: var(--cream); }
+
+    .hero-scroll {
+      position: absolute; bottom: 2rem; right: 2.5rem; z-index: 2;
+      font-size: 0.58rem; font-weight: 400;
+      letter-spacing: 0.25em; text-transform: uppercase;
+      color: rgba(240,232,216,0.3); text-decoration: none;
+      writing-mode: vertical-rl;
+      display: flex; align-items: center; gap: 0.8rem;
+      transition: color 0.2s;
+      animation: bounce 2.5s 1.5s ease-in-out infinite;
+    }
+
+    .hero-scroll::after {
+      content: '';
+      display: block; width: 1px; height: 2.5rem;
+      background: rgba(240,232,216,0.2);
+    }
+
+    .hero-scroll:hover { color: rgba(240,232,216,0.6); }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    /* ===================== SECTIONS BASE ===================== */
+    section { padding: 6rem 2.5rem; }
+
+    .section-tag {
+      font-size: 0.58rem; font-weight: 500;
+      letter-spacing: 0.38em; text-transform: uppercase;
+      color: var(--sage); margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: var(--f-display);
+      font-weight: 400;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      line-height: 1.08; color: var(--cream);
+    }
+
+    /* ===================== SOBRE ===================== */
+    .sobre {
+      background: var(--deep);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .sobre-text .section-title { margin-bottom: 1.5rem; }
+
+    .sobre-body {
+      font-size: 0.95rem; font-weight: 300; line-height: 1.85;
+      color: rgba(240,232,216,0.72);
+    }
+
+    .sobre-body p + p { margin-top: 1.2rem; }
+
+    .sobre-quote {
+      margin-top: 2rem;
+      padding-left: 1.4rem;
+      border-left: 2px solid var(--moss);
+      font-family: var(--f-display);
+      font-style: italic; font-weight: 300;
+      font-size: 1.2rem; line-height: 1.6;
+      color: rgba(240,232,216,0.6);
+    }
+
+    .sobre-img {
+      position: relative;
+      aspect-ratio: 4/5;
+      overflow: hidden;
+      border-radius: 2px;
+    }
+
+    .sobre-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.7s ease;
+    }
+
+    .sobre-img:hover img { transform: scale(1.04); }
+
+    .sobre-img-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 1rem 1.2rem;
+      background: linear-gradient(transparent, rgba(5,12,6,0.8));
+      font-size: 0.62rem; font-weight: 300;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: rgba(240,232,216,0.5);
+    }
+
+    @media (max-width: 768px) {
+      .sobre { grid-template-columns: 1fr; gap: 2.5rem; }
+      .sobre-img { aspect-ratio: 16/9; }
+    }
+
+    /* ===================== ACTIVIDADES ===================== */
+    .actividades { background: var(--ink); }
+
+    .actividades-header { max-width: 600px; margin-bottom: 4rem; }
+
+    .actividades-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .actividad {
+      padding: 2.2rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .actividad:nth-child(odd) {
+      padding-right: 3rem;
+      border-right: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .actividad:nth-child(even) { padding-left: 3rem; }
+
+    .actividad-num {
+      font-family: var(--f-display);
+      font-size: 1.8rem; font-weight: 300;
+      color: var(--moss); line-height: 1;
+      padding-top: 0.1rem;
+    }
+
+    .actividad-name {
+      font-family: var(--f-display);
+      font-size: 1.3rem; font-weight: 400;
+      color: var(--cream); margin-bottom: 0.4rem;
+    }
+
+    .actividad-desc {
+      font-size: 0.78rem; font-weight: 300; line-height: 1.7;
+      color: rgba(240,232,216,0.5);
+    }
+
+    @media (max-width: 640px) {
+      .actividades-grid { grid-template-columns: 1fr; }
+      .actividad:nth-child(odd) { padding-right: 0; border-right: none; }
+      .actividad:nth-child(even) { padding-left: 0; }
+    }
+
+    /* ===================== GALERÍA ===================== */
+    .galeria {
+      background: var(--deep);
+      padding-left: 0; padding-right: 0;
+    }
+
+    .galeria-header {
+      padding: 0 2.5rem; margin-bottom: 2.5rem;
+    }
+
+    .gallery-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      gap: 2px;
+      padding: 0 2.5rem 2.5rem;
+    }
+
+    .gallery-track::-webkit-scrollbar { display: none; }
+
+    .gallery-item {
+      flex: 0 0 32%;
+      scroll-snap-align: start;
+      aspect-ratio: 4/3;
+      overflow: hidden;
+      border-radius: 2px;
+      cursor: pointer;
+    }
+
+    .gallery-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+      display: block;
+    }
+
+    .gallery-item:hover img { transform: scale(1.06); }
+
+    .gallery-hint {
+      padding: 1rem 2.5rem 0;
+      font-size: 0.6rem; font-weight: 300;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(240,232,216,0.25);
+    }
+
+    @media (max-width: 640px) {
+      .gallery-item { flex: 0 0 82%; }
+    }
+
+    /* ===================== INFO PRÁCTICA ===================== */
+    .info {
+      background: var(--forest);
+    }
+
+    .info-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,0.06);
+      margin-top: 3rem;
+    }
+
+    .info-card {
+      background: var(--forest);
+      padding: 2.2rem 2rem;
+    }
+
+    .info-icon {
+      font-size: 1.6rem; margin-bottom: 1rem;
+    }
+
+    .info-card-title {
+      font-family: var(--f-display);
+      font-size: 1.4rem; font-weight: 400;
+      color: var(--cream); margin-bottom: 0.6rem;
+    }
+
+    .info-card-body {
+      font-size: 0.8rem; font-weight: 300; line-height: 1.75;
+      color: rgba(240,232,216,0.58);
+    }
+
+    .info-card-body strong {
+      font-weight: 500; color: rgba(240,232,216,0.85);
+    }
+
+    @media (max-width: 768px) {
+      .info-cards { grid-template-columns: 1fr; }
+    }
+
+    /* ===================== CÓMO LLEGAR ===================== */
+    .mapa { background: var(--ink); padding-bottom: 0; }
+
+    .mapa-inner { max-width: 700px; margin-bottom: 2.5rem; }
+
+    .mapa-btns {
+      display: flex; gap: 0.75rem; flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+
+    .btn-nav {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 1.3rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 3px;
+      font-size: 0.62rem; font-weight: 400;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: rgba(240,232,216,0.65); text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-nav:hover { border-color: rgba(255,255,255,0.35); color: var(--cream); }
+
+    .mapa-embed {
+      width: 100%; height: 400px; border: 0; display: block;
+      filter: brightness(0.85) contrast(1.05);
+      margin-top: 2.5rem;
+    }
+
+    /* ===================== CONTACTO ===================== */
+    .contacto {
+      background: var(--pine);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem; align-items: center;
+      padding: 6rem 2.5rem;
+    }
+
+    .contacto-title {
+      font-family: var(--f-display);
+      font-size: clamp(2rem, 4.5vw, 3.4rem);
+      font-weight: 300; line-height: 1.1;
+      color: var(--cream); margin-bottom: 1rem;
+    }
+
+    .contacto-sub {
+      font-size: 0.8rem; font-weight: 300; line-height: 1.75;
+      color: rgba(240,232,216,0.55);
+    }
+
+    .contacto-actions {
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+
+    .contacto-wa {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 1rem 2rem;
+      background: var(--wa); border-radius: 3px;
+      font-size: 0.68rem; font-weight: 500;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: #fff; text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .contacto-wa:hover { opacity: 0.88; }
+
+    .contacto-tel {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 1rem 2rem;
+      border: 1px solid rgba(240,232,216,0.2); border-radius: 3px;
+      font-size: 0.68rem; font-weight: 400;
+      letter-spacing: 0.12em;
+      color: rgba(240,232,216,0.65); text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .contacto-tel:hover { border-color: rgba(240,232,216,0.45); color: var(--cream); }
+
+    .contacto-info {
+      margin-top: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem;
+    }
+
+    .contacto-row {
+      display: flex; gap: 0.6rem;
+      font-size: 0.75rem; font-weight: 300;
+      color: rgba(240,232,216,0.5);
+    }
+
+    .contacto-row span:first-child { min-width: 1.2rem; }
+
+    @media (max-width: 768px) {
+      .contacto { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+
+    /* ===================== FOOTER ===================== */
+    footer {
+      background: var(--ink);
+      padding: 2rem 2.5rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+    }
+
+    .footer-logo {
+      font-family: var(--f-display);
+      font-weight: 300; font-size: 1.1rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(240,232,216,0.4); text-decoration: none;
+    }
+
+    .footer-meta {
+      font-size: 0.58rem; font-weight: 300;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(240,232,216,0.18);
+    }
+
+    .footer-back {
+      font-size: 0.58rem; font-weight: 400;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(240,232,216,0.3); text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-back:hover { color: rgba(240,232,216,0.6); }
+
+    /* ===================== WA FLOAT ===================== */
+    .wa-float {
+      position: fixed; bottom: 1.8rem; right: 1.8rem; z-index: 200;
+      width: 3rem; height: 3rem;
+      background: var(--wa);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 4px 24px rgba(37,211,102,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .wa-float:hover { transform: scale(1.08); box-shadow: 0 6px 32px rgba(37,211,102,0.5); }
+
+    .wa-float svg { width: 1.5rem; height: 1.5rem; }
+  </style>
+</head>
+<body>
+
+  <!-- ===== NAV ===== -->
+  <nav class="nav" id="nav">
+    <a href="index.html" class="nav-back">&larr; Inicio</a>
+    <a href="#inicio" class="nav-logo">Bellavista</a>
+    <ul class="nav-links">
+      <li><a href="#actividades">Actividades</a></li>
+      <li><a href="#galeria">Galer&iacute;a</a></li>
+      <li><a href="#comollegar">C&oacute;mo llegar</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <a href="https://api.whatsapp.com/send?phone=56974984220&text=Hola%20Camping%20Bellavista%2C%20me%20gustar%C3%ADa%20consultar%20disponibilidad" target="_blank" rel="noopener" class="nav-wa">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.107 1.508 5.836L.057 23.454a.75.75 0 00.918.918l5.618-1.451A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.732 9.732 0 01-5.034-1.4l-.362-.215-3.733.963.98-3.624-.235-.375A9.714 9.714 0 012.25 12C2.25 6.617 6.617 2.25 12 2.25S21.75 6.617 21.75 12 17.383 21.75 12 21.75z"/></svg>
+      Reservar
+    </a>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="inicio">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Salto del Laja &middot; Biob&iacute;o &middot; Chile</p>
+      <h1 class="hero-title">Bellavista</h1>
+      <p class="hero-tagline">Kayak &middot; Pesca &middot; R&iacute;o Laja &middot; Naturaleza</p>
+      <div class="hero-actions">
+        <a href="https://api.whatsapp.com/send?phone=56974984220&text=Hola%20Camping%20Bellavista%2C%20me%20gustar%C3%ADa%20consultar%20disponibilidad" target="_blank" rel="noopener" class="btn-primary">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.107 1.508 5.836L.057 23.454a.75.75 0 00.918.918l5.618-1.451A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.732 9.732 0 01-5.034-1.4l-.362-.215-3.733.963.98-3.624-.235-.375A9.714 9.714 0 012.25 12C2.25 6.617 6.617 2.25 12 2.25S21.75 6.617 21.75 12 17.383 21.75 12 21.75z"/></svg>
+          Consultar disponibilidad
+        </a>
+        <a href="#actividades" class="btn-ghost">Ver actividades</a>
+      </div>
+    </div>
+    <a href="#sobre" class="hero-scroll">Explorar</a>
+  </section>
+
+  <!-- ===== SOBRE ===== -->
+  <section class="sobre" id="sobre">
+    <div class="sobre-text">
+      <p class="section-tag">Camping Bellavista</p>
+      <h2 class="section-title">Donde el camino<br>dobla hacia el r&iacute;o</h2>
+      <div class="sobre-body">
+        <p>Ubicado en el km&nbsp;10,5 del Camino a Paraguay, en el Salto del Laja, el Camping Bellavista es el punto donde la Regi&oacute;n del Biob&iacute;o muestra su cara m&aacute;s tranquila. M&aacute;s lejos del ruido, m&aacute;s cerca del agua.</p>
+        <p>Acceso directo al r&iacute;o Laja, kayaks en la orilla, senderos entre pinos y prados abiertos para el asado. Un lugar que no necesita mucha explicaci&oacute;n — hay que vivirlo.</p>
+        <p>Iluminaci&oacute;n solar, estacionamiento junto al sitio, provisiones disponibles en nuestro minimarket a la entrada. Aceptamos una mascota por grupo, bajo responsabilidad de sus due&ntilde;os.</p>
+      </div>
+      <blockquote class="sobre-quote">
+        "Un entorno natural privilegiado donde el r&iacute;o Laja, el kayak y la pesca te esperan lejos del ruido de la ciudad."
+      </blockquote>
+    </div>
+    <div class="sobre-img">
+      <img src="https://bellavista.saltosdellaja.com/img/bellavista-1.webp" alt="Turista disfrutando el muelle de madera del Camping Bellavista" loading="lazy" />
+      <p class="sobre-img-caption">R&iacute;o Laja &middot; Camping Bellavista</p>
+    </div>
+  </section>
+
+  <!-- ===== ACTIVIDADES ===== -->
+  <section class="actividades" id="actividades">
+    <div class="actividades-header">
+      <p class="section-tag">Actividades &amp; Servicios</p>
+      <h2 class="section-title">Ocho razones para<br>no volver pronto</h2>
+    </div>
+    <div class="actividades-grid">
+
+      <div class="actividad">
+        <span class="actividad-num">01</span>
+        <div>
+          <h3 class="actividad-name">Acceso al R&iacute;o Laja</h3>
+          <p class="actividad-desc">Orillas naturales para nadar, descansar y perderse mirando el agua pasar. El r&iacute;o Laja en todo su estado.</p>
+        </div>
+      </div>
+
+      <div class="actividad">
+        <span class="actividad-num">02</span>
+        <div>
+          <h3 class="actividad-name">Kayak</h3>
+          <p class="actividad-desc">Kayaks disponibles para explorar los rincones m&aacute;s tranquilos del r&iacute;o a tu ritmo.</p>
+        </div>
+      </div>
+
+      <div class="actividad">
+        <span class="actividad-num">03</span>
+        <div>
+          <h3 class="actividad-name">Pesca Deportiva</h3>
+          <p class="actividad-desc">Aguas del Laja para lanzar la ca&ntilde;a y olvidar la hora. Un cl&aacute;sico que nunca falla.</p>
+        </div>
+      </div>
+
+      <div class="actividad">
+        <span class="actividad-num">04</span>
+        <div>
+          <h3 class="actividad-name">Caminatas</h3>
+          <p class="actividad-desc">Senderos naturales entre la flora del Biob&iacute;o. Sin prisa, sin mapa — s&oacute;lo caminar.</p>
+        </div>
+      </div>
+
+      <div class="actividad">
+        <span class="actividad-num">05</span>
+        <div>
+          <h3 class="actividad-name">Zona de Picnic</h3>
+          <p class="actividad-desc">Mesas y quinchos bajo los &aacute;rboles, perfectos para asados familiares y almuerzos largos.</p>
+        </div>
+      </div>
+
+      <div class="actividad">
+        <span class="actividad-num">06</span>
+        <div>
+          <h3 class="actividad-name">Cancha de F&uacute;tbol</h3>
+          <p class="actividad-desc">Prado habilitado para partidos entre grupos. Espacio amplio, pasto real, sin excusas.</p>
+        </div>
+      </div>
+
+      <div class="actividad">
+        <span class="actividad-num">07</span>
+        <div>
+          <h3 class="actividad-name">Iluminaci&oacute;n Solar</h3>
+          <p class="actividad-desc">Paneles solares que iluminan el camping de noche, respetuosos con el entorno y el cielo estrellado.</p>
+        </div>
+      </div>
+
+      <div class="actividad">
+        <span class="actividad-num">08</span>
+        <div>
+          <h3 class="actividad-name">Acepta Mascotas</h3>
+          <p class="actividad-desc">Una mascota por grupo, bienvenida. Bajo responsabilidad de sus due&ntilde;os, sin restricciones adicionales.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== GALERÍA ===== -->
+  <section class="galeria" id="galeria">
+    <div class="galeria-header">
+      <p class="section-tag">Galer&iacute;a</p>
+      <h2 class="section-title">El lugar en im&aacute;genes</h2>
+    </div>
+    <div class="gallery-track">
+      <div class="gallery-item"><img src="https://bellavista.saltosdellaja.com/img/bellavista-8.webp"  alt="Kayakistas al atardecer en el r&iacute;o Laja" loading="lazy" /></div>
+      <div class="gallery-item"><img src="https://bellavista.saltosdellaja.com/img/bellavista-10.webp" alt="Kayaks en la orilla del r&iacute;o" loading="lazy" /></div>
+      <div class="gallery-item"><img src="https://bellavista.saltosdellaja.com/img/bellavista-3.webp"  alt="Pesca deportiva en el Laja" loading="lazy" /></div>
+      <div class="gallery-item"><img src="https://bellavista.saltosdellaja.com/img/bellavista-5.webp"  alt="Familia en la zona de picnic" loading="lazy" /></div>
+      <div class="gallery-item"><img src="https://bellavista.saltosdellaja.com/img/bellavista-4.webp"  alt="Carpa instalada en el camping" loading="lazy" /></div>
+      <div class="gallery-item"><img src="https://bellavista.saltosdellaja.com/img/bellavista-6.webp"  alt="Mesa de picnic bajo los pinos" loading="lazy" /></div>
+      <div class="gallery-item"><img src="https://bellavista.saltosdellaja.com/img/bellavista-9.webp"  alt="Siluetas de &aacute;rboles al anochecer" loading="lazy" /></div>
+      <div class="gallery-item"><img src="https://bellavista.saltosdellaja.com/img/bellavista-11.webp" alt="Pradera verde del camping" loading="lazy" /></div>
+    </div>
+    <p class="gallery-hint">Desliza para ver m&aacute;s &rarr;</p>
+  </section>
+
+  <!-- ===== INFO PRÁCTICA ===== -->
+  <section class="info" id="info">
+    <p class="section-tag">Informaci&oacute;n pr&aacute;ctica</p>
+    <h2 class="section-title">Lo que necesitas saber</h2>
+    <div class="info-cards">
+
+      <div class="info-card">
+        <div class="info-icon">🕗</div>
+        <h3 class="info-card-title">Horario</h3>
+        <p class="info-card-body">
+          <strong>8:00 a 00:00</strong> todos los d&iacute;as del a&ntilde;o.<br><br>
+          Camping abierto desde la ma&ntilde;ana hasta la medianoche. Reservas y consultas por WhatsApp en cualquier momento.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-icon">🐾</div>
+        <h3 class="info-card-title">Mascotas</h3>
+        <p class="info-card-body">
+          <strong>Una mascota por grupo,</strong> bienvenida al camping.<br><br>
+          Siempre bajo responsabilidad de sus due&ntilde;os. Te pedimos mantenerla controlada dentro del predio.
+        </p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-icon">🛒</div>
+        <h3 class="info-card-title">Provisiones</h3>
+        <p class="info-card-body">
+          <strong>Minimarket Bellavista</strong> a la entrada del camping.<br><br>
+          Pan reci&eacute;n horneado todos los d&iacute;as, bebidas, snacks, carb&oacute;n, &aacute;til de aseo y mucho m&aacute;s. Abierto <strong>9:00 a 20:00.</strong>
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== CÓMO LLEGAR ===== -->
+  <section class="mapa" id="comollegar">
+    <div class="mapa-inner">
+      <p class="section-tag">C&oacute;mo llegar</p>
+      <h2 class="section-title">Camino a Paraguay km&nbsp;10,5<br>Salto del Laja, Biob&iacute;o</h2>
+      <p style="font-size:0.82rem;font-weight:300;line-height:1.75;color:rgba(240,232,216,0.55);margin-top:1rem;">
+        Acceso desde Ruta 5 Sur, desviar en el Salto del Laja hacia Camino a Paraguay. El camping se encuentra a 10,5 km del desvío, sobre la margen del r&iacute;o Laja. GPS: <strong style="color:rgba(240,232,216,0.75);">-37.202726, -72.263092</strong>
+      </p>
+      <div class="mapa-btns">
+        <a href="waze://?ll=-37.202726,-72.263092&navigate=yes" class="btn-nav">📍 Waze</a>
+        <a href="https://maps.google.com/?q=-37.202726,-72.263092" target="_blank" rel="noopener" class="btn-nav">🗺️ Google Maps</a>
+        <a href="https://maps.apple.com/?daddr=-37.202726,-72.263092" class="btn-nav">🍎 Apple Maps</a>
+      </div>
+    </div>
+    <iframe
+      class="mapa-embed"
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3130.5!2d-72.263092!3d-37.202726!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzfCsDEyJzA5LjgiUyA3MsKwMTUnNDcuMSJX!5e0!3m2!1ses!2scl!4v1710000000004!5m2!1ses!2scl"
+      allowfullscreen loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      title="Ubicaci&oacute;n Camping Bellavista">
+    </iframe>
+  </section>
+
+  <!-- ===== CONTACTO ===== -->
+  <section class="contacto" id="contacto">
+    <div>
+      <p class="section-tag">Reservas &amp; Contacto</p>
+      <h2 class="contacto-title">Escr&iacute;benos,<br>nos alegra saber de ti</h2>
+      <p class="contacto-sub">Consultas de disponibilidad, grupos, eventos o simplemente para orientarte sobre el acceso. Respondemos r&aacute;pido.</p>
+      <div class="contacto-info">
+        <div class="contacto-row"><span>📍</span><span>Camino a Paraguay km&nbsp;10,5, Salto del Laja, Biob&iacute;o</span></div>
+        <div class="contacto-row"><span>🕗</span><span>Abierto todos los d&iacute;as, 8:00 a 00:00</span></div>
+        <div class="contacto-row"><span>🐾</span><span>1 mascota por grupo</span></div>
+      </div>
+    </div>
+    <div class="contacto-actions">
+      <a href="https://api.whatsapp.com/send?phone=56974984220&text=Hola%20Camping%20Bellavista%2C%20me%20gustar%C3%ADa%20consultar%20disponibilidad" target="_blank" rel="noopener" class="contacto-wa">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.107 1.508 5.836L.057 23.454a.75.75 0 00.918.918l5.618-1.451A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.732 9.732 0 01-5.034-1.4l-.362-.215-3.733.963.98-3.624-.235-.375A9.714 9.714 0 012.25 12C2.25 6.617 6.617 2.25 12 2.25S21.75 6.617 21.75 12 17.383 21.75 12 21.75z"/></svg>
+        Escribir por WhatsApp
+      </a>
+      <a href="tel:+56974984220" class="contacto-tel">📞 +56 9 7498 4220</a>
+      <a href="tel:+56983366267" class="contacto-tel">📞 +56 9 8336 6267 (alternativo)</a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <a href="index.html" class="footer-logo">Bellavista</a>
+    <p class="footer-meta">Salto del Laja &middot; Biob&iacute;o &middot; Chile</p>
+    <a href="index.html" class="footer-back">&larr; Volver al inicio</a>
+  </footer>
+
+  <!-- WhatsApp float -->
+  <a href="https://api.whatsapp.com/send?phone=56974984220&text=Hola%20Camping%20Bellavista%2C%20me%20gustar%C3%ADa%20consultar%20disponibilidad" target="_blank" rel="noopener" class="wa-float" aria-label="Contactar por WhatsApp">
+    <svg viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.107 1.508 5.836L.057 23.454a.75.75 0 00.918.918l5.618-1.451A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.732 9.732 0 01-5.034-1.4l-.362-.215-3.733.963.98-3.624-.235-.375A9.714 9.714 0 012.25 12C2.25 6.617 6.617 2.25 12 2.25S21.75 6.617 21.75 12 17.383 21.75 12 21.75z"/></svg>
+  </a>
+
+  <script>
+    // Nav scroll behavior
+    const nav = document.getElementById('nav');
+    const onScroll = () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  </script>
+
+</body>
+</html>
