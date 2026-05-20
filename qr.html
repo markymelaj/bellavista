@@ -94,6 +94,16 @@
       display: flex; align-items: center; justify-content: center;
       padding: 3rem 2rem;
       background: #fff;
+      position: relative;
+    }
+
+    /* Real photo — subtle background, screen only */
+    .card-wrapper::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url('img/laja.jpg') center 30%/cover no-repeat;
+      opacity: 0.08;
+      pointer-events: none;
     }
 
     .card {
@@ -103,6 +113,7 @@
       border-radius: 4px;
       overflow: hidden;
       text-align: center;
+      position: relative; z-index: 1;
     }
 
     /* Card header — dark brand */
@@ -189,6 +200,9 @@
         justify-content: center;
       }
 
+      /* Hide photo background on print */
+      .card-wrapper::before { display: none !important; }
+
       .card {
         max-width: 14cm;
         border: 1px solid #ccc;
@@ -218,7 +232,7 @@
   <!-- Screen-only action buttons -->
   <div class="screen-actions">
     <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir</button>
-    <a class="btn btn-download" href="https://api.qrserver.com/v1/create-qr-code/?size=800x800&data=https%3A%2F%2Fcampingbellavista.vercel.app&ecc=H&margin=2" download="qr-bellavista.png" target="_blank">⬇️ Descargar PNG (800px)</a>
+    <a class="btn btn-download" href="https://api.qrserver.com/v1/create-qr-code/?size=800x800&data=https%3A%2F%2Fbellavista-topaz.vercel.app&ecc=H&margin=2" download="qr-bellavista.png" target="_blank">⬇️ Descargar PNG (800px)</a>
     <a class="btn btn-back" href="index.html">← Hub Bellavista</a>
   </div>
 
@@ -234,8 +248,8 @@
 
       <div class="card-qr">
         <img
-          src="https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=https%3A%2F%2Fcampingbellavista.vercel.app&ecc=H&margin=2&color=0a160c&bgcolor=ffffff"
-          alt="QR Bellavista — campingbellavista.vercel.app"
+          src="https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=https%3A%2F%2Fbellavista-topaz.vercel.app&ecc=H&margin=2&color=0a160c&bgcolor=ffffff"
+          alt="QR Bellavista — bellavista-topaz.vercel.app"
           width="240" height="240"
           loading="eager"
         />
@@ -243,7 +257,7 @@
 
       <div class="card-footer">
         <p class="card-cta">Escanea para ver todo lo que tenemos</p>
-        <a class="card-url" href="https://campingbellavista.vercel.app">campingbellavista.vercel.app</a>
+        <a class="card-url" href="https://bellavista-topaz.vercel.app">bellavista-topaz.vercel.app</a>
         <div class="card-services">
           <span class="card-service">🏕️ Camping</span>
           <span class="card-service">🛒 Minimarket</span>
