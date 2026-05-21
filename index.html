@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bellavista · Salto del Laja</title>
-  <meta name="description" content="Camping, minimarket y mucho más a orillas del Río Laja. Salto del Laja, Biobío, Chile." />
+  <title>Bellavista · Cercano a Saltos del Laja</title>
+  <meta name="description" content="Camping, minimarket y mucho más a orillas del Río Laja. Cercano a Saltos del Laja, Biobío, Chile." />
 
   <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Bellavista · Salto del Laja" />
-  <meta property="og:description" content="Camping, minimarket y mucho más a orillas del Río Laja. Salto del Laja, Biobío." />
+  <meta property="og:title" content="Bellavista · Cercano a Saltos del Laja" />
+  <meta property="og:description" content="Camping, minimarket y mucho más a orillas del Río Laja. Cercano a Saltos del Laja, Biobío." />
   <meta property="og:image" content="https://bellavista-topaz.vercel.app/img/laja.jpg" />
   <meta property="og:url" content="https://bellavista-topaz.vercel.app" />
   <meta property="og:locale" content="es_CL" />
@@ -174,18 +174,14 @@
     .portal:hover .portal-bg { transform: scale(1.05); }
     .portal:hover .portal-art { transform: scale(1.04); }
 
-    /* CAMPING — real photo, more visible */
+    /* CAMPING — real photo */
     .portal-camping .portal-bg {
       background: url('img/laja.jpg') center 35%/cover no-repeat;
-      filter: brightness(1.05) saturate(1.1);
     }
 
-    /* MINIMARKET — close-up of store products (Unsplash), with gradient + SVG fallback */
+    /* MINIMARKET — real store photo */
     .portal-market .portal-bg {
-      background:
-        url('https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat,
-        radial-gradient(ellipse at 50% 30%, #8a5128 0%, #4a2410 50%, #1a0c02 100%);
-      filter: brightness(1.0) saturate(1.05);
+      background: url('img/minimarket.jpg') center center/cover no-repeat;
     }
     .portal-market .portal-art {
       background-image: url('img/bg-minimarket.svg');
@@ -194,17 +190,14 @@
       opacity: 0;
     }
 
-    /* PRÓXIMAMENTE — abstract starry sky (Unsplash), with gradient + SVG fallback */
+    /* PRÓXIMAMENTE — abstract constellation */
     .portal-soon .portal-bg {
-      background:
-        url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat,
-        radial-gradient(ellipse at 50% 50%, #1f3f54 0%, #0d2030 55%, #050f18 100%);
+      background: radial-gradient(ellipse at 50% 50%, #1f3f54 0%, #0d2030 55%, #050f18 100%);
     }
     .portal-soon .portal-art {
       background-image: url('img/bg-proximamente.svg');
-      background-size: 85% auto;
-      background-position: center 35%;
-      opacity: 0;
+      background-size: 90% auto;
+      background-position: center 38%;
     }
 
     /* DARK OVERLAY — protects title at bottom */
@@ -213,15 +206,27 @@
     }
 
     .portal-camping::after {
-      background: linear-gradient(to top, rgba(5,15,6,0.88) 0%, rgba(5,15,6,0.15) 60%, transparent 100%);
+      background: linear-gradient(to top,
+        rgba(5,15,6,0.96) 0%,
+        rgba(5,15,6,0.85) 30%,
+        rgba(5,15,6,0.4) 60%,
+        rgba(5,15,6,0.1) 100%);
     }
 
     .portal-market::after {
-      background: linear-gradient(to top, rgba(20,8,0,0.92) 0%, rgba(20,8,0,0.45) 55%, rgba(20,8,0,0.18) 100%);
+      background: linear-gradient(to top,
+        rgba(20,8,0,0.97) 0%,
+        rgba(20,8,0,0.88) 30%,
+        rgba(20,8,0,0.5) 60%,
+        rgba(20,8,0,0.15) 100%);
     }
 
     .portal-soon::after {
-      background: linear-gradient(to top, rgba(5,10,20,0.92) 0%, rgba(5,10,20,0.45) 55%, rgba(5,10,20,0.18) 100%);
+      background: linear-gradient(to top,
+        rgba(5,10,20,0.96) 0%,
+        rgba(5,10,20,0.85) 30%,
+        rgba(5,10,20,0.45) 60%,
+        rgba(5,10,20,0.15) 100%);
     }
 
     .portal-line {
@@ -267,6 +272,7 @@
       font-weight: 400;
       font-size: clamp(1.6rem, 3.5vw, 2.5rem);
       line-height: 1.1; color: var(--cream);
+      text-shadow: 0 2px 14px rgba(0,0,0,0.5);
     }
 
     .portal-desc {
@@ -339,14 +345,14 @@
 
   <header class="hub-header">
     <h1 class="wordmark">Bellavista</h1>
-    <p class="sub">Salto del Laja &middot; Biob&iacute;o &middot; Chile</p>
+    <p class="sub">Cercano a Saltos del Laja &middot; Biob&iacute;o &middot; Chile</p>
     <div class="rule"></div>
   </header>
 
   <div class="loc-bar">
     <a class="loc-addr" href="https://maps.app.goo.gl/xzN5SZcovHiB2FJi7" target="_blank" rel="noopener">
       <svg width="10" height="13" viewBox="0 0 10 13" fill="currentColor"><path d="M5 0C2.24 0 0 2.24 0 5c0 3.75 5 8 5 8s5-4.25 5-8c0-2.76-2.24-5-5-5zm0 6.5C4.17 6.5 3.5 5.83 3.5 5S4.17 3.5 5 3.5 6.5 4.17 6.5 5 5.83 6.5 5 6.5z"/></svg>
-      Camino a Paraguay km&nbsp;10,5 &middot; Salto del Laja
+      Camino a Paraguay km&nbsp;10,5 &middot; Cercano a Saltos del Laja
     </a>
     <div class="loc-actions">
       <a class="loc-btn loc-btn-maps" href="https://maps.app.goo.gl/xzN5SZcovHiB2FJi7" target="_blank" rel="noopener">
@@ -400,7 +406,7 @@
   </nav>
 
   <footer class="hub-footer">
-    <p>Camino a Paraguay km&nbsp;10,5 &middot; Salto del Laja &middot; Biob&iacute;o &middot; Chile</p>
+    <p>Camino a Paraguay km&nbsp;10,5 &middot; Cercano a Saltos del Laja &middot; Biob&iacute;o &middot; Chile</p>
     <a href="qr.html" class="hub-footer-qr">&#128241; QR imprimible</a>
   </footer>
 

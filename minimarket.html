@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Minimarket Bellavista — Salto del Laja</title>
+  <title>Minimarket Bellavista — Cercano a Saltos del Laja</title>
   <meta name="description" content="Pan recién horneado, bebidas, abarrotes, carbón y más. Abierto 9 a 20h. Efectivo, tarjetas y Caja Vecina." />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Minimarket Bellavista · Salto del Laja" />
+  <meta property="og:title" content="Minimarket Bellavista · Cercano a Saltos del Laja" />
   <meta property="og:description" content="Pan recién horneado y todo lo que necesitas. Abierto 9-20h. Te lo acercamos al camping." />
   <meta property="og:image" content="https://bellavista-topaz.vercel.app/img/laja.jpg" />
   <meta property="og:url" content="https://bellavista-topaz.vercel.app/minimarket" />
@@ -130,6 +130,31 @@
       box-shadow: 0 2px 8px rgba(200,120,48,0.35);
     }
     .cart-btn:hover { background: var(--honey); transform: translateY(-1px); }
+
+    /* Live subtotal pill — appears next to cart button */
+    .cart-total-live {
+      display: none;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.1rem;
+      padding: 0.35rem 0.85rem;
+      background: rgba(46,92,56,0.18);
+      border: 1px solid rgba(95,219,122,0.35);
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .cart-total-live.visible { display: flex; }
+    .cart-total-live:hover { background: rgba(46,92,56,0.28); cursor: pointer; }
+    .cart-total-live-amount {
+      font-family: var(--f-d);
+      font-size: 1.15rem; font-weight: 500;
+      color: var(--gold); line-height: 1;
+    }
+    .cart-total-live-count {
+      font-size: 0.5rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(245,240,232,0.55);
+    }
     .cart-count {
       position: absolute; top: -7px; right: -7px;
       background: var(--moss); color: #fff;
@@ -579,8 +604,14 @@
     .footer-back:hover { color: rgba(245,240,232,0.65); }
 
     @media (max-width: 640px) {
-      .site-header { padding: 1rem; }
+      .site-header { padding: 0.85rem 1rem; }
       .header-status { display: none; }
+      .header-right { gap: 0.55rem; }
+      .cart-total-live { padding: 0.32rem 0.65rem; border-radius: 3px; }
+      .cart-total-live-amount { font-size: 0.95rem; }
+      .cart-total-live-count { font-size: 0.46rem; letter-spacing: 0.14em; }
+      .cart-btn { padding: 0.55rem 0.75rem; gap: 0.35rem; }
+      .cart-btn-label { display: none; }
       .catalog { padding: 1.5rem 1rem 5rem; }
       .hero-banner { padding: 2rem 1rem; }
       .info-strip { padding: 0.7rem 1rem; }
@@ -598,7 +629,7 @@
   <div class="topbar">
     <a class="topbar-addr" href="https://maps.app.goo.gl/xzN5SZcovHiB2FJi7" target="_blank" rel="noopener">
       <svg width="9" height="12" viewBox="0 0 9 12" fill="currentColor"><path d="M4.5 0C2.01 0 0 2.01 0 4.5c0 3.37 4.5 7.5 4.5 7.5S9 7.87 9 4.5C9 2.01 6.99 0 4.5 0zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
-      Camino a Paraguay km&nbsp;10,5 &middot; Salto del Laja
+      Camino a Paraguay km&nbsp;10,5 &middot; Cercano a Saltos del Laja
     </a>
     <div class="topbar-nav">
       <a href="camping.html">Camping</a>
@@ -617,8 +648,13 @@
           <span class="status-dot open"></span>
           <span>Abierto 9:00&ndash;20:00</span>
         </div>
+        <div class="cart-total-live" id="cart-total-live" onclick="toggleCart()" title="Ver pedido">
+          <span class="cart-total-live-amount" id="cart-total-live-amount">$0</span>
+          <span class="cart-total-live-count" id="cart-total-live-count">0 productos</span>
+        </div>
         <button class="cart-btn" onclick="toggleCart()">
-          &#128722;&nbsp;Mi pedido
+          <span class="cart-btn-icon">&#128722;</span>
+          <span class="cart-btn-label">Mi pedido</span>
           <span class="cart-count" id="cart-count">0</span>
         </button>
       </div>
@@ -728,7 +764,7 @@
 
   <footer class="site-footer">
     <a href="index.html" class="footer-brand">Bellavista</a>
-    <span class="footer-meta">Camino a Paraguay km&nbsp;10,5 &middot; Salto del Laja &middot; Biob&iacute;o</span>
+    <span class="footer-meta">Camino a Paraguay km&nbsp;10,5 &middot; Cercano a Saltos del Laja &middot; Biob&iacute;o</span>
     <a href="index.html" class="footer-back">&larr; Volver al inicio</a>
   </footer>
 
@@ -896,6 +932,16 @@
       document.getElementById('cart-total-amount').textContent = fmt(total);
       document.getElementById('cart-total-count').textContent = count;
       document.getElementById('cart-clear-btn').style.display = count > 0 ? '' : 'none';
+
+      // Live total beside cart button
+      var liveEl = document.getElementById('cart-total-live');
+      if (count > 0) {
+        liveEl.classList.add('visible');
+        document.getElementById('cart-total-live-amount').textContent = fmt(total);
+        document.getElementById('cart-total-live-count').textContent = count + (count === 1 ? ' producto' : ' productos');
+      } else {
+        liveEl.classList.remove('visible');
+      }
 
       var itemsEl = document.getElementById('cart-items');
       if (count === 0) {
