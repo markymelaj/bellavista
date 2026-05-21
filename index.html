@@ -86,23 +86,53 @@
     .rule { width: 2rem; height: 1px; background: var(--moss); margin: 1.2rem auto 0; }
 
     .loc-bar {
-      background: rgba(46,92,56,0.18);
+      background: rgba(46,92,56,0.15);
       border-top: 1px solid rgba(90,144,96,0.15);
       border-bottom: 1px solid rgba(90,144,96,0.15);
-      padding: 0.65rem 2rem;
+      padding: 0.7rem 2rem;
       display: flex; align-items: center; justify-content: center;
+      gap: 1.5rem; flex-wrap: wrap;
       opacity: 0; animation: rise 0.8s 0.2s ease forwards;
     }
 
-    .loc-bar a {
+    .loc-addr {
       display: inline-flex; align-items: center; gap: 0.55rem;
-      font-size: 0.65rem; font-weight: 400;
-      letter-spacing: 0.2em; text-transform: uppercase;
-      color: rgba(158,196,160,0.85);
+      font-size: 0.62rem; font-weight: 400;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(158,196,160,0.7);
       text-decoration: none; transition: color 0.2s;
     }
 
-    .loc-bar a:hover { color: var(--mist); }
+    .loc-addr:hover { color: var(--mist); }
+
+    .loc-actions {
+      display: flex; gap: 0.5rem;
+    }
+
+    .loc-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 3px;
+      font-size: 0.56rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      text-decoration: none;
+      transition: transform 0.15s, background 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .loc-btn:hover { transform: translateY(-1px); }
+
+    .loc-btn-maps {
+      background: rgba(90,144,96,0.18);
+      border: 1px solid rgba(90,144,96,0.35);
+      color: var(--mist);
+    }
+    .loc-btn-maps:hover { background: rgba(90,144,96,0.32); color: var(--cream); }
+
+    .loc-btn-wa {
+      background: #25d366;
+      color: #fff;
+    }
+    .loc-btn-wa:hover { background: #1fb955; }
 
     .portals {
       display: grid;
@@ -144,29 +174,37 @@
     .portal:hover .portal-bg { transform: scale(1.05); }
     .portal:hover .portal-art { transform: scale(1.04); }
 
-    /* CAMPING — real photo */
+    /* CAMPING — real photo, more visible */
     .portal-camping .portal-bg {
-      background: url('img/laja.jpg') center 40%/cover no-repeat;
+      background: url('img/laja.jpg') center 35%/cover no-repeat;
+      filter: brightness(1.05) saturate(1.1);
     }
 
-    /* MINIMARKET — warm gradient + bodegón SVG */
+    /* MINIMARKET — close-up of store products (Unsplash), with gradient + SVG fallback */
     .portal-market .portal-bg {
-      background: radial-gradient(ellipse at 50% 30%, #8a5128 0%, #4a2410 50%, #1a0c02 100%);
+      background:
+        url('https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat,
+        radial-gradient(ellipse at 50% 30%, #8a5128 0%, #4a2410 50%, #1a0c02 100%);
+      filter: brightness(1.0) saturate(1.05);
     }
     .portal-market .portal-art {
       background-image: url('img/bg-minimarket.svg');
       background-size: 80% auto;
       background-position: center 32%;
+      opacity: 0;
     }
 
-    /* PRÓXIMAMENTE — deep gradient + constellation SVG */
+    /* PRÓXIMAMENTE — abstract starry sky (Unsplash), with gradient + SVG fallback */
     .portal-soon .portal-bg {
-      background: radial-gradient(ellipse at 50% 50%, #1f3f54 0%, #0d2030 55%, #050f18 100%);
+      background:
+        url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat,
+        radial-gradient(ellipse at 50% 50%, #1f3f54 0%, #0d2030 55%, #050f18 100%);
     }
     .portal-soon .portal-art {
       background-image: url('img/bg-proximamente.svg');
       background-size: 85% auto;
       background-position: center 35%;
+      opacity: 0;
     }
 
     /* DARK OVERLAY — protects title at bottom */
@@ -175,15 +213,15 @@
     }
 
     .portal-camping::after {
-      background: linear-gradient(to top, rgba(5,15,6,0.92) 0%, rgba(5,15,6,0.28) 55%, transparent 100%);
+      background: linear-gradient(to top, rgba(5,15,6,0.88) 0%, rgba(5,15,6,0.15) 60%, transparent 100%);
     }
 
     .portal-market::after {
-      background: linear-gradient(to top, rgba(20,8,0,0.88) 0%, rgba(20,8,0,0.4) 50%, transparent 100%);
+      background: linear-gradient(to top, rgba(20,8,0,0.92) 0%, rgba(20,8,0,0.45) 55%, rgba(20,8,0,0.18) 100%);
     }
 
     .portal-soon::after {
-      background: linear-gradient(to top, rgba(5,10,20,0.85) 0%, rgba(5,10,20,0.35) 55%, transparent 100%);
+      background: linear-gradient(to top, rgba(5,10,20,0.92) 0%, rgba(5,10,20,0.45) 55%, rgba(5,10,20,0.18) 100%);
     }
 
     .portal-line {
@@ -283,8 +321,10 @@
       .portal { min-height: 33svh; padding: 1.5rem 1.4rem; }
       .portal-arrow { opacity: 0.75; transform: translateX(0); }
       .hub-header { padding: 2rem 1.5rem 1.2rem; }
-      .loc-bar { padding: 0.65rem 1.2rem; }
-      .loc-bar a { font-size: 0.58rem; }
+      .loc-bar { padding: 0.7rem 1rem; gap: 0.7rem; flex-direction: column; }
+      .loc-addr { font-size: 0.56rem; letter-spacing: 0.14em; text-align: center; }
+      .loc-actions { width: 100%; justify-content: center; }
+      .loc-btn { font-size: 0.52rem; padding: 0.4rem 0.7rem; }
       .portal-art { background-size: 65% auto !important; }
     }
 
@@ -304,10 +344,20 @@
   </header>
 
   <div class="loc-bar">
-    <a href="https://maps.app.goo.gl/xzN5SZcovHiB2FJi7" target="_blank" rel="noopener">
+    <a class="loc-addr" href="https://maps.app.goo.gl/xzN5SZcovHiB2FJi7" target="_blank" rel="noopener">
       <svg width="10" height="13" viewBox="0 0 10 13" fill="currentColor"><path d="M5 0C2.24 0 0 2.24 0 5c0 3.75 5 8 5 8s5-4.25 5-8c0-2.76-2.24-5-5-5zm0 6.5C4.17 6.5 3.5 5.83 3.5 5S4.17 3.5 5 3.5 6.5 4.17 6.5 5 5.83 6.5 5 6.5z"/></svg>
-      Camino a Paraguay km&nbsp;10,5 &middot; Salto del Laja &middot; <strong style="font-weight:500">Ver en mapa &rarr;</strong>
+      Camino a Paraguay km&nbsp;10,5 &middot; Salto del Laja
     </a>
+    <div class="loc-actions">
+      <a class="loc-btn loc-btn-maps" href="https://maps.app.goo.gl/xzN5SZcovHiB2FJi7" target="_blank" rel="noopener">
+        <svg width="10" height="13" viewBox="0 0 10 13" fill="currentColor"><path d="M5 0C2.24 0 0 2.24 0 5c0 3.75 5 8 5 8s5-4.25 5-8c0-2.76-2.24-5-5-5zm0 6.5C4.17 6.5 3.5 5.83 3.5 5S4.17 3.5 5 3.5 6.5 4.17 6.5 5 5.83 6.5 5 6.5z"/></svg>
+        C&oacute;mo llegar
+      </a>
+      <a class="loc-btn loc-btn-wa" href="https://api.whatsapp.com/send?phone=56974984220&text=Hola%20Bellavista%2C%20me%20gustar%C3%ADa%20consultar" target="_blank" rel="noopener">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.107 1.508 5.836L.057 23.454a.75.75 0 00.918.918l5.618-1.451A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.732 9.732 0 01-5.034-1.4l-.362-.215-3.733.963.98-3.624-.235-.375A9.714 9.714 0 012.25 12C2.25 6.617 6.617 2.25 12 2.25S21.75 6.617 21.75 12 17.383 21.75 12 21.75z"/></svg>
+        WhatsApp
+      </a>
+    </div>
   </div>
 
   <nav class="portals" aria-label="Secciones Bellavista">
