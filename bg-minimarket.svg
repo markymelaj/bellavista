@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200" preserveAspectRatio="xMidYMid meet">
+  <g fill="none" stroke="rgba(232,185,106,0.32)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- counter line -->
+    <line x1="20" y1="170" x2="260" y2="170" />
+    <!-- tall bottle -->
+    <path d="M 58 90 L 58 84 Q 58 80 62 80 L 68 80 Q 72 80 72 84 L 72 90 L 75 95 L 75 168 L 55 168 L 55 95 Z" />
+    <line x1="58" y1="108" x2="72" y2="108" />
+    <!-- round bread loaf -->
+    <ellipse cx="125" cy="148" rx="30" ry="22" />
+    <path d="M 105 145 Q 125 130 145 145" />
+    <path d="M 112 138 Q 118 134 124 138" />
+    <path d="M 128 138 Q 134 134 140 138" />
+    <!-- box / can -->
+    <rect x="180" y="105" width="48" height="63" rx="1.5" />
+    <line x1="180" y1="120" x2="228" y2="120" />
+    <circle cx="204" cy="138" r="9" />
+    <!-- small jar -->
+    <rect x="245" y="135" width="14" height="33" rx="1" />
+    <line x1="245" y1="142" x2="259" y2="142" />
+  </g>
+</svg>

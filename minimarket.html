@@ -4,11 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Minimarket Bellavista — Salto del Laja</title>
-  <meta name="description" content="Minimarket Bellavista: pan recién horneado, bebidas, abarrotes, carbón y más. Abierto 9 a 20h. Efectivo, tarjetas y Caja Vecina." />
+  <meta name="description" content="Pan recién horneado, bebidas, abarrotes, carbón y más. Abierto 9 a 20h. Efectivo, tarjetas y Caja Vecina." />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Minimarket Bellavista · Salto del Laja" />
+  <meta property="og:description" content="Pan recién horneado y todo lo que necesitas. Abierto 9-20h. Te lo acercamos al camping." />
+  <meta property="og:image" content="https://bellavista-topaz.vercel.app/img/laja.jpg" />
+  <meta property="og:url" content="https://bellavista-topaz.vercel.app/minimarket" />
+  <meta property="og:locale" content="es_CL" />
+  <meta name="twitter:card" content="summary_large_image" />
+
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -25,8 +35,8 @@
       --ink:       #1a0e06;
       --moss:      #2e5c38;
       --sage:      #5a9060;
-      --leaf:      #dff0e2;
       --wa:        #25d366;
+      --hairline:  rgba(30,15,4,0.08);
       --f-d: 'Cormorant Garamond', Georgia, serif;
       --f-b: 'Jost', system-ui, sans-serif;
     }
@@ -90,21 +100,23 @@
     }
     .header-right { display: flex; align-items: center; gap: 1rem; }
     .header-status {
-      display: flex; align-items: center; gap: 0.4rem;
+      display: flex; align-items: center; gap: 0.45rem;
       font-size: 0.58rem; font-weight: 400;
       letter-spacing: 0.14em; text-transform: uppercase;
-      color: rgba(245,240,232,0.45);
+      color: rgba(245,240,232,0.55);
     }
     .status-dot {
       width: 7px; height: 7px; border-radius: 50%;
-      background: var(--wa);
-      box-shadow: 0 0 0 2px rgba(37,211,102,0.2);
-      animation: pulse 2.5s infinite;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.05);
     }
+    .status-dot.open  { background: var(--wa); animation: pulse 2.5s infinite; }
+    .status-dot.closed { background: #d96050; }
+
     @keyframes pulse {
       0%,100% { box-shadow: 0 0 0 2px rgba(37,211,102,0.2); }
       50%      { box-shadow: 0 0 0 5px rgba(37,211,102,0.06); }
     }
+
     .cart-btn {
       position: relative;
       background: var(--amber); border: none;
@@ -118,7 +130,6 @@
       box-shadow: 0 2px 8px rgba(200,120,48,0.35);
     }
     .cart-btn:hover { background: var(--honey); transform: translateY(-1px); }
-    .cart-btn:active { transform: translateY(0); }
     .cart-count {
       position: absolute; top: -7px; right: -7px;
       background: var(--moss); color: #fff;
@@ -133,7 +144,7 @@
     /* ===== INFO STRIP ===== */
     .info-strip {
       background: var(--parchment);
-      border-bottom: 1px solid rgba(30,15,4,0.1);
+      border-bottom: 1px solid rgba(30,15,4,0.08);
       padding: 0.7rem 2rem;
     }
     .info-strip-inner {
@@ -143,7 +154,7 @@
     .info-item {
       display: flex; align-items: center; gap: 0.4rem;
       font-size: 0.62rem; font-weight: 400;
-      color: rgba(26,14,6,0.62);
+      color: rgba(26,14,6,0.6);
     }
     .info-item a {
       color: inherit; text-decoration: none;
@@ -153,18 +164,14 @@
     .info-item a:hover { color: var(--mahogany); border-color: rgba(26,14,6,0.45); }
     .info-sep { width: 1px; height: 14px; background: rgba(26,14,6,0.12); }
 
-    /* ===== PAYMENT CHIPS ===== */
-    .pay-chips {
-      display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
-    }
+    .pay-chips { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
     .pay-chip {
       display: inline-flex; align-items: center; gap: 0.25rem;
-      font-size: 0.56rem; font-weight: 600;
+      font-size: 0.55rem; font-weight: 600;
       letter-spacing: 0.12em; text-transform: uppercase;
       padding: 0.22rem 0.55rem; border-radius: 3px;
-      background: rgba(46,92,56,0.12);
-      color: var(--moss);
-      border: 1px solid rgba(46,92,56,0.2);
+      background: rgba(46,92,56,0.1); color: var(--moss);
+      border: 1px solid rgba(46,92,56,0.18);
     }
 
     /* ===== HERO BANNER ===== */
@@ -178,8 +185,7 @@
       position: absolute; right: 3rem; top: 50%;
       transform: translateY(-50%);
       font-size: clamp(5rem, 12vw, 9rem);
-      opacity: 0.08; pointer-events: none;
-      filter: blur(1px);
+      opacity: 0.08; pointer-events: none; filter: blur(1px);
     }
     .hero-banner::after {
       content: '';
@@ -195,9 +201,7 @@
       display: flex; align-items: center; gap: 0.5rem;
     }
     .hero-tag::before {
-      content: '';
-      display: inline-block; width: 1.5rem; height: 1px;
-      background: var(--amber);
+      content: ''; display: inline-block; width: 1.5rem; height: 1px; background: var(--amber);
     }
     .hero-title {
       font-family: var(--f-d);
@@ -212,13 +216,62 @@
     .hero-desc strong { color: var(--gold); font-weight: 500; }
 
     /* ===== CATALOG ===== */
-    .catalog { max-width: 1200px; margin: 0 auto; padding: 2.5rem 2rem 6rem; }
+    .catalog { max-width: 1200px; margin: 0 auto; padding: 2rem 2rem 6rem; }
 
-    /* Category tabs */
+    /* SEARCH */
+    .search-row {
+      display: flex; gap: 0.8rem; align-items: center;
+      padding: 0.4rem 0 1.4rem;
+      flex-wrap: wrap;
+    }
+    .search-wrap {
+      position: relative; flex: 1; min-width: 220px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.7rem 2.4rem 0.7rem 2.4rem;
+      background: #fff;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      font-family: var(--f-b);
+      font-size: 0.85rem; font-weight: 300;
+      color: var(--ink);
+      transition: border-color 0.2s;
+    }
+    .search-input:focus { outline: none; border-color: var(--amber); }
+    .search-icon {
+      position: absolute; left: 0.85rem; top: 50%;
+      transform: translateY(-50%);
+      color: rgba(26,14,6,0.3);
+      pointer-events: none;
+    }
+    .search-clear {
+      position: absolute; right: 0.55rem; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(26,14,6,0.35);
+      font-size: 1rem; cursor: pointer; line-height: 1;
+      border-radius: 50%;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s, background 0.2s;
+    }
+    .search-clear.visible { opacity: 1; pointer-events: all; }
+    .search-clear:hover { background: rgba(26,14,6,0.06); color: var(--ink); }
+
+    .results-count {
+      font-size: 0.6rem; font-weight: 400;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(26,14,6,0.4);
+      white-space: nowrap;
+    }
+
+    /* TABS */
     .cat-tabs {
       display: flex; gap: 0; flex-wrap: wrap;
-      border-bottom: 1px solid rgba(30,15,4,0.1);
-      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: 2rem;
     }
     .cat-tab {
       padding: 0.75rem 1rem;
@@ -234,66 +287,77 @@
     .cat-tab:hover { color: rgba(26,14,6,0.7); }
     .cat-tab.active { color: var(--espresso); border-bottom-color: var(--amber); }
 
-    /* Products grid */
+    /* PRODUCTS — minimal cards */
     .products-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
-      gap: 2px;
-      background: rgba(30,15,4,0.06);
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0;
     }
 
-    /* ---- CARD ---- */
     .product-card {
       background: #fff;
-      padding: 1.4rem 1.2rem 1.2rem;
+      padding: 1.5rem 1.25rem 1.25rem;
       display: flex; flex-direction: column;
       gap: 0;
-      transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
-      cursor: default;
       position: relative;
+      border: 1px solid transparent;
+      border-bottom: 1px solid var(--hairline);
+      border-right: 1px solid var(--hairline);
+      transition: border-color 0.2s, background 0.2s, z-index 0s 0.2s;
     }
     .product-card:hover {
-      background: var(--parchment);
-      z-index: 1;
-      box-shadow: 0 4px 20px rgba(30,15,4,0.1);
-      transform: translateY(-1px);
+      background: #fffcf6;
+      border-color: rgba(200,120,48,0.4);
+      z-index: 2;
+      transition: border-color 0.2s, background 0.2s, z-index 0s;
     }
 
-    /* Top row: emoji + badge */
+    /* In-cart accent */
+    .product-card.in-cart {
+      background: linear-gradient(180deg, rgba(46,92,56,0.04) 0%, rgba(46,92,56,0.0) 100%);
+    }
+    .product-card.in-cart::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0;
+      width: 2px; background: var(--moss);
+    }
+
     .card-top {
       display: flex; align-items: flex-start; justify-content: space-between;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.6rem; min-height: 2.2rem;
     }
-    .product-emoji { font-size: 2rem; line-height: 1; }
+    .product-emoji { font-size: 1.8rem; line-height: 1; }
     .product-badge {
-      font-size: 0.46rem; font-weight: 700;
-      letter-spacing: 0.18em; text-transform: uppercase;
+      font-size: 0.45rem; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
       padding: 0.2rem 0.5rem; border-radius: 3px;
       background: var(--amber); color: var(--bark);
+      align-self: flex-start;
     }
 
     .product-name {
       font-size: 0.85rem; font-weight: 400;
       color: var(--ink); line-height: 1.4;
-      flex: 1; margin-bottom: 0.5rem;
+      margin-bottom: 0.45rem;
+      flex: 1;
     }
 
-    /* Price */
+    .product-price-row {
+      display: flex; align-items: baseline; gap: 0.4rem;
+      margin-bottom: 0.85rem;
+    }
     .product-price {
       font-family: var(--f-d);
-      font-size: 1.2rem; font-weight: 500;
-      color: var(--mahogany);
-      line-height: 1; margin-bottom: 0.85rem;
+      font-size: 1.25rem; font-weight: 500;
+      color: var(--mahogany); line-height: 1;
     }
-    .product-price-ref {
+    .product-unit {
       font-family: var(--f-b);
       font-size: 0.5rem; font-weight: 400;
-      letter-spacing: 0.18em; text-transform: uppercase;
+      letter-spacing: 0.15em; text-transform: uppercase;
       color: rgba(26,14,6,0.35);
-      display: block; margin-top: 0.12rem;
     }
 
-    /* Controls */
     .product-controls {
       display: flex; align-items: center; gap: 0.5rem;
       margin-top: auto;
@@ -316,19 +380,28 @@
       color: var(--ink); font-family: var(--f-b);
     }
 
-    /* Quantity indicator dot */
-    .product-card.in-cart::before {
-      content: '';
-      position: absolute; top: 0.6rem; left: 0.6rem;
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--moss);
+    /* EMPTY STATES */
+    .empty-state {
+      grid-column: 1 / -1;
+      padding: 4rem 1rem;
+      text-align: center;
+      color: rgba(26,14,6,0.4);
+    }
+    .empty-icon { font-size: 2.5rem; opacity: 0.4; margin-bottom: 1rem; }
+    .empty-text {
+      font-family: var(--f-d);
+      font-size: 1.4rem; font-weight: 400;
+      color: rgba(26,14,6,0.55); margin-bottom: 0.4rem;
+    }
+    .empty-sub {
+      font-size: 0.8rem; font-weight: 300;
+      color: rgba(26,14,6,0.4);
     }
 
-    /* ===== CART PANEL ===== */
+    /* ===== CART ===== */
     .cart-overlay {
       position: fixed; inset: 0; z-index: 299;
-      background: rgba(10,5,2,0.55);
-      backdrop-filter: blur(5px);
+      background: rgba(10,5,2,0.55); backdrop-filter: blur(5px);
       opacity: 0; pointer-events: none;
       transition: opacity 0.3s;
     }
@@ -351,10 +424,21 @@
       display: flex; align-items: center; justify-content: space-between;
       border-bottom: 2px solid var(--amber);
     }
+    .cart-panel-title-row { display: flex; align-items: center; gap: 0.8rem; }
     .cart-panel-title {
       font-family: var(--f-d);
       font-size: 1.4rem; font-weight: 400; color: var(--cream);
     }
+    .cart-clear {
+      background: none; border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(245,240,232,0.45);
+      font-size: 0.52rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 0.3rem 0.6rem; border-radius: 3px;
+      cursor: pointer; transition: color 0.2s, border-color 0.2s;
+    }
+    .cart-clear:hover { color: var(--cream); border-color: rgba(255,255,255,0.4); }
+
     .cart-close {
       background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
       color: rgba(245,240,232,0.7); font-size: 1.2rem;
@@ -365,18 +449,17 @@
     .cart-close:hover { background: rgba(255,255,255,0.15); color: var(--cream); }
 
     .cart-items { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; }
-
     .cart-empty {
       text-align: center; padding: 3rem 1rem;
       font-size: 0.82rem; font-weight: 300;
       color: rgba(26,14,6,0.3); line-height: 1.85;
     }
-    .cart-empty-icon { font-size: 2.5rem; display: block; margin-bottom: 0.8rem; opacity: 0.4; }
+    .cart-empty-icon { font-size: 2.5rem; display: block; margin-bottom: 0.8rem; opacity: 0.35; }
 
     .cart-item {
       display: flex; align-items: flex-start; gap: 0.75rem;
       padding: 0.85rem 0;
-      border-bottom: 1px solid rgba(30,15,4,0.07);
+      border-bottom: 1px solid var(--hairline);
     }
     .cart-item-emoji { font-size: 1.4rem; flex-shrink: 0; }
     .cart-item-info { flex: 1; }
@@ -400,35 +483,30 @@
     }
     .cart-item-remove:hover { color: #c0392b; }
 
-    .cart-footer {
-      padding: 1.2rem 1.5rem;
-      border-top: 1px solid rgba(30,15,4,0.1);
-      background: var(--parchment);
-    }
+    .cart-footer { padding: 1.2rem 1.5rem; border-top: 1px solid var(--hairline); background: var(--parchment); }
 
-    /* Total estimado */
     .cart-total-block {
       background: var(--espresso);
       border-radius: 5px;
       padding: 1rem 1.2rem;
       margin-bottom: 1rem;
-      display: flex; align-items: baseline; justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
     }
     .cart-total-label {
-      font-size: 0.6rem; font-weight: 500;
+      font-size: 0.58rem; font-weight: 500;
       letter-spacing: 0.2em; text-transform: uppercase;
       color: rgba(245,240,232,0.5);
     }
     .cart-total-amount {
       font-family: var(--f-d);
-      font-size: 1.8rem; font-weight: 400; color: var(--gold);
+      font-size: 1.8rem; font-weight: 500; color: var(--gold);
       line-height: 1;
     }
     .cart-total-note {
-      font-size: 0.5rem; font-weight: 300;
-      letter-spacing: 0.15em; text-transform: uppercase;
+      font-size: 0.48rem; font-weight: 300;
+      letter-spacing: 0.18em; text-transform: uppercase;
       color: rgba(245,240,232,0.3);
-      display: block; text-align: right; margin-top: 0.25rem;
+      display: block; text-align: right; margin-top: 0.3rem;
     }
 
     .cart-notes-label {
@@ -439,7 +517,7 @@
     .cart-notes {
       width: 100%; padding: 0.7rem 0.9rem;
       background: #fff;
-      border: 1px solid rgba(30,15,4,0.12); border-radius: 4px;
+      border: 1px solid var(--hairline); border-radius: 4px;
       font-family: var(--f-b);
       font-size: 0.82rem; font-weight: 300;
       color: var(--ink); resize: vertical; min-height: 70px;
@@ -460,24 +538,21 @@
       box-shadow: 0 4px 12px rgba(37,211,102,0.3);
     }
     .btn-wa-order:hover { opacity: 0.9; transform: translateY(-1px); }
-    .btn-wa-order:active { transform: translateY(0); }
     .btn-wa-order:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; transform: none; }
 
-    /* Pay methods in cart */
     .cart-pay-row {
       display: flex; align-items: center; justify-content: center; gap: 0.5rem;
       margin-top: 0.85rem; flex-wrap: wrap;
     }
     .cart-pay-chip {
-      font-size: 0.52rem; font-weight: 500;
+      font-size: 0.5rem; font-weight: 500;
       letter-spacing: 0.12em; text-transform: uppercase;
       padding: 0.22rem 0.55rem; border-radius: 3px;
-      background: rgba(46,92,56,0.1);
-      color: var(--moss);
+      background: rgba(46,92,56,0.1); color: var(--moss);
       border: 1px solid rgba(46,92,56,0.18);
     }
 
-    /* ===== FOOTER ===== */
+    /* FOOTER */
     .site-footer {
       background: var(--bark); color: var(--cream);
       padding: 2rem;
@@ -503,23 +578,23 @@
     }
     .footer-back:hover { color: rgba(245,240,232,0.65); }
 
-    /* ===== RESPONSIVE ===== */
     @media (max-width: 640px) {
       .site-header { padding: 1rem; }
       .header-status { display: none; }
-      .catalog { padding: 2rem 1rem 5rem; }
+      .catalog { padding: 1.5rem 1rem 5rem; }
       .hero-banner { padding: 2rem 1rem; }
       .info-strip { padding: 0.7rem 1rem; }
       .info-strip-inner { gap: 0.7rem; }
       .info-sep { display: none; }
       .site-footer { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-      .products-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+      .products-grid { grid-template-columns: repeat(2, 1fr); }
+      .search-row { gap: 0.6rem; }
+      .results-count { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top bar -->
   <div class="topbar">
     <a class="topbar-addr" href="https://maps.app.goo.gl/xzN5SZcovHiB2FJi7" target="_blank" rel="noopener">
       <svg width="9" height="12" viewBox="0 0 9 12" fill="currentColor"><path d="M4.5 0C2.01 0 0 2.01 0 4.5c0 3.37 4.5 7.5 4.5 7.5S9 7.87 9 4.5C9 2.01 6.99 0 4.5 0zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
@@ -531,7 +606,6 @@
     </div>
   </div>
 
-  <!-- Header -->
   <header class="site-header">
     <div class="header-inner">
       <a href="minimarket.html" class="header-brand">
@@ -539,8 +613,8 @@
         <div class="header-sub">A la entrada del camping</div>
       </a>
       <div class="header-right">
-        <div class="header-status">
-          <span class="status-dot"></span>
+        <div class="header-status" id="header-status">
+          <span class="status-dot open"></span>
           <span>Abierto 9:00&ndash;20:00</span>
         </div>
         <button class="cart-btn" onclick="toggleCart()">
@@ -551,12 +625,11 @@
     </div>
   </header>
 
-  <!-- Info strip -->
   <div class="info-strip">
     <div class="info-strip-inner">
       <span class="info-item">
         <svg width="9" height="12" viewBox="0 0 9 12" fill="currentColor"><path d="M4.5 0C2.01 0 0 2.01 0 4.5c0 3.37 4.5 7.5 4.5 7.5S9 7.87 9 4.5C9 2.01 6.99 0 4.5 0zm0 6a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
-        <a href="https://maps.app.goo.gl/xzN5SZcovHiB2FJi7" target="_blank" rel="noopener">Camino a Paraguay km&nbsp;10,5, Salto del Laja</a>
+        <a href="https://maps.app.goo.gl/xzN5SZcovHiB2FJi7" target="_blank" rel="noopener">Camino a Paraguay km&nbsp;10,5</a>
       </span>
       <span class="info-sep"></span>
       <span class="info-item">&#128222;&nbsp;+56 9 7498 4220</span>
@@ -569,22 +642,33 @@
     </div>
   </div>
 
-  <!-- Hero -->
   <div class="hero-banner">
     <div class="hero-inner">
       <p class="hero-tag">Todos los d&iacute;as &middot; Reci&eacute;n horneado</p>
       <h1 class="hero-title">Pan fresco cada ma&ntilde;ana.<br>Todo lo dem&aacute;s tambi&eacute;n.</h1>
       <p class="hero-desc">
-        Elige lo que necesitas, arm&aacute; tu pedido y env&iacute;anos el mensaje por WhatsApp.
-        Lo tenemos listo para que lo pases a buscar, o <strong>te lo acercamos al camping</strong>.<br><br>
-        Aceptamos <strong>efectivo, tarjetas y Caja Vecina</strong>.
-        Los precios son referenciales.
+        Arm&aacute; tu pedido y env&iacute;alo por WhatsApp.
+        Lo tenemos listo para que lo retires, o <strong>te lo acercamos al sitio del camping</strong>.<br><br>
+        Pagas con <strong>efectivo, tarjetas o Caja Vecina</strong>. Los precios son referenciales.
       </p>
     </div>
   </div>
 
-  <!-- Catalog -->
   <div class="catalog">
+
+    <!-- Search -->
+    <div class="search-row">
+      <div class="search-wrap">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/>
+        </svg>
+        <input type="search" class="search-input" id="search-input" placeholder="Buscar productos..." autocomplete="off" />
+        <button class="search-clear" id="search-clear" onclick="clearSearch()" aria-label="Limpiar">&times;</button>
+      </div>
+      <span class="results-count" id="results-count">38 productos</span>
+    </div>
+
+    <!-- Tabs -->
     <div class="cat-tabs" id="cat-tabs">
       <button class="cat-tab active" data-cat="all">Todo</button>
       <button class="cat-tab" data-cat="panaderia">&#127838; Panader&iacute;a</button>
@@ -596,16 +680,18 @@
       <button class="cat-tab" data-cat="aseo">&#129692; Aseo</button>
       <button class="cat-tab" data-cat="hielo">&#129514; Hielo</button>
     </div>
+
     <div class="products-grid" id="products-grid"></div>
   </div>
 
-  <!-- Cart overlay -->
   <div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
 
-  <!-- Cart panel -->
   <div class="cart-panel" id="cart-panel">
     <div class="cart-panel-header">
-      <h2 class="cart-panel-title">Mi pedido</h2>
+      <div class="cart-panel-title-row">
+        <h2 class="cart-panel-title">Mi pedido</h2>
+        <button class="cart-clear" id="cart-clear-btn" onclick="clearCart()" style="display:none">Vaciar</button>
+      </div>
       <button class="cart-close" onclick="toggleCart()">&times;</button>
     </div>
     <div class="cart-items" id="cart-items">
@@ -619,15 +705,15 @@
         <div>
           <div class="cart-total-label">Total estimado</div>
           <div class="cart-total-amount" id="cart-total-amount">$0</div>
-          <span class="cart-total-note">Precios referenciales</span>
         </div>
         <div style="text-align:right">
           <div class="cart-total-label">Productos</div>
-          <div style="font-size:1.4rem;font-family:var(--f-d);color:var(--gold)" id="cart-total-count">0</div>
+          <div style="font-size:1.5rem;font-family:var(--f-d);color:var(--gold);font-weight:500" id="cart-total-count">0</div>
+          <span class="cart-total-note">Referencial</span>
         </div>
       </div>
       <p class="cart-notes-label">Nota (opcional)</p>
-      <textarea class="cart-notes" id="cart-notes" placeholder="Ej: llego en 30 min, o estoy en el sitio 12..."></textarea>
+      <textarea class="cart-notes" id="cart-notes" placeholder="Ej: llego en 30 min, estoy en el sitio 12, lo paso a buscar..."></textarea>
       <button class="btn-wa-order" id="wa-btn" onclick="sendWhatsApp()" disabled>
         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.107 1.508 5.836L.057 23.454a.75.75 0 00.918.918l5.618-1.451A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.732 9.732 0 01-5.034-1.4l-.362-.215-3.733.963.98-3.624-.235-.375A9.714 9.714 0 012.25 12C2.25 6.617 6.617 2.25 12 2.25S21.75 6.617 21.75 12 17.383 21.75 12 21.75z"/></svg>
         Enviar pedido por WhatsApp
@@ -640,7 +726,6 @@
     </div>
   </div>
 
-  <!-- Footer -->
   <footer class="site-footer">
     <a href="index.html" class="footer-brand">Bellavista</a>
     <span class="footer-meta">Camino a Paraguay km&nbsp;10,5 &middot; Salto del Laja &middot; Biob&iacute;o</span>
@@ -649,75 +734,107 @@
 
   <script>
     var WA = '56974984220';
+    var STORAGE_KEY = 'bellavista_cart_v1';
 
-    // Prices in CLP (referential)
+    // u: unit label (optional) | b: badge | p: price CLP
     var PRODUCTS = [
-      // Panaderia
-      {id:1,  cat:'panaderia', e:'🍞', n:'Pan marraqueta',       b:'Fresco', p:250},
-      {id:2,  cat:'panaderia', e:'🫓', n:'Pan amasado',          b:'Fresco', p:300},
-      {id:3,  cat:'panaderia', e:'🍞', n:'Hallulla',             b:null,     p:250},
-      {id:4,  cat:'panaderia', e:'🍞', n:'Pan de molde',         b:null,     p:1500},
-      {id:5,  cat:'panaderia', e:'🥐', n:'Croissant',            b:'Fresco', p:600},
-      // Bebidas
-      {id:6,  cat:'bebidas',   e:'💧', n:'Agua mineral 1.5L',    b:null,     p:1200},
-      {id:7,  cat:'bebidas',   e:'🥤', n:'Bebida cola 1.5L',     b:null,     p:1800},
-      {id:8,  cat:'bebidas',   e:'🥤', n:'Bebida sabor 1.5L',    b:null,     p:1800},
-      {id:9,  cat:'bebidas',   e:'🧃', n:'Jugo natural 1L',      b:null,     p:2000},
-      {id:10, cat:'bebidas',   e:'🍺', n:'Cerveza lata',         b:null,     p:1500},
-      {id:11, cat:'bebidas',   e:'🍺', n:'Cerveza 1L',           b:null,     p:2800},
-      // Lacteos
-      {id:12, cat:'lacteos',   e:'🥛', n:'Leche larga vida 1L',  b:null,     p:1200},
-      {id:13, cat:'lacteos',   e:'🥚', n:'Huevos 1 docena',      b:null,     p:3500},
-      {id:14, cat:'lacteos',   e:'🧈', n:'Mantequilla 200g',     b:null,     p:2500},
-      {id:15, cat:'lacteos',   e:'🫙', n:'Yogurt natural',       b:null,     p:1200},
-      // Embutidos
-      {id:16, cat:'embutidos', e:'🥩', n:'Vienesas 1 paquete',   b:null,     p:2800},
-      {id:17, cat:'embutidos', e:'🥪', n:'Jamon de pavo 150g',   b:null,     p:2500},
-      {id:18, cat:'embutidos', e:'🧀', n:'Queso 200g',           b:null,     p:3500},
-      // Abarrotes
-      {id:19, cat:'abarrotes', e:'🌾', n:'Arroz 1kg',            b:null,     p:1500},
-      {id:20, cat:'abarrotes', e:'🍝', n:'Fideos 400g',          b:null,     p:1200},
-      {id:21, cat:'abarrotes', e:'🫙', n:'Aceite 1L',            b:null,     p:2500},
-      {id:22, cat:'abarrotes', e:'☕', n:'Cafe instantaneo',     b:null,     p:2000},
-      {id:23, cat:'abarrotes', e:'🍅', n:'Salsa de tomate',      b:null,     p:1200},
-      {id:24, cat:'abarrotes', e:'🥫', n:'Mayonesa',             b:null,     p:1500},
-      {id:25, cat:'abarrotes', e:'🧂', n:'Sal 1kg',              b:null,     p:800},
-      // BBQ
-      {id:26, cat:'bbq',       e:'🪵', n:'Carbon 3kg',           b:null,     p:4500},
-      {id:27, cat:'bbq',       e:'📦', n:'Papel aluminio',       b:null,     p:1500},
-      {id:28, cat:'bbq',       e:'🔥', n:'Fosforos / encendedor',b:null,     p:800},
-      {id:29, cat:'bbq',       e:'🥢', n:'Palillos brocheta',    b:null,     p:800},
-      {id:30, cat:'bbq',       e:'🫙', n:'Condimentos surtidos', b:null,     p:1200},
-      // Aseo
-      {id:31, cat:'aseo',      e:'🧻', n:'Papel higienico x4',   b:null,     p:2500},
-      {id:32, cat:'aseo',      e:'🧴', n:'Jabon liquido',        b:null,     p:1500},
-      {id:33, cat:'aseo',      e:'🪥', n:'Shampoo pequeño',      b:null,     p:1500},
-      {id:34, cat:'aseo',      e:'🦟', n:'Repelente insectos',   b:null,     p:3500},
-      {id:35, cat:'aseo',      e:'☀️', n:'Protector solar',     b:null,     p:5000},
-      {id:36, cat:'aseo',      e:'🤲', n:'Alcohol gel',          b:null,     p:1500},
-      // Hielo
-      {id:37, cat:'hielo',     e:'🧊', n:'Bolsa de hielo 2kg',   b:null,     p:2000},
-      {id:38, cat:'hielo',     e:'🧊', n:'Bolsa de hielo 5kg',   b:null,     p:4000}
+      {id:1,  cat:'panaderia', e:'🍞', n:'Pan marraqueta',       b:'Fresco', p:250,  u:'por unidad'},
+      {id:2,  cat:'panaderia', e:'🫓', n:'Pan amasado',          b:'Fresco', p:300,  u:'por unidad'},
+      {id:3,  cat:'panaderia', e:'🍞', n:'Hallulla',             b:null,     p:250,  u:'por unidad'},
+      {id:4,  cat:'panaderia', e:'🍞', n:'Pan de molde',         b:null,     p:1500, u:null},
+      {id:5,  cat:'panaderia', e:'🥐', n:'Croissant',            b:'Fresco', p:600,  u:'por unidad'},
+      {id:6,  cat:'bebidas',   e:'💧', n:'Agua mineral 1.5L',    b:null,     p:1200, u:null},
+      {id:7,  cat:'bebidas',   e:'🥤', n:'Bebida cola 1.5L',     b:null,     p:1800, u:null},
+      {id:8,  cat:'bebidas',   e:'🥤', n:'Bebida sabor 1.5L',    b:null,     p:1800, u:null},
+      {id:9,  cat:'bebidas',   e:'🧃', n:'Jugo natural 1L',      b:null,     p:2000, u:null},
+      {id:10, cat:'bebidas',   e:'🍺', n:'Cerveza lata',         b:null,     p:1500, u:null},
+      {id:11, cat:'bebidas',   e:'🍺', n:'Cerveza 1L',           b:null,     p:2800, u:null},
+      {id:12, cat:'lacteos',   e:'🥛', n:'Leche larga vida 1L',  b:null,     p:1200, u:null},
+      {id:13, cat:'lacteos',   e:'🥚', n:'Huevos 1 docena',      b:null,     p:3500, u:null},
+      {id:14, cat:'lacteos',   e:'🧈', n:'Mantequilla 200g',     b:null,     p:2500, u:null},
+      {id:15, cat:'lacteos',   e:'🫙', n:'Yogurt natural',       b:null,     p:1200, u:null},
+      {id:16, cat:'embutidos', e:'🥩', n:'Vienesas paquete',     b:null,     p:2800, u:null},
+      {id:17, cat:'embutidos', e:'🥪', n:'Jamon de pavo 150g',   b:null,     p:2500, u:null},
+      {id:18, cat:'embutidos', e:'🧀', n:'Queso 200g',           b:null,     p:3500, u:null},
+      {id:19, cat:'abarrotes', e:'🌾', n:'Arroz 1kg',            b:null,     p:1500, u:null},
+      {id:20, cat:'abarrotes', e:'🍝', n:'Fideos 400g',          b:null,     p:1200, u:null},
+      {id:21, cat:'abarrotes', e:'🫙', n:'Aceite 1L',            b:null,     p:2500, u:null},
+      {id:22, cat:'abarrotes', e:'☕', n:'Cafe instantaneo',     b:null,     p:2000, u:null},
+      {id:23, cat:'abarrotes', e:'🍅', n:'Salsa de tomate',      b:null,     p:1200, u:null},
+      {id:24, cat:'abarrotes', e:'🥫', n:'Mayonesa',             b:null,     p:1500, u:null},
+      {id:25, cat:'abarrotes', e:'🧂', n:'Sal 1kg',              b:null,     p:800,  u:null},
+      {id:26, cat:'bbq',       e:'🪵', n:'Carbon 3kg',           b:null,     p:4500, u:null},
+      {id:27, cat:'bbq',       e:'📦', n:'Papel aluminio',       b:null,     p:1500, u:null},
+      {id:28, cat:'bbq',       e:'🔥', n:'Fosforos / encendedor',b:null,     p:800,  u:null},
+      {id:29, cat:'bbq',       e:'🥢', n:'Palillos brocheta',    b:null,     p:800,  u:null},
+      {id:30, cat:'bbq',       e:'🫙', n:'Condimentos surtidos', b:null,     p:1200, u:null},
+      {id:31, cat:'aseo',      e:'🧻', n:'Papel higienico x4',   b:null,     p:2500, u:null},
+      {id:32, cat:'aseo',      e:'🧴', n:'Jabon liquido',        b:null,     p:1500, u:null},
+      {id:33, cat:'aseo',      e:'🪥', n:'Shampoo pequeño',      b:null,     p:1500, u:null},
+      {id:34, cat:'aseo',      e:'🦟', n:'Repelente insectos',   b:null,     p:3500, u:null},
+      {id:35, cat:'aseo',      e:'☀️', n:'Protector solar',     b:null,     p:5000, u:null},
+      {id:36, cat:'aseo',      e:'🤲', n:'Alcohol gel',          b:null,     p:1500, u:null},
+      {id:37, cat:'hielo',     e:'🧊', n:'Bolsa de hielo 2kg',   b:null,     p:2000, u:null},
+      {id:38, cat:'hielo',     e:'🧊', n:'Bolsa de hielo 5kg',   b:null,     p:4000, u:null}
     ];
 
     var cart = {};
+    var activeCat = 'all';
+    var searchTerm = '';
 
-    function fmt(n) {
-      return '$' + n.toLocaleString('es-CL');
+    // ---- Storage ----
+    function saveCart() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); } catch(e) {}
+    }
+    function loadCart() {
+      try {
+        var data = localStorage.getItem(STORAGE_KEY);
+        if (data) cart = JSON.parse(data) || {};
+      } catch(e) { cart = {}; }
     }
 
-    function priceLabel(p) {
-      if (p.cat === 'panaderia' && p.p < 500) return 'por unidad';
-      return 'ref.';
+    function fmt(n) { return '$' + n.toLocaleString('es-CL'); }
+    function getProduct(id) {
+      for (var i = 0; i < PRODUCTS.length; i++) if (PRODUCTS[i].id == id) return PRODUCTS[i];
+      return null;
+    }
+    function norm(s) {
+      return s.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
-    function renderProducts(cat) {
-      cat = cat || 'all';
-      var grid = document.getElementById('products-grid');
-      grid.innerHTML = '';
+    function getFilteredProducts() {
+      var q = norm(searchTerm.trim());
+      var out = [];
       for (var i = 0; i < PRODUCTS.length; i++) {
         var p = PRODUCTS[i];
-        if (cat !== 'all' && p.cat !== cat) continue;
+        if (activeCat !== 'all' && p.cat !== activeCat) continue;
+        if (q && norm(p.n).indexOf(q) === -1 && norm(p.cat).indexOf(q) === -1) continue;
+        out.push(p);
+      }
+      return out;
+    }
+
+    function renderProducts() {
+      var grid = document.getElementById('products-grid');
+      var filtered = getFilteredProducts();
+      grid.innerHTML = '';
+
+      // Update count label
+      var countEl = document.getElementById('results-count');
+      countEl.textContent = filtered.length + (filtered.length === 1 ? ' producto' : ' productos');
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="empty-state">' +
+          '<div class="empty-icon">&#128269;</div>' +
+          '<div class="empty-text">Sin resultados</div>' +
+          '<div class="empty-sub">Probá con otra palabra o categoría</div>' +
+          '</div>';
+        return;
+      }
+
+      for (var i = 0; i < filtered.length; i++) {
+        var p = filtered[i];
         var qty = cart[p.id] || 0;
         var card = document.createElement('div');
         card.className = 'product-card' + (qty > 0 ? ' in-cart' : '');
@@ -728,12 +845,14 @@
         if (p.b) html += '<span class="product-badge">' + p.b + '</span>';
         html += '</div>';
         html += '<p class="product-name">' + p.n + '</p>';
-        html += '<div class="product-price">' + fmt(p.p);
-        html += '<span class="product-price-ref">' + priceLabel(p) + '</span></div>';
+        html += '<div class="product-price-row">';
+        html += '<span class="product-price">' + fmt(p.p) + '</span>';
+        if (p.u) html += '<span class="product-unit">' + p.u + '</span>';
+        html += '</div>';
         html += '<div class="product-controls">';
-        html += '<button class="qty-btn" onclick="changeQty(' + p.id + ',-1)">&#8722;</button>';
+        html += '<button class="qty-btn" onclick="changeQty(' + p.id + ',-1)" aria-label="Quitar">&#8722;</button>';
         html += '<span class="qty-display" id="qty-' + p.id + '">' + qty + '</span>';
-        html += '<button class="qty-btn" onclick="changeQty(' + p.id + ',1)">+</button>';
+        html += '<button class="qty-btn" onclick="changeQty(' + p.id + ',1)" aria-label="Agregar">+</button>';
         html += '</div>';
         card.innerHTML = html;
         grid.appendChild(card);
@@ -744,6 +863,7 @@
       var cur = cart[id] || 0;
       var next = cur + delta;
       if (next <= 0) { delete cart[id]; next = 0; } else { cart[id] = next; }
+      saveCart();
       var el = document.getElementById('qty-' + id);
       if (el) el.textContent = next;
       var cardEl = document.getElementById('card-' + id);
@@ -755,47 +875,28 @@
     }
 
     function calcTotal() {
-      var total = 0;
-      for (var id in cart) {
-        var p = getProduct(id);
-        if (p) total += p.p * cart[id];
-      }
-      return total;
+      var t = 0;
+      for (var id in cart) { var p = getProduct(id); if (p) t += p.p * cart[id]; }
+      return t;
     }
-
     function calcCount() {
-      var n = 0;
-      for (var k in cart) n += cart[k];
-      return n;
-    }
-
-    function getProduct(id) {
-      for (var i = 0; i < PRODUCTS.length; i++) {
-        if (PRODUCTS[i].id == id) return PRODUCTS[i];
-      }
-      return null;
+      var n = 0; for (var k in cart) n += cart[k]; return n;
     }
 
     function updateCartUI() {
       var count = calcCount();
       var total = calcTotal();
 
-      // Badge
       var countEl = document.getElementById('cart-count');
       countEl.textContent = count;
-      countEl.classList.remove('bump');
-      void countEl.offsetWidth;
+      countEl.classList.remove('bump'); void countEl.offsetWidth;
       if (count > 0) countEl.classList.add('bump');
 
-      // Button
-      var waBtn = document.getElementById('wa-btn');
-      waBtn.disabled = (count === 0);
-
-      // Totals
+      document.getElementById('wa-btn').disabled = (count === 0);
       document.getElementById('cart-total-amount').textContent = fmt(total);
-      document.getElementById('cart-total-count').textContent = count + (count === 1 ? ' item' : ' items');
+      document.getElementById('cart-total-count').textContent = count;
+      document.getElementById('cart-clear-btn').style.display = count > 0 ? '' : 'none';
 
-      // Items
       var itemsEl = document.getElementById('cart-items');
       if (count === 0) {
         itemsEl.innerHTML = '<div class="cart-empty"><span class="cart-empty-icon">&#128722;</span>Aun no hay productos.<br>Agragalos desde el catalogo.</div>';
@@ -811,23 +912,27 @@
           '<span class="cart-item-emoji">' + p.e + '</span>' +
           '<div class="cart-item-info">' +
             '<div class="cart-item-name">' + p.n + '</div>' +
-            '<div class="cart-item-price">' + fmt(p.p) + ' x' + cart[id] + ' = ' + fmt(p.p * cart[id]) + '</div>' +
+            '<div class="cart-item-price">' + fmt(p.p) + ' x ' + cart[id] + ' = ' + fmt(p.p * cart[id]) + '</div>' +
           '</div>' +
           '<div class="cart-item-right">' +
             '<span class="cart-item-qty">x' + cart[id] + '</span>' +
-            '<button class="cart-item-remove" onclick="removeItem(' + id + ')">&times;</button>' +
+            '<button class="cart-item-remove" onclick="removeItem(' + id + ')" aria-label="Quitar">&times;</button>' +
           '</div>';
         itemsEl.appendChild(item);
       }
     }
 
     function removeItem(id) {
-      delete cart[id];
-      var el = document.getElementById('qty-' + id);
-      if (el) el.textContent = '0';
-      var cardEl = document.getElementById('card-' + id);
-      if (cardEl) cardEl.classList.remove('in-cart');
+      delete cart[id]; saveCart();
+      var el = document.getElementById('qty-' + id); if (el) el.textContent = '0';
+      var cardEl = document.getElementById('card-' + id); if (cardEl) cardEl.classList.remove('in-cart');
       updateCartUI();
+    }
+
+    function clearCart() {
+      if (!confirm('¿Vaciar el pedido?')) return;
+      cart = {}; saveCart();
+      renderProducts(); updateCartUI();
     }
 
     function toggleCart() {
@@ -848,17 +953,45 @@
       window.open('https://api.whatsapp.com/send?phone=' + WA + '&text=' + encodeURIComponent(msg), '_blank', 'noopener');
     }
 
-    // Category tabs
+    // ---- Search ----
+    function clearSearch() {
+      document.getElementById('search-input').value = '';
+      searchTerm = '';
+      document.getElementById('search-clear').classList.remove('visible');
+      renderProducts();
+    }
+
+    document.getElementById('search-input').addEventListener('input', function(e) {
+      searchTerm = e.target.value;
+      document.getElementById('search-clear').classList.toggle('visible', searchTerm.length > 0);
+      renderProducts();
+    });
+
     document.getElementById('cat-tabs').addEventListener('click', function(e) {
       var tab = e.target.closest('.cat-tab');
       if (!tab) return;
       document.querySelectorAll('.cat-tab').forEach(function(t) { t.classList.remove('active'); });
       tab.classList.add('active');
-      renderProducts(tab.dataset.cat);
+      activeCat = tab.dataset.cat;
+      renderProducts();
     });
 
-    renderProducts('all');
+    // ---- Status indicator ----
+    function updateStatus() {
+      var h = new Date().getHours();
+      var open = (h >= 9 && h < 20);
+      var el = document.getElementById('header-status');
+      if (!el) return;
+      var dotClass = open ? 'open' : 'closed';
+      var text = open ? 'Abierto 9:00&ndash;20:00' : 'Cerrado &middot; abre a las 9:00';
+      el.innerHTML = '<span class="status-dot ' + dotClass + '"></span><span>' + text + '</span>';
+    }
+
+    // ---- Init ----
+    loadCart();
+    renderProducts();
     updateCartUI();
+    updateStatus();
   </script>
 
 </body>
