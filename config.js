@@ -13,13 +13,12 @@
  */
 window.BELLAVISTA_CONFIG = {
   SUPABASE_URL:  'https://wtqxyclosajruswjjcbm.supabase.co',
-  SUPABASE_ANON: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0cXh5Y2xvc2FqcnVzd2pqY2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3OTg2NTQsImV4cCI6MjA5NTM3NDY1NH0.wsy3gHEQ1Mu3_rXlNHG8rD6PYxTZxRDkkDJlYR53JM4',
+  SUPABASE_ANON: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS...PEGA_TU_KEY_COMPLETA_AQUI',
   WHATSAPP:      '56974984220',
 };
 
 window.bv = window.supabase.createClient(
-SUPABASE_URL:  'https://wtqxyclosajruswjjcbm.supabase.co',
-  SUPABASE_ANON: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind0cXh5Y2xvc2FqcnVzd2pqY2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3OTg2NTQsImV4cCI6MjA5NTM3NDY1NH0.wsy3gHEQ1Mu3_rXlNHG8rD6PYxTZxRDkkDJlYR53JM4',
-  WHATSAPP:      '56974984220',
+  window.BELLAVISTA_CONFIG.SUPABASE_URL,
+  window.BELLAVISTA_CONFIG.SUPABASE_ANON,
   { auth: { persistSession: true, autoRefreshToken: true } }
 );
