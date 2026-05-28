@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin · Minimarket Bellavista</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+  <script src="/config.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bark: #1e0f04; --espresso: #2d1505; --mahogany: #4a2010;
+      --amber: #c87830; --honey: #d4a455; --gold: #e8b96a;
+      --cream: #f5f0e8; --parchment: #ede5d4; --warm: #faf7f2;
+      --ink: #1a0e06; --moss: #2e5c38; --sage: #5a9060;
+      --hairline: rgba(30,15,4,0.10);
+      --f-d: 'Cormorant Garamond', Georgia, serif;
+      --f-b: 'Jost', system-ui, sans-serif;
+    }
+    body { background: var(--warm); color: var(--ink); font-family: var(--f-b); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; cursor: pointer; }
+    input, select, textarea { font-family: inherit; }
+
+    .bar {
+      background: var(--espresso); color: var(--cream);
+      padding: 0.75rem 1.5rem;
+    }
+    .bar-inner {
+      max-width: 1400px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand {
+      font-family: var(--f-d);
+      font-size: 1.1rem; font-weight: 500;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--gold);
+    }
+    .bar-actions { display: flex; align-items: center; gap: 1rem; }
+    .bar-back, .bar-logout {
+      font-size: 0.6rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(245,240,232,0.7);
+      background: none; border: 1px solid rgba(245,240,232,0.18);
+      padding: 0.35rem 0.7rem; border-radius: 3px;
+    }
+    .bar-back:hover, .bar-logout:hover { color: var(--gold); border-color: var(--gold); }
+
+    .shell {
+      max-width: 1400px; margin: 0 auto;
+      display: grid; grid-template-columns: 220px 1fr;
+      gap: 1rem; padding: 1rem;
+    }
+    @media (max-width: 768px) {
+      .shell { grid-template-columns: 1fr; }
+      .sidebar { order: 2; }
+    }
+
+    .sidebar {
+      background: #fff;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      padding: 0.6rem;
+      height: fit-content;
+      position: sticky; top: 1rem;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.65rem 0.75rem;
+      border-radius: 4px;
+      color: var(--ink);
+      font-size: 0.85rem; font-weight: 500;
+      cursor: pointer;
+    }
+    .nav-item:hover { background: var(--parchment); }
+    .nav-item.active { background: var(--espresso); color: var(--cream); }
+    .nav-item.active .nav-ico { filter: brightness(1.5); }
+    .nav-ico { font-size: 1.1rem; }
+    .user-info {
+      margin-top: 0.8rem; padding-top: 0.7rem;
+      border-top: 1px solid var(--hairline);
+      font-size: 0.65rem;
+      color: rgba(26,14,6,0.55);
+      word-break: break-all;
+      padding: 0.7rem 0.75rem 0;
+    }
+
+    .main {
+      background: #fff;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      padding: 1.5rem;
+      min-height: 70vh;
+    }
+    h1 {
+      font-family: var(--f-d);
+      font-size: 1.8rem; font-weight: 500;
+      color: var(--ink);
+      margin-bottom: 0.3rem;
+    }
+    h1 + .sub {
+      font-size: 0.65rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(26,14,6,0.55);
+      margin-bottom: 1.5rem;
+    }
+
+    .stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat {
+      background: var(--warm);
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      padding: 1.2rem;
+    }
+    .stat-label {
+      font-size: 0.55rem; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: rgba(26,14,6,0.55);
+      margin-bottom: 0.4rem;
+    }
+    .stat-value {
+      font-family: var(--f-d);
+      font-size: 2rem; font-weight: 500;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .actions {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+      align-items: center; margin-bottom: 1rem;
+    }
+    .btn {
+      padding: 0.55rem 0.9rem;
+      background: var(--moss); color: #fff;
+      border: none; border-radius: 4px;
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+    }
+    .btn:hover { background: #235029; }
+    .btn.ghost {
+      background: transparent; color: var(--ink);
+      border: 1px solid var(--hairline);
+    }
+    .btn.ghost:hover { background: var(--parchment); }
+    .btn.danger { background: #a04830; }
+    .btn.danger:hover { background: #802818; }
+    .inp, .sel {
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      background: #fff;
+    }
+    .inp:focus, .sel:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 2px rgba(200,120,48,0.15); }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th {
+      text-align: left;
+      padding: 0.6rem 0.5rem;
+      border-bottom: 2px solid var(--hairline);
+      font-size: 0.55rem; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: rgba(26,14,6,0.55);
+    }
+    td {
+      padding: 0.55rem 0.5rem;
+      border-bottom: 1px solid var(--hairline);
+      vertical-align: middle;
+    }
+    tr:hover { background: var(--warm); }
+    table input[type="number"], table input[type="text"] {
+      width: 100%;
+      padding: 0.3rem 0.4rem;
+      border: 1px solid var(--hairline);
+      border-radius: 3px;
+      font-size: 0.82rem;
+    }
+    .pill {
+      display: inline-block;
+      padding: 0.18rem 0.55rem;
+      border-radius: 99px;
+      font-size: 0.55rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .pill.green { background: rgba(46,92,56,0.15); color: var(--moss); }
+    .pill.amber { background: rgba(200,120,48,0.15); color: var(--amber); }
+    .pill.gray { background: var(--parchment); color: rgba(26,14,6,0.55); }
+    .pill.red { background: rgba(160,72,48,0.15); color: #a04830; }
+
+    .empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: rgba(26,14,6,0.5);
+      font-style: italic;
+    }
+
+    .modal-bg {
+      position: fixed; inset: 0;
+      background: rgba(30,15,4,0.65);
+      display: none;
+      align-items: center; justify-content: center;
+      z-index: 200; padding: 1rem;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 4px;
+      max-width: 600px; width: 100%;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--hairline);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-title {
+      font-family: var(--f-d);
+      font-size: 1.4rem; font-weight: 500;
+    }
+    .modal-close {
+      background: none; border: none;
+      font-size: 1.6rem; line-height: 1;
+      color: rgba(26,14,6,0.4);
+      padding: 0; width: 32px; height: 32px;
+    }
+    .modal-body { padding: 1.5rem; }
+    .modal-body label {
+      display: block;
+      font-size: 0.55rem; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: rgba(26,14,6,0.55);
+      margin-bottom: 0.25rem;
+      margin-top: 0.8rem;
+    }
+    .modal-body label:first-child { margin-top: 0; }
+    .modal-body input, .modal-body select, .modal-body textarea {
+      width: 100%;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+    .modal-body textarea { min-height: 70px; resize: vertical; }
+    .modal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--hairline);
+      display: flex; gap: 0.5rem; justify-content: flex-end;
+    }
+
+    .checkbox-label {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.85rem !important;
+      text-transform: none !important;
+      letter-spacing: 0 !important;
+      margin-top: 1rem !important;
+      color: var(--ink) !important;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: auto !important;
+      margin: 0; padding: 0;
+    }
+
+    .setup-warning {
+      background: rgba(200,120,48,0.1);
+      border: 1px solid rgba(200,120,48,0.3);
+      color: var(--mahogany);
+      padding: 1rem 1.2rem;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+    }
+    .setup-warning code {
+      background: rgba(0,0,0,0.05);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.78rem;
+    }
+
+    .filters-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    @media (max-width: 640px) {
+      .filters-row { grid-template-columns: 1fr 1fr; }
+      .filters-row .btn { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="bar">
+    <div class="bar-inner">
+      <span class="brand">Admin · Bellavista</span>
+      <div class="bar-actions">
+        <a href="/minimarket" class="bar-back">← Ver sitio</a>
+        <button class="bar-logout" id="logout-btn">Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell">
+    <nav class="sidebar">
+      <a class="nav-item" data-view="dashboard"><span class="nav-ico">📊</span> Dashboard</a>
+      <a class="nav-item" data-view="productos"><span class="nav-ico">📦</span> Productos</a>
+      <a class="nav-item" data-view="categorias"><span class="nav-ico">🏷️</span> Categorías</a>
+      <a class="nav-item" data-view="pedidos"><span class="nav-ico">🧾</span> Pedidos</a>
+      <a class="nav-item" data-view="settings"><span class="nav-ico">⚙️</span> Settings</a>
+      <div class="user-info" id="user-info"></div>
+    </nav>
+    <main class="main" id="main">
+      <div class="empty">Cargando...</div>
+    </main>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-bg" id="modal-bg">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Editar</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================
+  // AUTH GUARD
+  // =========================================================
+  (async function() {
+    const { data: { user }, error } = await window.bv.auth.getUser();
+    if (!user) { location.href = '/admin-login'; return; }
+    document.getElementById('user-info').textContent = user.email;
+    boot();
+  })();
+
+  document.getElementById('logout-btn').addEventListener('click', async function() {
+    await window.bv.auth.signOut();
+    location.href = '/admin-login';
+  });
+
+  // =========================================================
+  // HELPERS
+  // =========================================================
+  const $ = sel => document.querySelector(sel);
+  const fmt = n => '$' + (Number(n) || 0).toLocaleString('es-CL');
+  const norm = s => (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  function pillFor(status) {
+    return { nuevo:'amber', en_preparacion:'green', listo:'green', entregado:'gray', cancelado:'red' }[status] || 'gray';
+  }
+
+  // =========================================================
+  // ROUTER
+  // =========================================================
+  let CATS_CACHE = null;
+
+  async function boot() {
+    window.addEventListener('hashchange', route);
+    route();
+  }
+
+  function route() {
+    const view = (location.hash.replace('#','') || 'dashboard');
+    document.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.toggle('active', n.dataset.view === view);
+    });
+    if (view === 'dashboard')   renderDashboard();
+    else if (view === 'productos')  renderProductos();
+    else if (view === 'categorias') renderCategorias();
+    else if (view === 'pedidos')    renderPedidos();
+    else if (view === 'settings')   renderSettings();
+    else renderDashboard();
+  }
+
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.addEventListener('click', () => location.hash = '#' + n.dataset.view);
+  });
+
+  // =========================================================
+  // DASHBOARD
+  // =========================================================
+  async function renderDashboard() {
+    const main = $('#main');
+    main.innerHTML = `<h1>Dashboard</h1><div class="sub">Vista general</div><div class="empty">Cargando...</div>`;
+
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+
+    const [prods, cats, today, total, recent] = await Promise.all([
+      window.bv.from('products').select('id', { count:'exact', head:true }).eq('active', true),
+      window.bv.from('categories').select('id', { count:'exact', head:true }).eq('active', true),
+      window.bv.from('orders').select('subtotal').gte('created_at', todayStart.toISOString()),
+      window.bv.from('orders').select('id', { count:'exact', head:true }),
+      window.bv.from('orders').select('id, order_number, customer_name, subtotal, status, created_at').order('created_at', { ascending:false }).limit(8)
+    ]);
+
+    const todayTotal = (today.data || []).reduce((s,o)=>s + (o.subtotal||0), 0);
+    const todayCount = (today.data || []).length;
+
+    main.innerHTML = `
+      <h1>Dashboard</h1>
+      <div class="sub">Vista general · Minimarket Bellavista</div>
+      <div class="stats">
+        <div class="stat"><div class="stat-label">Productos activos</div><div class="stat-value">${prods.count || 0}</div></div>
+        <div class="stat"><div class="stat-label">Categorías</div><div class="stat-value">${cats.count || 0}</div></div>
+        <div class="stat"><div class="stat-label">Pedidos hoy</div><div class="stat-value">${todayCount}</div></div>
+        <div class="stat"><div class="stat-label">Ingreso hoy</div><div class="stat-value">${fmt(todayTotal)}</div></div>
+        <div class="stat"><div class="stat-label">Pedidos totales</div><div class="stat-value">${total.count || 0}</div></div>
+      </div>
+      <h2 style="font-family:var(--f-d);font-size:1.3rem;font-weight:500;margin-bottom:0.6rem">Últimos pedidos</h2>
+      ${(recent.data && recent.data.length) ? `
+        <div class="table-wrap"><table>
+          <thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+          <tbody>
+            ${recent.data.map(o => `
+              <tr>
+                <td><strong>#${o.order_number}</strong></td>
+                <td>${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</td>
+                <td>${esc(o.customer_name) || '—'}</td>
+                <td>${fmt(o.subtotal)}</td>
+                <td><span class="pill ${pillFor(o.status)}">${o.status}</span></td>
+              </tr>`).join('')}
+          </tbody>
+        </table></div>` : `<p class="empty">Aún no hay pedidos</p>`}
+
+      ${(prods.count === 0) ? `
+        <div class="setup-warning" style="margin-top:1.5rem">
+          ⚠️ No hay productos cargados. Para subir los del Excel, usa la página
+          <a href="/migrate" style="color:var(--mahogany);text-decoration:underline">migrate</a>.
+        </div>` : ''}
+    `;
+  }
+
+  // =========================================================
+  // PRODUCTOS
+  // =========================================================
+  let PROD_STATE = { items: [], q: '', cat: '', flag: '' };
+
+  async function renderProductos() {
+    const main = $('#main');
+    main.innerHTML = `
+      <h1>Productos</h1>
+      <div class="sub" id="prod-sub">Cargando...</div>
+      <div class="filters-row">
+        <input class="inp" id="prod-q" placeholder="Buscar por nombre o SKU..." />
+        <select class="sel" id="prod-cat"><option value="">Todas las categorías</option></select>
+        <select class="sel" id="prod-flag"><option value="">Todos</option><option value="review">Para revisar</option></select>
+        <button class="btn" id="new-prod">+ Nuevo producto</button>
+      </div>
+      <div class="table-wrap"><table id="prod-table">
+        <thead><tr><th>SKU</th><th>Nombre</th><th>Categoría</th><th style="width:100px">Precio</th><th style="width:80px">Stock</th><th>Activo</th><th></th></tr></thead>
+        <tbody><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
+      </table></div>
+    `;
+
+    // Load cats
+    const cats = await loadCats();
+    const catSel = $('#prod-cat');
+    cats.forEach(c => catSel.insertAdjacentHTML('beforeend', `<option value="${c.id}">${esc(c.name)}</option>`));
+
+    // Initial load
+    await reloadProds();
+
+    // Filters
+    let timer = null;
+    $('#prod-q').addEventListener('input', e => {
+      PROD_STATE.q = e.target.value;
+      clearTimeout(timer); timer = setTimeout(renderProdRows, 200);
+    });
+    $('#prod-cat').addEventListener('change', e => {
+      PROD_STATE.cat = e.target.value;
+      renderProdRows();
+    });
+    $('#prod-flag').addEventListener('change', e => {
+      PROD_STATE.flag = e.target.value;
+      renderProdRows();
+    });
+    $('#new-prod').addEventListener('click', () => openProductModal(null, cats));
+  }
+
+  async function reloadProds() {
+    const { data, error } = await window.bv.from('products')
+      .select('id, sku, ean, name, category_id, price, stock, active, featured, image_url, needs_review, unit, description')
+      .order('name');
+    if (error) {
+      $('#prod-sub').textContent = 'Error: ' + error.message;
+      return;
+    }
+    PROD_STATE.items = data || [];
+    $('#prod-sub').textContent = PROD_STATE.items.length + ' productos en catálogo';
+    renderProdRows();
+  }
+
+  function renderProdRows() {
+    const cats = CATS_CACHE || [];
+    const catMap = Object.fromEntries(cats.map(c => [c.id, c.name]));
+    const q = norm(PROD_STATE.q);
+    const items = PROD_STATE.items.filter(p => {
+      if (PROD_STATE.cat && p.category_id !== PROD_STATE.cat) return false;
+      if (PROD_STATE.flag === 'review' && !p.needs_review) return false;
+      if (q) {
+        const n = norm(p.name);
+        if (n.indexOf(q) === -1 && p.sku.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+    const tbody = $('#prod-table tbody');
+    if (items.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty">Sin resultados</td></tr>`;
+      return;
+    }
+    const shown = items.slice(0, 200);
+    tbody.innerHTML = shown.map(p => `
+      <tr data-id="${p.id}">
+        <td style="font-family:monospace;font-size:0.7rem">${esc(p.sku)}</td>
+        <td>${esc(p.name)} ${p.needs_review ? '<span class="pill amber" style="margin-left:6px">revisar</span>' : ''}</td>
+        <td>${esc(catMap[p.category_id]) || '—'}</td>
+        <td><input type="number" value="${p.price}" data-field="price" data-id="${p.id}" /></td>
+        <td><input type="number" value="${p.stock}" data-field="stock" data-id="${p.id}" /></td>
+        <td><span class="pill ${p.active ? 'green' : 'gray'}">${p.active ? 'activo' : 'inactivo'}</span></td>
+        <td><button class="btn ghost" data-edit="${p.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">Editar</button></td>
+      </tr>`).join('');
+    if (items.length > 200) {
+      tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="7" style="text-align:center;font-size:0.75rem;color:rgba(26,14,6,0.5);padding:1rem">... y ${items.length - 200} más (refiná la búsqueda)</td></tr>`);
+    }
+
+    // Inline edit (blur)
+    tbody.querySelectorAll('input[data-field]').forEach(inp => {
+      inp.addEventListener('blur', async e => {
+        const id = e.target.dataset.id;
+        const field = e.target.dataset.field;
+        const value = parseInt(e.target.value, 10) || 0;
+        const cur = PROD_STATE.items.find(x => x.id === id);
+        if (cur && cur[field] === value) return;
+        const { error } = await window.bv.from('products').update({ [field]: value }).eq('id', id);
+        if (error) { alert('Error: ' + error.message); return; }
+        if (cur) cur[field] = value;
+      });
+    });
+    tbody.querySelectorAll('button[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.edit;
+        const p = PROD_STATE.items.find(x => x.id === id);
+        if (p) openProductModal(p, CATS_CACHE);
+      });
+    });
+  }
+
+  function openProductModal(p, cats) {
+    const isNew = !p;
+    const f = p || { sku:'', ean:'', name:'', description:'', category_id: (cats[0] && cats[0].id) || '', price:0, stock:0, unit:'unidad', active:true, featured:false, image_url:'' };
+
+    $('#modal-title').textContent = isNew ? 'Nuevo producto' : 'Editar producto';
+    $('#modal-body').innerHTML = `
+      <div class="modal-row">
+        <div><label>SKU *</label><input id="m-sku" value="${esc(f.sku)}" /></div>
+        <div><label>EAN (opcional)</label><input id="m-ean" value="${esc(f.ean)}" /></div>
+      </div>
+      <label>Nombre *</label><input id="m-name" value="${esc(f.name)}" />
+      <label>Descripción</label><textarea id="m-desc">${esc(f.description)}</textarea>
+      <div class="modal-row">
+        <div><label>Categoría</label><select id="m-cat">${cats.map(c => `<option value="${c.id}" ${c.id === f.category_id ? 'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>
+        <div><label>Unidad</label><input id="m-unit" value="${esc(f.unit)}" placeholder="unidad, kg, L..." /></div>
+      </div>
+      <div class="modal-row">
+        <div><label>Precio CLP *</label><input id="m-price" type="number" value="${f.price}" /></div>
+        <div><label>Stock</label><input id="m-stock" type="number" value="${f.stock}" /></div>
+      </div>
+      <label>URL imagen</label><input id="m-img" value="${esc(f.image_url)}" placeholder="https://..." />
+      <div id="m-imgPrev" style="margin-top:0.5rem">${f.image_url ? `<img src="${esc(f.image_url)}" style="width:100px;height:100px;object-fit:contain;border:1px solid var(--hairline);border-radius:4px"/>` : ''}</div>
+      <label class="checkbox-label"><input type="checkbox" id="m-active" ${f.active ? 'checked':''}/> Activo (visible en web)</label>
+      <label class="checkbox-label"><input type="checkbox" id="m-featured" ${f.featured ? 'checked':''}/> Destacado</label>
+    `;
+    $('#modal-footer').innerHTML = `
+      ${isNew ? '' : `<button class="btn danger" id="m-del" style="margin-right:auto">Eliminar</button>`}
+      <button class="btn ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn" id="m-save">${isNew ? 'Crear' : 'Guardar'}</button>
+    `;
+    $('#modal-bg').classList.add('open');
+
+    if (!isNew) {
+      $('#m-del').addEventListener('click', async () => {
+        if (!confirm('¿Eliminar "' + f.name + '"?')) return;
+        const { error } = await window.bv.from('products').delete().eq('id', f.id);
+        if (error) { alert(error.message); return; }
+        closeModal();
+        reloadProds();
+      });
+    }
+    $('#m-save').addEventListener('click', async () => {
+      const name = $('#m-name').value.trim();
+      const sku = $('#m-sku').value.trim();
+      if (!name || !sku) { alert('SKU y nombre son requeridos'); return; }
+      const payload = {
+        sku,
+        ean: $('#m-ean').value.trim() || null,
+        name,
+        name_normalized: norm(name),
+        slug: norm(name).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60) + '-' + sku.slice(-4),
+        description: $('#m-desc').value.trim() || null,
+        category_id: $('#m-cat').value || null,
+        unit: $('#m-unit').value.trim() || 'unidad',
+        price: parseInt($('#m-price').value, 10) || 0,
+        stock: parseInt($('#m-stock').value, 10) || 0,
+        image_url: $('#m-img').value.trim() || null,
+        active: $('#m-active').checked,
+        featured: $('#m-featured').checked
+      };
+      let res;
+      if (isNew) res = await window.bv.from('products').insert(payload).select().single();
+      else res = await window.bv.from('products').update(payload).eq('id', f.id).select().single();
+      if (res.error) { alert(res.error.message); return; }
+      closeModal();
+      reloadProds();
+    });
+  }
+
+  async function loadCats(force) {
+    if (!force && CATS_CACHE) return CATS_CACHE;
+    const { data } = await window.bv.from('categories').select('*').order('position');
+    CATS_CACHE = data || [];
+    return CATS_CACHE;
+  }
+
+  // =========================================================
+  // CATEGORÍAS
+  // =========================================================
+  async function renderCategorias() {
+    const main = $('#main');
+    main.innerHTML = `
+      <h1>Categorías</h1>
+      <div class="sub" id="cat-sub">Cargando...</div>
+      <div class="actions"><button class="btn" id="new-cat">+ Nueva categoría</button></div>
+      <div class="table-wrap"><table id="cat-table">
+        <thead><tr><th style="width:60px">Orden</th><th>Nombre</th><th>Slug</th><th>Ícono</th><th>Productos</th><th>Activa</th><th></th></tr></thead>
+        <tbody><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
+      </table></div>
+    `;
+
+    const cats = await loadCats(true);
+    // counts per cat
+    const counts = {};
+    for (const c of cats) {
+      const { count } = await window.bv.from('products').select('id', { count:'exact', head:true }).eq('category_id', c.id);
+      counts[c.id] = count || 0;
+    }
+
+    $('#cat-sub').textContent = cats.length + ' categorías';
+    const tbody = $('#cat-table tbody');
+    tbody.innerHTML = cats.map(c => `
+      <tr data-id="${c.id}">
+        <td>${c.position}</td>
+        <td><strong>${esc(c.name)}</strong></td>
+        <td style="font-family:monospace;font-size:0.7rem">${esc(c.slug)}</td>
+        <td style="font-family:monospace;font-size:0.7rem">${esc(c.icon)}</td>
+        <td>${counts[c.id] || 0}</td>
+        <td><input type="checkbox" ${c.active ? 'checked':''} data-toggle-active="${c.id}"/></td>
+        <td><button class="btn ghost" data-edit="${c.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">Editar</button></td>
+      </tr>`).join('');
+
+    tbody.querySelectorAll('input[data-toggle-active]').forEach(chk => {
+      chk.addEventListener('change', async e => {
+        const id = e.target.dataset.toggleActive;
+        await window.bv.from('categories').update({ active: e.target.checked }).eq('id', id);
+      });
+    });
+    tbody.querySelectorAll('button[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const c = cats.find(x => x.id === btn.dataset.edit);
+        if (c) openCategoryModal(c);
+      });
+    });
+    $('#new-cat').addEventListener('click', () => openCategoryModal(null));
+  }
+
+  function openCategoryModal(c) {
+    const isNew = !c;
+    const f = c || { name:'', slug:'', icon:'Package', position:100, active:true };
+    $('#modal-title').textContent = isNew ? 'Nueva categoría' : 'Editar categoría';
+    $('#modal-body').innerHTML = `
+      <label>Nombre *</label><input id="cm-name" value="${esc(f.name)}" />
+      <label>Slug</label><input id="cm-slug" value="${esc(f.slug)}" placeholder="se genera del nombre si está vacío" />
+      <label>Ícono (lucide-react)</label><input id="cm-icon" value="${esc(f.icon)}" placeholder="Package, Wine, Milk..."/>
+      <small style="font-size:0.7rem;color:rgba(26,14,6,0.5);display:block;margin-top:0.4rem">
+        Sugeridos: Croissant, Wine, Milk, ShoppingBasket, Cookie, Apple, Beef, Sparkles, Bath, Cigarette, Pill, Package
+      </small>
+      <label>Orden de aparición</label><input id="cm-pos" type="number" value="${f.position}" />
+      <label class="checkbox-label"><input type="checkbox" id="cm-active" ${f.active ? 'checked':''}/> Activa (visible en web)</label>
+    `;
+    $('#modal-footer').innerHTML = `
+      <button class="btn ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn" id="cm-save">${isNew ? 'Crear' : 'Guardar'}</button>
+    `;
+    $('#modal-bg').classList.add('open');
+
+    $('#cm-save').addEventListener('click', async () => {
+      const name = $('#cm-name').value.trim();
+      if (!name) { alert('Nombre requerido'); return; }
+      const slug = $('#cm-slug').value.trim() || norm(name).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+      const payload = {
+        name, slug,
+        icon: $('#cm-icon').value.trim() || 'Package',
+        position: parseInt($('#cm-pos').value, 10) || 100,
+        active: $('#cm-active').checked
+      };
+      let res;
+      if (isNew) res = await window.bv.from('categories').insert(payload).select().single();
+      else res = await window.bv.from('categories').update(payload).eq('id', f.id).select().single();
+      if (res.error) { alert(res.error.message); return; }
+      CATS_CACHE = null;
+      closeModal();
+      renderCategorias();
+    });
+  }
+
+  // =========================================================
+  // PEDIDOS
+  // =========================================================
+  const STATUSES = [
+    { v:'nuevo', l:'Nuevo' },
+    { v:'en_preparacion', l:'En preparación' },
+    { v:'listo', l:'Listo' },
+    { v:'entregado', l:'Entregado' },
+    { v:'cancelado', l:'Cancelado' }
+  ];
+
+  async function renderPedidos() {
+    const main = $('#main');
+    main.innerHTML = `
+      <h1>Pedidos</h1>
+      <div class="sub" id="ord-sub">Cargando...</div>
+      <div class="actions">
+        <select class="sel" id="ord-filter">
+          <option value="">Todos los estados</option>
+          ${STATUSES.map(s => `<option value="${s.v}">${s.l}</option>`).join('')}
+        </select>
+      </div>
+      <div class="table-wrap"><table id="ord-table">
+        <thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Entrega</th><th>Pago</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+        <tbody><tr><td colspan="8" class="empty">Cargando...</td></tr></tbody>
+      </table></div>
+    `;
+
+    let orders = [];
+    async function reload() {
+      const { data, error } = await window.bv.from('orders')
+        .select('*, order_items(*)')
+        .order('created_at', { ascending:false })
+        .limit(200);
+      if (error) { $('#ord-sub').textContent = 'Error: ' + error.message; return; }
+      orders = data || [];
+      paint();
+    }
+
+    function paint() {
+      const filter = $('#ord-filter').value;
+      const items = filter ? orders.filter(o => o.status === filter) : orders;
+      $('#ord-sub').textContent = items.length + ' pedido' + (items.length === 1 ? '' : 's');
+      const tbody = $('#ord-table tbody');
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="empty">No hay pedidos</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = items.map(o => `
+        <tr data-id="${o.id}">
+          <td><strong>#${o.order_number}</strong></td>
+          <td>${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</td>
+          <td>${esc(o.customer_name) || '—'}</td>
+          <td>${o.delivery_type === 'sitio_camping' ? 'Sitio ' + esc(o.delivery_detail || '') : 'Retiro'}</td>
+          <td>${esc({efectivo:'Efectivo',tarjeta:'Tarjeta',caja_vecina:'Caja Vecina'}[o.payment_method] || o.payment_method)}</td>
+          <td>${fmt(o.subtotal)}</td>
+          <td>
+            <select class="sel pill ${pillFor(o.status)}" data-set-status="${o.id}" style="padding:0.2rem 0.5rem;font-weight:700;letter-spacing:0.1em">
+              ${STATUSES.map(s => `<option value="${s.v}" ${o.status === s.v ? 'selected':''}>${s.l}</option>`).join('')}
+            </select>
+          </td>
+          <td><button class="btn ghost" data-toggle="${o.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">Ver</button></td>
+        </tr>
+        <tr id="det-${o.id}" style="display:none">
+          <td colspan="8" style="background:var(--warm);padding:1rem">
+            <strong>Productos:</strong>
+            <ul style="margin:0.5rem 0 0 1.2rem">
+              ${(o.order_items || []).map(it => `<li style="font-size:0.8rem;margin-bottom:0.2rem"><strong>${it.quantity}x</strong> ${esc(it.product_name)} — ${fmt(it.unit_price)} c/u = <strong>${fmt(it.subtotal)}</strong></li>`).join('')}
+            </ul>
+            ${o.notes ? `<div style="font-size:0.78rem;margin-top:0.6rem"><strong>Nota:</strong> ${esc(o.notes)}</div>` : ''}
+          </td>
+        </tr>
+      `).join('');
+
+      tbody.querySelectorAll('select[data-set-status]').forEach(sel => {
+        sel.addEventListener('change', async e => {
+          const id = e.target.dataset.setStatus;
+          const status = e.target.value;
+          await window.bv.from('orders').update({ status }).eq('id', id);
+          const ord = orders.find(x => x.id === id);
+          if (ord) ord.status = status;
+          // refresh pill class
+          e.target.className = 'sel pill ' + pillFor(status);
+        });
+      });
+      tbody.querySelectorAll('button[data-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const det = document.getElementById('det-' + btn.dataset.toggle);
+          if (det) det.style.display = det.style.display === 'none' ? 'table-row' : 'none';
+        });
+      });
+    }
+
+    $('#ord-filter').addEventListener('change', paint);
+    await reload();
+  }
+
+  // =========================================================
+  // SETTINGS
+  // =========================================================
+  async function renderSettings() {
+    const main = $('#main');
+    main.innerHTML = `<h1>Configuración</h1><div class="sub">Información del minimarket</div><div class="empty">Cargando...</div>`;
+
+    const { data } = await window.bv.from('settings').select('value').eq('key', 'store').single();
+    const s = (data && data.value) || {};
+
+    main.innerHTML = `
+      <h1>Configuración</h1>
+      <div class="sub">Información del minimarket</div>
+      <div style="max-width:600px">
+        <label style="font-size:0.55rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(26,14,6,0.55);margin-top:1rem;display:block">Nombre del minimarket</label>
+        <input class="inp" id="s-name" value="${esc(s.name)}" style="width:100%;margin-top:0.25rem"/>
+
+        <label style="font-size:0.55rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(26,14,6,0.55);margin-top:1rem;display:block">Tagline</label>
+        <input class="inp" id="s-tagline" value="${esc(s.tagline)}" style="width:100%;margin-top:0.25rem"/>
+
+        <label style="font-size:0.55rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(26,14,6,0.55);margin-top:1rem;display:block">Dirección</label>
+        <input class="inp" id="s-address" value="${esc(s.address)}" style="width:100%;margin-top:0.25rem"/>
+
+        <label style="font-size:0.55rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(26,14,6,0.55);margin-top:1rem;display:block">WhatsApp</label>
+        <input class="inp" id="s-wa" value="${esc(s.whatsapp)}" style="width:100%;margin-top:0.25rem"/>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-top:0.5rem">
+          <div>
+            <label style="font-size:0.55rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(26,14,6,0.55);margin-top:1rem;display:block">Hora apertura</label>
+            <input class="inp" id="s-open" type="number" min="0" max="23" value="${s.hours_open || 9}" style="width:100%;margin-top:0.25rem"/>
+          </div>
+          <div>
+            <label style="font-size:0.55rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(26,14,6,0.55);margin-top:1rem;display:block">Hora cierre</label>
+            <input class="inp" id="s-close" type="number" min="0" max="23" value="${s.hours_close || 20}" style="width:100%;margin-top:0.25rem"/>
+          </div>
+        </div>
+
+        <div style="margin-top:1.5rem;display:flex;gap:1rem;align-items:center">
+          <button class="btn" id="s-save">Guardar cambios</button>
+          <span id="s-status" style="font-size:0.8rem;color:var(--moss)"></span>
+        </div>
+      </div>
+    `;
+
+    $('#s-save').addEventListener('click', async () => {
+      const payload = {
+        name: $('#s-name').value.trim(),
+        tagline: $('#s-tagline').value.trim(),
+        address: $('#s-address').value.trim(),
+        whatsapp: $('#s-wa').value.trim(),
+        hours_open: parseInt($('#s-open').value, 10) || 9,
+        hours_close: parseInt($('#s-close').value, 10) || 20
+      };
+      const { error } = await window.bv.from('settings')
+        .update({ value: payload, updated_at: new Date().toISOString() })
+        .eq('key', 'store');
+      const status = $('#s-status');
+      if (error) { status.style.color = '#a04830'; status.textContent = 'Error: ' + error.message; return; }
+      status.style.color = 'var(--moss)';
+      status.textContent = '✓ Guardado';
+      setTimeout(() => status.textContent = '', 3000);
+    });
+  }
+
+  // =========================================================
+  // MODAL HELPERS
+  // =========================================================
+  function closeModal() {
+    $('#modal-bg').classList.remove('open');
+  }
+  $('#modal-bg').addEventListener('click', e => {
+    if (e.target.id === 'modal-bg') closeModal();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Migrate · Bellavista</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="/config.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bark: #1e0f04; --espresso: #2d1505; --mahogany: #4a2010;
+      --amber: #c87830; --gold: #e8b96a;
+      --cream: #f5f0e8; --warm: #faf7f2; --parchment: #ede5d4;
+      --ink: #1a0e06; --moss: #2e5c38;
+      --hairline: rgba(30,15,4,0.10);
+      --f-d: 'Cormorant Garamond', Georgia, serif;
+      --f-b: 'Jost', system-ui, sans-serif;
+    }
+    body {
+      background: var(--warm); color: var(--ink);
+      font-family: var(--f-b); padding: 2rem 1rem;
+      min-height: 100vh;
+    }
+    .card {
+      max-width: 720px; margin: 0 auto;
+      background: #fff;
+      border: 1px solid var(--hairline);
+      border-radius: 4px;
+      padding: 2rem;
+    }
+    h1 {
+      font-family: var(--f-d);
+      font-size: 2rem; font-weight: 500;
+      margin-bottom: 0.3rem;
+    }
+    .sub {
+      font-size: 0.65rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(26,14,6,0.55);
+      margin-bottom: 1.5rem;
+    }
+    p { font-size: 0.85rem; line-height: 1.55; margin-bottom: 0.8rem; color: rgba(26,14,6,0.78); }
+    p strong { color: var(--ink); }
+    .warning {
+      background: rgba(200,120,48,0.1);
+      border: 1px solid rgba(200,120,48,0.3);
+      padding: 0.8rem 1rem;
+      border-radius: 4px;
+      font-size: 0.82rem;
+      margin: 1rem 0;
+      color: var(--mahogany);
+    }
+    .step { margin: 1.5rem 0 1rem; }
+    .step-title {
+      font-family: var(--f-d);
+      font-size: 1.2rem;
+      margin-bottom: 0.4rem;
+      color: var(--ink);
+    }
+    label {
+      display: block;
+      font-size: 0.6rem; font-weight: 700;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: rgba(26,14,6,0.6);
+      margin: 0.7rem 0 0.25rem;
+    }
+    input[type="file"], input[type="text"] {
+      width: 100%; padding: 0.55rem 0.7rem;
+      border: 1px solid var(--hairline); border-radius: 4px;
+      font-family: inherit; font-size: 0.85rem;
+      background: var(--warm);
+    }
+    button {
+      padding: 0.8rem 1.2rem;
+      background: var(--moss); color: #fff;
+      border: none; border-radius: 4px;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      cursor: pointer; margin-top: 1rem;
+    }
+    button:hover { background: #235029; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .log {
+      background: var(--bark); color: #c4dbaf;
+      font-family: 'SF Mono', Menlo, monospace;
+      font-size: 0.75rem;
+      padding: 1rem; border-radius: 4px;
+      max-height: 350px; overflow-y: auto;
+      margin-top: 1rem;
+      white-space: pre-wrap;
+    }
+    .log .err { color: #ff6e57; }
+    .log .ok { color: #6ee08b; }
+
+    code {
+      background: var(--parchment);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.78rem;
+    }
+    a { color: var(--mahogany); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Migrate</h1>
+    <div class="sub">Subir Excel → Supabase</div>
+
+    <p>Esta herramienta sube los <strong>1939 productos del Excel</strong> a Supabase, junto con las URLs de imagen del CSV de Open Food Facts (194 productos con foto).</p>
+
+    <div class="warning">
+      <strong>Requisito de seguridad:</strong> esta página usa la <code>service_role</code> de Supabase para escribir todos los productos sin restricciones. <strong>No publiques esta URL ni guardes la key en config.js</strong>. Pegá la key abajo, hacé la migración una vez, listo.
+    </div>
+
+    <div class="step">
+      <div class="step-title">1. Service role key</div>
+      <p>Vas a Supabase → <strong>Settings → API → Project API Keys → service_role</strong> (click "Reveal") y la pegás acá. Solo se usa en esta sesión, no se guarda.</p>
+      <label>service_role key</label>
+      <input type="text" id="srk" placeholder="eyJhbGciOi..."/>
+    </div>
+
+    <div class="step">
+      <div class="step-title">2. Archivos</div>
+      <label>Archivo Excel <code>minimarket_bellavista_limpio.xlsx</code></label>
+      <input type="file" id="excel-file" accept=".xlsx"/>
+
+      <label>CSV de imágenes <code>image_results.csv</code> (opcional)</label>
+      <input type="file" id="csv-file" accept=".csv"/>
+    </div>
+
+    <div class="step">
+      <div class="step-title">3. Migrar</div>
+      <p>El script va a hacer <code>upsert</code> por SKU — si lo corrés dos veces no duplica, solo actualiza.</p>
+      <button id="run">Iniciar migración</button>
+    </div>
+
+    <div class="log" id="log" style="display:none"></div>
+
+    <p style="margin-top:2rem;font-size:0.75rem;color:rgba(26,14,6,0.5)">
+      <a href="/admin">← Volver al admin</a>
+    </p>
+  </div>
+
+<script>
+  const $ = s => document.querySelector(s);
+  const logEl = $('#log');
+  function log(msg, cls) {
+    logEl.style.display = 'block';
+    const span = document.createElement('div');
+    if (cls) span.className = cls;
+    span.textContent = msg;
+    logEl.appendChild(span);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function norm(s) { return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+  function slugify(s) { return norm(s).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60); }
+
+  const CAT_SLUG = {
+    'Panadería y Pastelería': 'panaderia',
+    'Bebidas y Licores': 'bebidas',
+    'Lácteos y Embutidos': 'lacteos-embutidos',
+    'Abarrotes': 'abarrotes',
+    'Snacks y Golosinas': 'snacks',
+    'Frutas y Verduras': 'frutas-verduras',
+    'Carnes y Congelados': 'carnes-congelados',
+    'Aseo y Hogar': 'aseo-hogar',
+    'Higiene Personal': 'higiene-personal',
+    'Cigarros': 'cigarros',
+    'Farmacia': 'farmacia',
+    'Otros': 'otros',
+  };
+
+  function parseCSV(text) {
+    // Simple CSV parser — assumes well-formed with optional quoted strings
+    const lines = text.split(/\r?\n/).filter(l => l.length);
+    const headers = splitCsvLine(lines[0]);
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const cols = splitCsvLine(lines[i]);
+      const obj = {};
+      for (let j = 0; j < headers.length; j++) obj[headers[j]] = cols[j] || '';
+      rows.push(obj);
+    }
+    return rows;
+  }
+  function splitCsvLine(line) {
+    const out = []; let cur = ''; let q = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { q = !q; continue; }
+      if (c === ',' && !q) { out.push(cur); cur = ''; continue; }
+      cur += c;
+    }
+    out.push(cur);
+    return out;
+  }
+
+  $('#run').addEventListener('click', async () => {
+    const srk = $('#srk').value.trim();
+    const excel = $('#excel-file').files[0];
+    const csv = $('#csv-file').files[0];
+
+    if (!srk) return alert('Pegá la service_role key');
+    if (!excel) return alert('Subí el archivo Excel');
+
+    logEl.innerHTML = '';
+    $('#run').disabled = true;
+    $('#run').textContent = 'Migrando...';
+
+    try {
+      const admin = window.supabase.createClient(
+        window.BELLAVISTA_CONFIG.SUPABASE_URL,
+        srk,
+        { auth: { autoRefreshToken:false, persistSession:false } }
+      );
+
+      // ---- Categorías ----
+      log('→ Verificando categorías existentes...');
+      const { data: cats } = await admin.from('categories').select('id, slug');
+      const catBySlug = Object.fromEntries((cats||[]).map(c => [c.slug, c.id]));
+      log('  ' + (cats||[]).length + ' categorías encontradas', 'ok');
+
+      // ---- CSV imágenes ----
+      let imageMap = {};
+      if (csv) {
+        log('→ Procesando CSV de imágenes...');
+        const txt = await csv.text();
+        const rows = parseCSV(txt);
+        for (const r of rows) {
+          if (String(r.found).toLowerCase() === 'true' && r.image_url) {
+            imageMap[r.sku] = r.image_url;
+          }
+        }
+        log('  ' + Object.keys(imageMap).length + ' imágenes mapeadas', 'ok');
+      }
+
+      // ---- Excel ----
+      log('→ Leyendo Excel...');
+      const buf = await excel.arrayBuffer();
+      const wb = XLSX.read(buf, { type:'array' });
+      const sh = wb.Sheets['Productos'] || wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sh);
+      log('  ' + rows.length + ' filas leídas', 'ok');
+
+      // ---- Build payload ----
+      const products = [];
+      const seenSlugs = new Set();
+      let skipped = 0;
+      for (const r of rows) {
+        const sku = String(r.sku || '').trim();
+        const name = String(r.nombre || '').trim();
+        if (!sku || !name || name.length < 2) { skipped++; continue; }
+        let slug = slugify(name) + '-' + sku.slice(-4);
+        while (seenSlugs.has(slug)) slug += '-x';
+        seenSlugs.add(slug);
+
+        const cat_slug = CAT_SLUG[r.categoria] || 'otros';
+        const category_id = catBySlug[cat_slug];
+        const tieneBarcode = String(r.tiene_barcode).toLowerCase() === 'true';
+        const imgUrl = imageMap[sku] || null;
+
+        products.push({
+          sku,
+          ean: tieneBarcode ? sku : null,
+          name,
+          name_normalized: r.nombre_busqueda || norm(name),
+          slug,
+          category_id,
+          price: Math.round(Number(r.precio) || 0),
+          cost: Math.round(Number(r.costo) || 0),
+          stock: Math.round(Number(r.stock) || 0),
+          unit: 'unidad',
+          active: true,
+          needs_review: r.revisar || null,
+          image_url: imgUrl,
+          image_source: imgUrl ? 'off' : 'none'
+        });
+      }
+      log('  ' + products.length + ' productos preparados (' + skipped + ' saltados)', 'ok');
+      log('  ' + products.filter(p => p.image_url).length + ' con imagen', 'ok');
+
+      // ---- Upsert en batches ----
+      const BATCH = 200;
+      log('→ Subiendo a Supabase...');
+      for (let i = 0; i < products.length; i += BATCH) {
+        const chunk = products.slice(i, i + BATCH);
+        const { error } = await admin.from('products').upsert(chunk, { onConflict: 'sku' });
+        if (error) throw error;
+        log('  [' + (i + chunk.length) + '/' + products.length + ']');
+      }
+
+      log('', 'ok');
+      log('✅ Migración completa.', 'ok');
+      log('   Ahora podés revisar el catálogo en /minimarket y administrarlo en /admin');
+    } catch (e) {
+      log('❌ Error: ' + (e.message || e), 'err');
+      console.error(e);
+    } finally {
+      $('#run').disabled = false;
+      $('#run').textContent = 'Iniciar migración';
+    }
+  });
+</script>
+</body>
+</html>

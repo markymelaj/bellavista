@@ -1,7 +1,7 @@
-# Bellavista — Salto del Laja
+# Bellavista — Cercano a Saltos del Laja
 
-Plataforma web para Camping y Minimarket Bellavista.  
-Hub QR → sitio del camping → minimarket con pedidos por WhatsApp.
+Plataforma web para Camping y Minimarket Bellavista.
+Hub QR → camping / minimarket → pedidos por WhatsApp.
 
 **URL de producción:** https://bellavista-topaz.vercel.app
 
@@ -11,100 +11,119 @@ Hub QR → sitio del camping → minimarket con pedidos por WhatsApp.
 
 ```
 /
-├── index.html        → Hub QR (página raíz, destino del código QR físico)
-├── camping.html      → Sitio del Camping Bellavista (reconstruido)
-├── minimarket.html   → Minimarket Bellavista (catálogo + pedidos WhatsApp)
-├── qr.html           → Código QR imprimible / descargable
-├── vercel.json       → Configuración Vercel (clean URLs + headers de seguridad)
-└── README.md         → Este archivo
+├── index.html         → Hub QR (página raíz)
+├── camping.html       → Sitio del Camping
+├── minimarket.html    → Catálogo + pedidos por WhatsApp (lee de Supabase)
+├── qr.html            → QR imprimible
+├── admin.html         → Panel admin (productos, categorías, pedidos, settings)
+├── admin-login.html   → Login del admin
+├── migrate.html       → Herramienta one-shot para subir Excel a Supabase
+├── config.js          → Configuración Supabase compartida
+├── supabase-schema.sql→ SQL de tablas y RLS (correr una vez)
+├── vercel.json        → Config Vercel
+└── README.md
 ```
 
-> **Sin build step.** Todo es HTML + CSS + JS vanilla. Vercel lo despliega directo.
+> **Sin build step.** Vanilla HTML + JS + Supabase JS desde CDN. Vercel lo despliega tal cual.
 
 ---
 
-## Deploy en Vercel (primera vez)
+## Setup inicial (una sola vez)
 
-1. Sube este repositorio a GitHub
-2. En [vercel.com](https://vercel.com) → **Add New Project** → importa el repo
-3. En la configuración del proyecto:
-   - **Framework Preset:** Other
-   - **Build Command:** *(dejar vacío)*
-   - **Output Directory:** *(dejar vacío / `.`)*
-4. Clic en **Deploy**
+### Paso 1 — Crear proyecto Supabase
 
-Listo. Vercel detecta `vercel.json` y aplica clean URLs y headers automáticamente.
+1. Andate a https://supabase.com/dashboard → **New Project**
+2. Nombre: `bellavista-minimarket` · Región: **South America (São Paulo)** · Plan: **Free**
+3. Esperá ~2 min hasta que esté listo
 
-### Clean URLs habilitadas
+### Paso 2 — Crear el schema
 
-Con `cleanUrls: true` en `vercel.json`, las páginas son accesibles sin `.html`:
+1. En Supabase: menú lateral → **SQL Editor** → **New query**
+2. Pegá todo el contenido de [`supabase-schema.sql`](./supabase-schema.sql)
+3. Click **Run** (verde, abajo a la derecha)
+4. Verificás en **Table Editor** que están las tablas: `categories`, `products`, `orders`, `order_items`, `settings`
+5. La tabla `categories` ya viene poblada con las 12 categorías de Bellavista
 
-| Archivo          | URL limpia                                        |
-|------------------|---------------------------------------------------|
-| `index.html`     | `bellavista-topaz.vercel.app`                   |
-| `camping.html`   | `bellavista-topaz.vercel.app/camping`           |
-| `minimarket.html`| `bellavista-topaz.vercel.app/minimarket`        |
-| `qr.html`        | `bellavista-topaz.vercel.app/qr`                |
+### Paso 3 — Crear tu usuario admin
+
+1. En Supabase: **Authentication → Users → Add user → Create new user**
+2. Email: tu email · Contraseña: la que vas a usar · **Auto Confirm User: ON**
+3. Click **Create user**
+
+### Paso 4 — Copiar las keys a config.js
+
+1. En Supabase: **Project Settings → API**
+2. Copiás:
+   - `Project URL` → reemplazás `YOUR-PROJECT` en `config.js`
+   - `anon public` → reemplazás `YOUR-ANON-KEY-HERE` en `config.js`
+3. Editás `config.js`:
+   ```js
+   window.BELLAVISTA_CONFIG = {
+     SUPABASE_URL:  'https://xxxxx.supabase.co',
+     SUPABASE_ANON: 'eyJhbGc...',
+     WHATSAPP:      '56974984220',
+   };
+   ```
+4. Commit + push → Vercel autodeploya
+
+### Paso 5 — Migrar el Excel de productos
+
+1. Andá a `https://bellavista-topaz.vercel.app/migrate`
+2. Pegás la **service_role** key (Supabase → Settings → API → service_role → Reveal)
+3. Subís el archivo `minimarket_bellavista_limpio.xlsx` (lo tenés del proyecto)
+4. Subís el `image_results.csv` (opcional, agrega 194 imágenes)
+5. Click **Iniciar migración** → 30-60 segundos
+6. Verificás en Supabase → Table Editor → **products** que tiene los 1939 productos
+
+### Paso 6 — Listo
+
+| URL | Qué hace |
+|-----|----------|
+| `/` | Hub QR |
+| `/camping` | Sitio del camping |
+| `/minimarket` | Catálogo público (lee Supabase) |
+| `/admin-login` | Login admin |
+| `/admin` | Panel admin (requiere login) |
+| `/migrate` | Migración Excel (no compartas esta URL) |
 
 ---
 
-## Configuración post-deploy
+## Cómo funciona
 
-| Qué configurar          | Dónde                           | Estado         |
-|-------------------------|---------------------------------|----------------|
-| WhatsApp camping        | `camping.html` — links WA       | ✅ +56974984220 |
-| WhatsApp minimarket     | `minimarket.html` — `WA_NUMBER` | ✅ +56974984220 |
-| Catálogo minimarket     | `minimarket.html` — array `PRODUCTS` | ⚙️ Expandir |
-| Precios catálogo        | Agregar campo `price` en `PRODUCTS` | 🔜 Pendiente |
-| URL en el QR físico     | `qr.html` — atributo `data=` en img src | ✅ Fija a producción |
+### Frontend público
+
+`minimarket.html` carga productos y categorías desde Supabase al boot. El cliente arma el pedido en localStorage, lo envía: se guarda en la tabla `orders` y se abre WhatsApp con el mensaje formateado.
+
+### Admin
+
+`admin.html` es un SPA simple con hash routing (`#dashboard`, `#productos`, etc.). Todas las operaciones de DB usan el cliente Supabase autenticado. Si no estás logueado, redirige a `/admin-login`.
+
+### Seguridad (RLS)
+
+Las políticas en `supabase-schema.sql`:
+- Público puede **leer** categorías y productos activos
+- Público puede **insertar** orders y order_items (para crear pedidos)
+- Solo usuarios autenticados pueden hacer cualquier otra operación (editar productos, ver todos los pedidos, etc.)
+
+La `anon` key es pública por diseño. La `service_role` solo se usa una vez en `/migrate` y nunca se guarda en código.
 
 ---
 
-## Supabase
+## Editar productos diariamente
 
-**No se usa Supabase en esta versión.** Todo opera vía WhatsApp.
+1. `/admin-login` con tu usuario
+2. `/admin#productos` → buscás, editás precio/stock directo en la tabla (blur para guardar), o click "Editar" para modal completo
+3. Los cambios son inmediatos en `/minimarket`
 
-La arquitectura actual es completamente estática y no requiere base de datos.  
-La integración con Eleventa (pedidos desde web → ticket en POS) es fase siguiente,  
-evaluando si Eleventa expone API/webhook en el plan activo.
+## Recibir pedidos
+
+`/admin#pedidos` muestra todos los pedidos. Cambiás estado con el dropdown (nuevo → en preparación → listo → entregado).
 
 ---
 
 ## QR físico
 
-El código QR ya está generado en `qr.html`. Para imprimirlo:
-
-1. Ir a `bellavista-topaz.vercel.app/qr`
-2. Clic en **Imprimir** o **Descargar PNG (800px)**
-3. El PNG descargado es de 800×800px — suficiente para imprimir hasta A4
-
-El QR apunta a `https://bellavista-topaz.vercel.app` (la raíz).  
-**No cambies el dominio una vez impreso el QR físico.**
-
----
-
-## Agregar precios al minimarket
-
-En `minimarket.html`, el array `PRODUCTS` acepta un campo `price`:
-
-```js
-{ id: 1, cat: 'panaderia', emoji: '🍞', name: 'Pan marraqueta', badge: 'Fresco', price: 200 },
-```
-
-Para mostrarlos, agrega en el template del `renderProducts()`:
-
-```js
-${p.price ? `<span class="product-price">$${p.price.toLocaleString('es-CL')}</span>` : ''}
-```
-
----
-
-## Próxima fase
-
-- [ ] Integración Eleventa (API / webhook)
-- [ ] Página "Próximamente" con contenido real (eventos, internet nativo, productos caseros)
-- [ ] Dominio propio (actualizar QR impreso si se cambia)
-- [ ] Precios en catálogo minimarket
+El QR de `qr.html` apunta a la raíz. Sin cambios.
 
 ---
 
