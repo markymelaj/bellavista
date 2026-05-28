@@ -18,7 +18,7 @@ window.BELLAVISTA_CONFIG = {
 };
 
 window.bv = window.supabase.createClient(
-  window.BELLAVISTA_CONFIG.SUPABASE_URL,
-  window.BELLAVISTA_CONFIG.SUPABASE_ANON,
+SUPABASE_URL:  'https://YOUR-PROJECT.supabase.co',
+  SUPABASE_ANON: 'YOUR-ANON-KEY-HERE',
   { auth: { persistSession: true, autoRefreshToken: true } }
 );
