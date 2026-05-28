@@ -90,6 +90,14 @@ Hub QR → camping / minimarket → pedidos por WhatsApp.
 
 ## Cómo funciona
 
+### Portada del minimarket
+
+Al entrar a `/minimarket` se ve una **portada** pensada para que el cliente no se pierda entre los ~1900 productos:
+- **Slider hero** arriba que rota cada 5s ("Pan fresco cada mañana", "Antojos para el camping", "Frutas y verduras")
+- **Categorías con foto** ("¿Qué necesitas hoy?") — al tocar una se entra a ese rubro
+- **Destacados** — los productos marcados como destacados en el admin (si no hay ninguno marcado, muestra una selección)
+- Botón de **búsqueda flotante** (abajo a la izquierda) y "Ver todo el catálogo" para el listado completo
+
 ### Frontend público
 
 `minimarket.html` carga productos y categorías desde Supabase al boot. El cliente arma el pedido en localStorage, lo envía: se guarda en la tabla `orders` y se abre WhatsApp con el mensaje formateado.
@@ -98,12 +106,21 @@ Hub QR → camping / minimarket → pedidos por WhatsApp.
 
 `admin.html` es un SPA simple con hash routing (`#dashboard`, `#productos`, etc.). Todas las operaciones de DB usan el cliente Supabase autenticado. Si no estás logueado, redirige a `/admin-login`.
 
+**Subir foto de un producto:** en el modal de producto (Productos → Editar), hay tres formas:
+- **📷 Cámara** — en el celular abre la cámara directamente
+- **🖼️ Galería** — elegir una foto del teléfono/compu
+- **Arrastrar** una imagen a la zona, o pegar una URL
+
+La foto se comprime a 800px y se sube al bucket `product-images` de Supabase Storage. La URL pública queda guardada en el producto.
+
+**Marcar destacado:** el checkbox "Destacado" en el modal hace que el producto aparezca en la sección Destacados de la portada.
+
 ### Seguridad (RLS)
 
 Las políticas en `supabase-schema.sql`:
-- Público puede **leer** categorías y productos activos
+- Público puede **leer** categorías y productos activos, y **ver** las fotos del bucket
 - Público puede **insertar** orders y order_items (para crear pedidos)
-- Solo usuarios autenticados pueden hacer cualquier otra operación (editar productos, ver todos los pedidos, etc.)
+- Solo usuarios autenticados pueden editar productos, ver pedidos, y subir/borrar fotos
 
 La `anon` key es pública por diseño. La `service_role` solo se usa una vez en `/migrate` y nunca se guarda en código.
 
@@ -112,12 +129,18 @@ La `anon` key es pública por diseño. La `service_role` solo se usa una vez en 
 ## Editar productos diariamente
 
 1. `/admin-login` con tu usuario
-2. `/admin#productos` → buscás, editás precio/stock directo en la tabla (blur para guardar), o click "Editar" para modal completo
+2. `/admin#productos` → buscás, editás precio/stock directo en la tabla (blur para guardar), o click "Editar" para modal completo (incluye subir foto)
 3. Los cambios son inmediatos en `/minimarket`
 
 ## Recibir pedidos
 
 `/admin#pedidos` muestra todos los pedidos. Cambiás estado con el dropdown (nuevo → en preparación → listo → entregado).
+
+## Limpiar productos repetidos / descontinuados
+
+El Excel tiene una hoja **"Duplicados"** con 134 productos en 61 grupos de nombres iguales (la mayoría son variantes legítimas de distinto tamaño/precio). Para los que ya no vendés:
+- En `/admin#productos`, abrí el producto y **destildá "Activo"** → desaparece de la web pero no se borra (podés reactivarlo)
+- O usá "Eliminar" en el modal si querés borrarlo definitivamente
 
 ---
 

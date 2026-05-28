@@ -241,7 +241,192 @@
     .hero-desc strong { color: var(--gold); font-weight: 500; }
 
     /* ===== CATALOG ===== */
-    .catalog { max-width: 1200px; margin: 0 auto; padding: 2rem 2rem 6rem; }
+    /* ===== HERO SLIDER ===== */
+    .hero-slider {
+      position: relative;
+      overflow: hidden;
+      background: var(--espresso);
+    }
+    .hero-track {
+      display: flex;
+      transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    .hero-slide {
+      min-width: 100%;
+      height: 280px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+    }
+    @media (min-width: 768px) { .hero-slide { height: 380px; } }
+    .hero-slide::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(30,15,4,0.15) 0%, rgba(30,15,4,0.35) 50%, rgba(30,15,4,0.85) 100%);
+    }
+    .hero-slide-inner {
+      position: relative; z-index: 2;
+      padding: 2rem 1.5rem;
+      max-width: 1200px; margin: 0 auto; width: 100%;
+    }
+    @media (min-width: 768px) { .hero-slide-inner { padding: 2.5rem 2rem; } }
+    .hero-tag {
+      font-size: 0.6rem; font-weight: 600;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--gold); margin-bottom: 0.6rem;
+    }
+    .hero-title {
+      font-family: var(--f-d);
+      font-weight: 500; font-size: clamp(1.8rem, 5vw, 3rem);
+      color: #fff; line-height: 1.05;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .hero-sub {
+      margin-top: 0.5rem;
+      font-size: 0.85rem; font-weight: 300;
+      color: rgba(255,255,255,0.9);
+      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+      max-width: 480px;
+    }
+    .hero-dots {
+      position: absolute;
+      bottom: 0.9rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 0.4rem; z-index: 3;
+    }
+    .hero-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+      border: none; cursor: pointer; padding: 0;
+      transition: background 0.2s, width 0.2s;
+    }
+    .hero-dot.active { background: var(--gold); width: 20px; border-radius: 4px; }
+
+    /* ===== DELIVERY STRIP ===== */
+    .delivery-strip {
+      background: var(--bark);
+      color: rgba(245,240,232,0.85);
+      overflow: hidden;
+    }
+    .delivery-strip-inner {
+      max-width: 1200px; margin: 0 auto;
+      padding: 0.7rem 1.5rem;
+      display: flex; align-items: center; justify-content: center;
+      gap: 0.8rem; flex-wrap: wrap;
+      font-size: 0.7rem; font-weight: 400;
+      text-align: center;
+    }
+    .ds-sep { color: var(--amber); }
+    @media (max-width: 600px) {
+      .ds-sep { display: none; }
+      .delivery-strip-inner { gap: 0.3rem; flex-direction: column; }
+    }
+
+    /* ===== SECTION TITLES ===== */
+    .section-title {
+      font-family: var(--f-d);
+      font-weight: 500; font-size: 1.6rem;
+      color: var(--ink);
+      margin: 0.5rem 0 1rem;
+    }
+    .section-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin: 2.5rem 0 1rem; gap: 1rem;
+    }
+    .section-head .section-title { margin: 0; }
+    .see-all {
+      background: none; border: none;
+      color: var(--amber);
+      font-family: var(--f-b);
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 0.03em;
+      cursor: pointer; white-space: nowrap;
+    }
+    .see-all:hover { color: var(--mahogany); }
+
+    /* ===== CATEGORY GRID (portada) ===== */
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.7rem;
+    }
+    @media (min-width: 600px) { .cat-grid { grid-template-columns: repeat(3, 1fr); gap: 0.9rem; } }
+    @media (min-width: 960px) { .cat-grid { grid-template-columns: repeat(4, 1fr); } }
+
+    .cat-card {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      border: none;
+      background: var(--parchment);
+      display: block; width: 100%;
+      padding: 0;
+      transition: transform 0.12s, box-shadow 0.2s;
+    }
+    .cat-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(30,15,4,0.15); }
+    .cat-card-img {
+      position: absolute; inset: 0;
+      background-size: cover; background-position: center;
+    }
+    .cat-card-emoji {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem;
+      background: var(--parchment);
+    }
+    .cat-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(30,15,4,0) 35%, rgba(30,15,4,0.78) 100%);
+    }
+    .cat-card-label {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      z-index: 2;
+      padding: 0.7rem 0.7rem 0.6rem;
+      text-align: left;
+    }
+    .cat-card-name {
+      font-family: var(--f-b);
+      font-size: 0.82rem; font-weight: 600;
+      color: #fff; line-height: 1.2;
+      display: block;
+    }
+    .cat-card-count {
+      font-size: 0.62rem; font-weight: 400;
+      color: rgba(255,255,255,0.75);
+      margin-top: 0.1rem; display: block;
+    }
+
+    .back-to-home {
+      background: none; border: none;
+      color: var(--amber);
+      font-family: var(--f-b);
+      font-size: 0.78rem; font-weight: 600;
+      cursor: pointer; padding: 0;
+      margin-bottom: 1.2rem;
+    }
+    .back-to-home:hover { color: var(--mahogany); }
+
+    /* ===== SEARCH FAB ===== */
+    .search-fab {
+      position: fixed;
+      bottom: 1.5rem; left: 1.5rem;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: var(--espresso);
+      color: var(--gold);
+      border: none;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px rgba(30,15,4,0.3);
+      z-index: 50; cursor: pointer;
+    }
+    .search-fab:hover { background: var(--mahogany); }
+
+    .catalog { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1.5rem 6rem; }
 
     /* SEARCH */
     .search-row {
@@ -717,39 +902,90 @@
     </div>
   </div>
 
-  <div class="hero-banner">
-    <div class="hero-inner">
-      <p class="hero-tag">Todos los d&iacute;as &middot; Reci&eacute;n horneado</p>
-      <h1 class="hero-title">Pan fresco cada ma&ntilde;ana.<br>Todo lo dem&aacute;s tambi&eacute;n.</h1>
-      <p class="hero-desc">
-        Arm&aacute; tu pedido y env&iacute;alo por WhatsApp.
-        Lo tenemos listo para que lo retires, o <strong>te lo acercamos al sitio del camping</strong>.<br><br>
-        Pagas con <strong>efectivo, tarjetas o Caja Vecina</strong>. Los precios son referenciales.
-      </p>
+  <!-- HERO SLIDER -->
+  <div class="hero-slider" id="hero-slider">
+    <div class="hero-track" id="hero-track">
+      <div class="hero-slide" style="background-image:url('/img/hero/pan-marraqueta.jpg')">
+        <div class="hero-slide-inner">
+          <p class="hero-tag">Todos los días · Recién horneado</p>
+          <h1 class="hero-title">Pan fresco cada mañana</h1>
+          <p class="hero-sub">Marraqueta, hallulla y amasado, recién salido del horno</p>
+        </div>
+      </div>
+      <div class="hero-slide" style="background-image:url('/img/hero/snacks-wide.jpg')">
+        <div class="hero-slide-inner">
+          <p class="hero-tag">Delicias caseras</p>
+          <h1 class="hero-title">Antojos para el camping</h1>
+          <p class="hero-sub">Snacks, dulces y todo para compartir junto al río</p>
+        </div>
+      </div>
+      <div class="hero-slide" style="background-image:url('/img/cat/frutas.jpg')">
+        <div class="hero-slide-inner">
+          <p class="hero-tag">Fresco cada día</p>
+          <h1 class="hero-title">Frutas y verduras</h1>
+          <p class="hero-sub">Lo que necesitas para tu asado y tu mesa</p>
+        </div>
+      </div>
+    </div>
+    <div class="hero-dots" id="hero-dots"></div>
+  </div>
+
+  <!-- DELIVERY STRIP -->
+  <div class="delivery-strip">
+    <div class="delivery-strip-inner">
+      <span class="ds-item">🛒 Armá tu pedido y envíalo por WhatsApp</span>
+      <span class="ds-sep">·</span>
+      <span class="ds-item">🏕️ Te lo acercamos al sitio del camping</span>
+      <span class="ds-sep">·</span>
+      <span class="ds-item">💳 Efectivo · Tarjetas · Caja Vecina</span>
     </div>
   </div>
 
   <div class="catalog">
 
-    <!-- Search -->
-    <div class="search-row">
-      <div class="search-wrap">
-        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/>
-        </svg>
-        <input type="search" class="search-input" id="search-input" placeholder="Buscar productos..." autocomplete="off" />
-        <button class="search-clear" id="search-clear" onclick="clearSearch()" aria-label="Limpiar">&times;</button>
+    <!-- CATEGORÍAS DESTACADAS (portada) -->
+    <section id="home-section">
+      <h2 class="section-title">¿Qué necesitas hoy?</h2>
+      <div class="cat-grid" id="cat-grid"></div>
+
+      <div class="section-head">
+        <h2 class="section-title">Destacados</h2>
+        <button class="see-all" onclick="showCategory('all')">Ver todo el catálogo →</button>
       </div>
-      <span class="results-count" id="results-count">38 productos</span>
-    </div>
+      <div class="products-grid" id="featured-grid"></div>
+    </section>
 
-    <!-- Tabs -->
-    <div class="cat-tabs" id="cat-tabs">
-      <button class="cat-tab active" data-cat="all">Todo</button>
-    </div>
+    <!-- CATÁLOGO COMPLETO (oculto hasta que entran a una categoría o buscan) -->
+    <section id="catalog-section" style="display:none">
+      <button class="back-to-home" onclick="showHome()">← Volver al inicio</button>
 
-    <div class="products-grid" id="products-grid"></div>
+      <!-- Search -->
+      <div class="search-row">
+        <div class="search-wrap">
+          <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/>
+          </svg>
+          <input type="search" class="search-input" id="search-input" placeholder="Buscar productos..." autocomplete="off" />
+          <button class="search-clear" id="search-clear" onclick="clearSearch()" aria-label="Limpiar">&times;</button>
+        </div>
+        <span class="results-count" id="results-count"></span>
+      </div>
+
+      <!-- Tabs -->
+      <div class="cat-tabs" id="cat-tabs">
+        <button class="cat-tab active" data-cat="all">Todo</button>
+      </div>
+
+      <div class="products-grid" id="products-grid"></div>
+    </section>
   </div>
+
+  <!-- Persistent search trigger (always visible) -->
+  <button class="search-fab" id="search-fab" onclick="openSearch()" aria-label="Buscar">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/>
+    </svg>
+  </button>
 
   <div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
 
@@ -844,14 +1080,35 @@
       return out;
     }
 
+    function productCardHTML(p) {
+      var qty = cart[p.id] || 0;
+      var imgHTML = p.img
+        ? '<img src="' + p.img + '" alt="' + escapeAttr(p.n) + '" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{className:\'ico-fallback\',textContent:\'\\u{1F4E6}\'}))" />'
+        : '<span class="ico-fallback">' + iconFor(p.cat) + '</span>';
+      var html = '<div class="product-card' + (qty > 0 ? ' in-cart' : '') + '" id="card-' + p.id + '">';
+      html += '<div class="product-image" data-cat="' + p.cat + '">' + imgHTML + '</div>';
+      html += '<div class="product-body">';
+      html += '<p class="product-name">' + escapeHtml(p.n) + '</p>';
+      html += '<div class="product-price-row">';
+      html += '<span class="product-price">' + fmt(p.p) + '</span>';
+      html += '<div class="product-controls' + (qty === 0 ? ' empty' : '') + '">';
+      html += '<button class="qty-btn minus" onclick="changeQty(\'' + p.id + '\',-1)" aria-label="Quitar">&#8722;</button>';
+      html += '<span class="qty-display" id="qty-' + p.id + '">' + qty + '</span>';
+      html += '<button class="qty-btn" onclick="changeQty(\'' + p.id + '\',1)" aria-label="Agregar">+</button>';
+      html += '</div></div></div></div>';
+      return html;
+    }
+
+    function wireProductCards(container) {
+      // cards use inline onclick for qty; nothing extra needed
+    }
+
     function renderProducts() {
       var grid = document.getElementById('products-grid');
       var filtered = getFilteredProducts();
-      grid.innerHTML = '';
 
-      // Update count label
       var countEl = document.getElementById('results-count');
-      countEl.textContent = filtered.length + (filtered.length === 1 ? ' producto' : ' productos');
+      if (countEl) countEl.textContent = filtered.length + (filtered.length === 1 ? ' producto' : ' productos');
 
       if (filtered.length === 0) {
         grid.innerHTML = '<div class="empty-state">' +
@@ -862,32 +1119,7 @@
         return;
       }
 
-      for (var i = 0; i < filtered.length; i++) {
-        var p = filtered[i];
-        var qty = cart[p.id] || 0;
-        var card = document.createElement('div');
-        card.className = 'product-card' + (qty > 0 ? ' in-cart' : '');
-        card.id = 'card-' + p.id;
-
-        var imgHTML = p.img
-          ? '<img src="' + p.img + '" alt="' + escapeAttr(p.n) + '" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{className:\'ico-fallback\',textContent:\'\\u{1F4E6}\'}))" />'
-          : '<span class="ico-fallback">' + iconFor(p.cat) + '</span>';
-
-        var html = '<div class="product-image" data-cat="' + p.cat + '">' + imgHTML + '</div>';
-        html += '<div class="product-body">';
-        html += '<p class="product-name">' + escapeHtml(p.n) + '</p>';
-        html += '<div class="product-price-row">';
-        html += '<span class="product-price">' + fmt(p.p) + '</span>';
-        html += '<div class="product-controls' + (qty === 0 ? ' empty' : '') + '">';
-        html += '<button class="qty-btn minus" onclick="changeQty(\'' + p.id + '\',-1)" aria-label="Quitar">&#8722;</button>';
-        html += '<span class="qty-display" id="qty-' + p.id + '">' + qty + '</span>';
-        html += '<button class="qty-btn" onclick="changeQty(\'' + p.id + '\',1)" aria-label="Agregar">+</button>';
-        html += '</div>';
-        html += '</div>';
-        html += '</div>';
-        card.innerHTML = html;
-        grid.appendChild(card);
-      }
+      grid.innerHTML = filtered.map(productCardHTML).join('');
     }
 
     function escapeHtml(s) { return String(s).replace(/[&<>]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
@@ -907,15 +1139,22 @@
       var next = cur + delta;
       if (next <= 0) { delete cart[id]; next = 0; } else { cart[id] = next; }
       saveCart();
-      var el = document.getElementById('qty-' + id);
-      if (el) el.textContent = next;
-      var cardEl = document.getElementById('card-' + id);
-      if (cardEl) {
-        if (next > 0) cardEl.classList.add('in-cart');
-        else cardEl.classList.remove('in-cart');
-      }
+      // Update every instance of this product's qty display + card state
+      var qtyEls = document.querySelectorAll('#qty-' + cssEscape(id) + ', [id="qty-' + id + '"]');
+      document.querySelectorAll('.qty-display').forEach(function(el){
+        if (el.id === 'qty-' + id) el.textContent = next;
+      });
+      document.querySelectorAll('.product-controls').forEach(function(ctrl){
+        var disp = ctrl.querySelector('.qty-display');
+        if (disp && disp.id === 'qty-' + id) ctrl.classList.toggle('empty', next === 0);
+      });
+      document.querySelectorAll('#card-' + id + ', [id="card-' + id + '"]').forEach(function(){});
+      document.querySelectorAll('.product-card').forEach(function(c){
+        if (c.id === 'card-' + id) c.classList.toggle('in-cart', next > 0);
+      });
       updateCartUI();
     }
+    function cssEscape(s){ return String(s).replace(/[^a-zA-Z0-9_-]/g, '\\$&'); }
 
     function calcTotal() {
       var t = 0;
@@ -1073,58 +1312,158 @@
       el.innerHTML = '<span class="status-dot ' + dotClass + '"></span><span>' + text + '</span>';
     }
 
+    // ---- Category icons + portada images ----
+    var CAT_ICONS = {
+      'panaderia':'🥖','bebidas':'🍷','lacteos-embutidos':'🥛','abarrotes':'🛒',
+      'snacks':'🍪','frutas-verduras':'🍎','carnes-congelados':'🥩','aseo-hogar':'🧽',
+      'higiene-personal':'🧴','cigarros':'🚬','farmacia':'💊','otros':'📦'
+    };
+    // Optional local cover images per category (fallback to emoji if missing)
+    var CAT_COVERS = {
+      'panaderia': '/img/hero/pan-marraqueta.jpg',
+      'lacteos-embutidos': '/img/cat/lacteos.jpg',
+      'frutas-verduras': '/img/cat/frutas.jpg',
+      'bebidas': '/img/cat/bebidas.jpg',
+      'snacks': '/img/hero/snacks-wide.jpg',
+      'aseo-hogar': '/img/cat/extra1.jpg'
+    };
+
+    // ---- Home/catalog navigation ----
+    function showHome() {
+      document.getElementById('home-section').style.display = '';
+      document.getElementById('catalog-section').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function showCategory(slug) {
+      document.getElementById('home-section').style.display = 'none';
+      document.getElementById('catalog-section').style.display = '';
+      activeCat = slug;
+      document.querySelectorAll('.cat-tab').forEach(function(t) {
+        t.classList.toggle('active', t.dataset.cat === slug);
+      });
+      searchTerm = '';
+      var si = document.getElementById('search-input');
+      if (si) si.value = '';
+      renderProducts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function openSearch() {
+      document.getElementById('home-section').style.display = 'none';
+      document.getElementById('catalog-section').style.display = '';
+      activeCat = 'all';
+      document.querySelectorAll('.cat-tab').forEach(function(t) {
+        t.classList.toggle('active', t.dataset.cat === 'all');
+      });
+      renderProducts();
+      var si = document.getElementById('search-input');
+      if (si) { si.focus(); si.scrollIntoView({ behavior:'smooth', block:'center' }); }
+    }
+
+    // ---- Hero slider ----
+    function initSlider() {
+      var track = document.getElementById('hero-track');
+      var slides = track ? track.children : [];
+      if (!slides.length) return;
+      var dots = document.getElementById('hero-dots');
+      var idx = 0;
+      for (var i = 0; i < slides.length; i++) {
+        var d = document.createElement('button');
+        d.className = 'hero-dot' + (i === 0 ? ' active' : '');
+        d.setAttribute('aria-label', 'Slide ' + (i+1));
+        (function(n){ d.onclick = function(){ go(n); }; })(i);
+        dots.appendChild(d);
+      }
+      function go(n) {
+        idx = n;
+        track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+        var ds = dots.children;
+        for (var k = 0; k < ds.length; k++) ds[k].classList.toggle('active', k === idx);
+      }
+      setInterval(function(){ go((idx + 1) % slides.length); }, 5000);
+    }
+
+    // ---- Render portada (category cards + featured) ----
+    function renderHome(catById, catCounts, featured) {
+      // Category cards
+      var grid = document.getElementById('cat-grid');
+      var html = '';
+      for (var i = 0; i < CATEGORIES.length; i++) {
+        var c = CATEGORIES[i];
+        var count = catCounts[c.slug] || 0;
+        if (count === 0) continue;
+        var cover = CAT_COVERS[c.slug];
+        var visual = cover
+          ? '<div class="cat-card-img" style="background-image:url(\'' + cover + '\')"></div>'
+          : '<div class="cat-card-emoji">' + (CAT_ICONS[c.slug] || '📦') + '</div>';
+        html += '<button class="cat-card" onclick="showCategory(\'' + c.slug + '\')">' +
+          visual +
+          '<span class="cat-card-label">' +
+            '<span class="cat-card-name">' + escapeHtml(c.name) + '</span>' +
+            '<span class="cat-card-count">' + count + ' productos</span>' +
+          '</span>' +
+        '</button>';
+      }
+      grid.innerHTML = html;
+
+      // Featured products
+      var fg = document.getElementById('featured-grid');
+      if (featured.length === 0) {
+        // No featured set yet — show a sample from popular categories
+        featured = PRODUCTS.slice(0, 10);
+      }
+      fg.innerHTML = featured.map(productCardHTML).join('');
+      wireProductCards(fg);
+    }
+
     // ---- Boot from Supabase ----
     async function bootFromSupabase() {
       try {
         var [catsRes, prodsRes] = await Promise.all([
           window.bv.from('categories').select('id, name, slug, icon, position').eq('active', true).order('position'),
-          window.bv.from('products').select('id, sku, name, name_normalized, category_id, price, image_url').eq('active', true).order('name')
+          window.bv.from('products').select('id, sku, name, name_normalized, category_id, price, image_url, featured').eq('active', true).order('name')
         ]);
 
         if (catsRes.error) throw catsRes.error;
         if (prodsRes.error) throw prodsRes.error;
 
         CATEGORIES = catsRes.data || [];
-        var catBySlug = {};
-        var catById = {};
+        var catBySlug = {}, catById = {};
         for (var i = 0; i < CATEGORIES.length; i++) {
           catBySlug[CATEGORIES[i].slug] = CATEGORIES[i];
           catById[CATEGORIES[i].id] = CATEGORIES[i];
         }
 
-        // Render category tabs
+        // Category tabs (for catalog view)
         var tabs = document.getElementById('cat-tabs');
         var tabsHTML = '<button class="cat-tab active" data-cat="all">Todo</button>';
-        var catIcons = {
-          'panaderia':'🥖','bebidas':'🍷','lacteos-embutidos':'🥛','abarrotes':'🛒',
-          'snacks':'🍪','frutas-verduras':'🍎','carnes-congelados':'🥩','aseo-hogar':'🧽',
-          'higiene-personal':'🧴','cigarros':'🚬','farmacia':'💊','otros':'📦'
-        };
         for (var j = 0; j < CATEGORIES.length; j++) {
           var c = CATEGORIES[j];
-          tabsHTML += '<button class="cat-tab" data-cat="'+c.slug+'">'+(catIcons[c.slug]||'')+' '+escapeHtml(c.name)+'</button>';
+          tabsHTML += '<button class="cat-tab" data-cat="'+c.slug+'">'+(CAT_ICONS[c.slug]||'')+' '+escapeHtml(c.name)+'</button>';
         }
         tabs.innerHTML = tabsHTML;
 
-        // Map products to internal shape (id, cat slug, n name, p price, img, sku)
+        // Map products
+        var featured = [];
+        var catCounts = {};
         PRODUCTS = (prodsRes.data || []).map(function(p) {
           var cat = catById[p.category_id];
-          return {
-            id: p.id,
-            sku: p.sku,
-            cat: cat ? cat.slug : 'otros',
-            n: p.name,
-            ns: p.name_normalized || norm(p.name),
-            p: p.price,
-            img: p.image_url || ''
+          var slug = cat ? cat.slug : 'otros';
+          catCounts[slug] = (catCounts[slug] || 0) + 1;
+          var prod = {
+            id: p.id, sku: p.sku, cat: slug,
+            n: p.name, ns: p.name_normalized || norm(p.name),
+            p: p.price, img: p.image_url || ''
           };
+          if (p.featured) featured.push(prod);
+          return prod;
         });
 
-        renderProducts();
+        renderHome(catById, catCounts, featured);
+        initSlider();
       } catch (e) {
         console.error('Boot error:', e);
-        document.getElementById('products-grid').innerHTML =
-          '<div class="empty-state"><div class="empty-icon">&#9888;</div>' +
+        document.getElementById('cat-grid').innerHTML =
+          '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">&#9888;</div>' +
           '<div class="empty-text">Error cargando productos</div>' +
           '<div class="empty-sub">Verifica config.js o intenta de nuevo.</div></div>';
       }

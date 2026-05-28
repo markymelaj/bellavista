@@ -271,6 +271,36 @@
       margin: 0; padding: 0;
     }
 
+    /* ---- Photo dropzone ---- */
+    .dropzone {
+      border: 2px dashed var(--hairline);
+      border-radius: 6px;
+      background: var(--warm);
+      min-height: 140px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .dropzone:hover { border-color: var(--amber); }
+    .dropzone.dragover { border-color: var(--moss); background: rgba(46,92,56,0.06); }
+    .dz-content { width: 100%; display: flex; align-items: center; justify-content: center; }
+    .dz-placeholder { text-align: center; padding: 1.5rem 1rem; color: rgba(26,14,6,0.5); }
+    .dz-icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+    .dz-text { font-size: 0.78rem; line-height: 1.4; }
+    .dz-preview { max-width: 100%; max-height: 200px; object-fit: contain; display: block; }
+    .dz-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(0,0,0,0.08); }
+    .dz-bar { height: 100%; width: 0%; background: var(--moss); transition: width 0.3s; }
+    .dz-actions { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
+    .dz-btn { flex: 1; }
+    .dz-url-details { margin-top: 0.8rem; }
+    .dz-url-details summary {
+      font-size: 0.7rem; color: rgba(26,14,6,0.55);
+      cursor: pointer; letter-spacing: 0.05em;
+    }
+    .dz-url-details summary:hover { color: var(--amber); }
+
     .setup-warning {
       background: rgba(200,120,48,0.1);
       border: 1px solid rgba(200,120,48,0.3);
@@ -581,8 +611,26 @@
         <div><label>Precio CLP *</label><input id="m-price" type="number" value="${f.price}" /></div>
         <div><label>Stock</label><input id="m-stock" type="number" value="${f.stock}" /></div>
       </div>
-      <label>URL imagen</label><input id="m-img" value="${esc(f.image_url)}" placeholder="https://..." />
-      <div id="m-imgPrev" style="margin-top:0.5rem">${f.image_url ? `<img src="${esc(f.image_url)}" style="width:100px;height:100px;object-fit:contain;border:1px solid var(--hairline);border-radius:4px"/>` : ''}</div>
+      <label>Foto del producto</label>
+      <div id="m-dropzone" class="dropzone">
+        <div id="m-dz-content" class="dz-content">
+          ${f.image_url
+            ? `<img id="m-preview" src="${esc(f.image_url)}" class="dz-preview"/>`
+            : `<div class="dz-placeholder"><span class="dz-icon">📷</span><span class="dz-text">Tomar foto, elegir de galería<br>o arrastrar una imagen aquí</span></div>`}
+        </div>
+        <div id="m-dz-progress" class="dz-progress" style="display:none"><div class="dz-bar" id="m-dz-bar"></div></div>
+      </div>
+      <div class="dz-actions">
+        <button type="button" class="btn ghost dz-btn" id="m-cam-btn">📷 Cámara</button>
+        <button type="button" class="btn ghost dz-btn" id="m-gal-btn">🖼️ Galería</button>
+        ${'' /* hidden file inputs */}
+        <input type="file" id="m-cam-input" accept="image/*" capture="environment" style="display:none"/>
+        <input type="file" id="m-gal-input" accept="image/*" style="display:none"/>
+      </div>
+      <details class="dz-url-details">
+        <summary>O pegar una URL de imagen</summary>
+        <input id="m-img" value="${esc(f.image_url)}" placeholder="https://..." style="margin-top:0.5rem"/>
+      </details>
       <label class="checkbox-label"><input type="checkbox" id="m-active" ${f.active ? 'checked':''}/> Activo (visible en web)</label>
       <label class="checkbox-label"><input type="checkbox" id="m-featured" ${f.featured ? 'checked':''}/> Destacado</label>
     `;
@@ -592,6 +640,9 @@
       <button class="btn" id="m-save">${isNew ? 'Crear' : 'Guardar'}</button>
     `;
     $('#modal-bg').classList.add('open');
+
+    // ---- Photo upload (camera / gallery / drag-drop) ----
+    setupPhotoUpload(f);
 
     if (!isNew) {
       $('#m-del').addEventListener('click', async () => {
@@ -627,6 +678,118 @@
       if (res.error) { alert(res.error.message); return; }
       closeModal();
       reloadProds();
+    });
+  }
+
+  // =========================================================
+  // PHOTO UPLOAD (Supabase Storage)
+  // =========================================================
+  function setupPhotoUpload(f) {
+    const dz = $('#m-dropzone');
+    const camBtn = $('#m-cam-btn');
+    const galBtn = $('#m-gal-btn');
+    const camInput = $('#m-cam-input');
+    const galInput = $('#m-gal-input');
+    if (!dz) return;
+
+    camBtn.addEventListener('click', () => camInput.click());
+    galBtn.addEventListener('click', () => galInput.click());
+    camInput.addEventListener('change', e => { if (e.target.files[0]) handleImageFile(e.target.files[0]); });
+    galInput.addEventListener('change', e => { if (e.target.files[0]) handleImageFile(e.target.files[0]); });
+
+    // Drag & drop
+    ['dragenter','dragover'].forEach(ev => dz.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation(); dz.classList.add('dragover');
+    }));
+    ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation(); dz.classList.remove('dragover');
+    }));
+    dz.addEventListener('drop', e => {
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) handleImageFile(file);
+    });
+    // Click the dropzone (when empty) opens gallery
+    dz.addEventListener('click', () => {
+      if (!$('#m-preview')) galInput.click();
+    });
+
+    // If user pastes a URL manually, reflect in preview
+    const urlInput = $('#m-img');
+    if (urlInput) {
+      urlInput.addEventListener('change', () => {
+        const u = urlInput.value.trim();
+        if (u) showPreview(u);
+      });
+    }
+  }
+
+  function showPreview(url) {
+    const content = $('#m-dz-content');
+    content.innerHTML = `<img id="m-preview" src="${esc(url)}" class="dz-preview"/>`;
+  }
+
+  async function handleImageFile(file) {
+    const bar = $('#m-dz-bar');
+    const progress = $('#m-dz-progress');
+    try {
+      // Resize/compress client-side before upload (max 800px, jpeg)
+      const blob = await resizeImage(file, 800, 0.82);
+
+      progress.style.display = 'block';
+      bar.style.width = '40%';
+
+      const ext = 'jpg';
+      const path = 'prod-' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.' + ext;
+
+      const { error: upErr } = await window.bv.storage
+        .from('product-images')
+        .upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+      if (upErr) throw upErr;
+
+      bar.style.width = '80%';
+
+      const { data: pub } = window.bv.storage.from('product-images').getPublicUrl(path);
+      const publicUrl = pub.publicUrl;
+
+      bar.style.width = '100%';
+
+      // Set URL field + preview
+      const urlInput = $('#m-img');
+      if (urlInput) urlInput.value = publicUrl;
+      showPreview(publicUrl);
+
+      setTimeout(() => { progress.style.display = 'none'; bar.style.width = '0%'; }, 600);
+    } catch (e) {
+      progress.style.display = 'none';
+      bar.style.width = '0%';
+      alert('Error subiendo la foto: ' + (e.message || e));
+      console.error(e);
+    }
+  }
+
+  // Resize an image File to a max dimension, return a Blob (JPEG)
+  function resizeImage(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = e => { img.src = e.target.result; };
+      reader.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width >= height) { height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error('No se pudo procesar la imagen')), 'image/jpeg', quality);
+      };
+      img.onerror = reject;
+      reader.readAsDataURL(file);
     });
   }
 

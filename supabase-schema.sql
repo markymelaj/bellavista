@@ -162,3 +162,31 @@ insert into public.settings (key, value) values
     "hours_close": 20
   }'::jsonb)
 on conflict (key) do nothing;
+
+-- =========================================================================
+-- STORAGE BUCKET para fotos de productos
+-- =========================================================================
+-- Crear bucket público 'product-images'
+insert into storage.buckets (id, name, public)
+values ('product-images', 'product-images', true)
+on conflict (id) do nothing;
+
+-- Público puede VER las imágenes
+drop policy if exists "product-images public read" on storage.objects;
+create policy "product-images public read" on storage.objects
+  for select using (bucket_id = 'product-images');
+
+-- Solo admin autenticado puede SUBIR
+drop policy if exists "product-images auth insert" on storage.objects;
+create policy "product-images auth insert" on storage.objects
+  for insert with check (bucket_id = 'product-images' and auth.role() = 'authenticated');
+
+-- Solo admin autenticado puede ACTUALIZAR/REEMPLAZAR
+drop policy if exists "product-images auth update" on storage.objects;
+create policy "product-images auth update" on storage.objects
+  for update using (bucket_id = 'product-images' and auth.role() = 'authenticated');
+
+-- Solo admin autenticado puede ELIMINAR
+drop policy if exists "product-images auth delete" on storage.objects;
+create policy "product-images auth delete" on storage.objects
+  for delete using (bucket_id = 'product-images' and auth.role() = 'authenticated');
