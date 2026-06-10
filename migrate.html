@@ -268,6 +268,13 @@
         const tieneBarcode = String(r.tiene_barcode).toLowerCase() === 'true';
         const imgUrl = imageMap[sku] || null;
 
+        const activoRaw = r.activo ?? r.active ?? true;
+        const destacadoRaw = r.destacado ?? r.featured ?? false;
+        const active = String(activoRaw).toLowerCase() !== 'false' && String(activoRaw).toLowerCase() !== 'no' && String(activoRaw) !== '0';
+        const featured = String(destacadoRaw).toLowerCase() === 'true' || String(destacadoRaw).toLowerCase() === 'si' || String(destacadoRaw).toLowerCase() === 'sí' || String(destacadoRaw) === '1';
+        const position = Math.round(Number(r.posicion || r.position) || 1000);
+        const unit = String(r.unidad || r.unit || 'unidad').trim() || 'unidad';
+
         products.push({
           sku,
           ean: tieneBarcode ? sku : null,
@@ -278,8 +285,10 @@
           price: Math.round(Number(r.precio) || 0),
           cost: Math.round(Number(r.costo) || 0),
           stock: Math.round(Number(r.stock) || 0),
-          unit: 'unidad',
-          active: true,
+          unit,
+          active,
+          featured,
+          position,
           needs_review: r.revisar || null,
           image_url: imgUrl,
           image_source: imgUrl ? 'off' : 'none'

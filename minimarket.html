@@ -597,6 +597,25 @@
       font-size: 1.1rem; font-weight: 500;
       color: var(--mahogany); line-height: 1;
     }
+    .product-price.pending {
+      font-family: var(--f-b);
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #8a4b1b;
+      background: rgba(246, 183, 83, 0.22);
+      border: 1px solid rgba(138, 75, 27, 0.18);
+      border-radius: 999px;
+      padding: 0.26rem 0.45rem;
+      white-space: nowrap;
+    }
+    .price-pending-note {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: rgba(26,14,6,0.55);
+      text-align: right;
+      line-height: 1.1;
+      max-width: 92px;
+    }
     @media (min-width: 640px) { .product-price { font-size: 1.2rem; } }
 
     .product-controls {
@@ -1085,17 +1104,25 @@
       var imgHTML = p.img
         ? '<img src="' + p.img + '" alt="' + escapeAttr(p.n) + '" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{className:\'ico-fallback\',textContent:\'\\u{1F4E6}\'}))" />'
         : '<span class="ico-fallback">' + iconFor(p.cat) + '</span>';
+      var hasPrice = Number(p.p) > 0;
       var html = '<div class="product-card' + (qty > 0 ? ' in-cart' : '') + '" id="card-' + p.id + '">';
       html += '<div class="product-image" data-cat="' + p.cat + '">' + imgHTML + '</div>';
       html += '<div class="product-body">';
       html += '<p class="product-name">' + escapeHtml(p.n) + '</p>';
       html += '<div class="product-price-row">';
-      html += '<span class="product-price">' + fmt(p.p) + '</span>';
-      html += '<div class="product-controls' + (qty === 0 ? ' empty' : '') + '">';
-      html += '<button class="qty-btn minus" onclick="changeQty(\'' + p.id + '\',-1)" aria-label="Quitar">&#8722;</button>';
-      html += '<span class="qty-display" id="qty-' + p.id + '">' + qty + '</span>';
-      html += '<button class="qty-btn" onclick="changeQty(\'' + p.id + '\',1)" aria-label="Agregar">+</button>';
-      html += '</div></div></div></div>';
+      html += hasPrice
+        ? '<span class="product-price">' + fmt(p.p) + '</span>'
+        : '<span class="product-price pending">Consultar precio</span>';
+      if (hasPrice) {
+        html += '<div class="product-controls' + (qty === 0 ? ' empty' : '') + '">';
+        html += '<button class="qty-btn minus" onclick="changeQty(\'' + p.id + '\',-1)" aria-label="Quitar">&#8722;</button>';
+        html += '<span class="qty-display" id="qty-' + p.id + '">' + qty + '</span>';
+        html += '<button class="qty-btn" onclick="changeQty(\'' + p.id + '\',1)" aria-label="Agregar">+</button>';
+        html += '</div>';
+      } else {
+        html += '<div class="price-pending-note">editar en<br>backend</div>';
+      }
+      html += '</div></div></div>';
       return html;
     }
 
@@ -1135,6 +1162,11 @@
     }
 
     function changeQty(id, delta) {
+      var prod = getProduct(id);
+      if (!prod || Number(prod.p) <= 0) {
+        alert('Este producto todavía no tiene precio cargado. Editalo desde el backend antes de venderlo.');
+        return;
+      }
       var cur = cart[id] || 0;
       var next = cur + delta;
       if (next <= 0) { delete cart[id]; next = 0; } else { cart[id] = next; }
@@ -1240,7 +1272,7 @@
       var items = [];
       for (var id in cart) {
         var p = getProduct(id);
-        if (p) items.push({
+        if (p && Number(p.p) > 0) items.push({
           product_id: p.id,
           product_sku: p.sku,
           product_name: p.n,
@@ -1420,7 +1452,7 @@
       try {
         var [catsRes, prodsRes] = await Promise.all([
           window.bv.from('categories').select('id, name, slug, icon, position').eq('active', true).order('position'),
-          window.bv.from('products').select('id, sku, name, name_normalized, category_id, price, image_url, featured').eq('active', true).order('name')
+          window.bv.from('products').select('id, sku, name, name_normalized, category_id, price, image_url, featured, position, needs_review').eq('active', true).order('position', { ascending: true }).order('name')
         ]);
 
         if (catsRes.error) throw catsRes.error;
@@ -1452,7 +1484,7 @@
           var prod = {
             id: p.id, sku: p.sku, cat: slug,
             n: p.name, ns: p.name_normalized || norm(p.name),
-            p: p.price, img: p.image_url || ''
+            p: Number(p.price) || 0, img: p.image_url || '', pos: p.position || 1000
           };
           if (p.featured) featured.push(prod);
           return prod;

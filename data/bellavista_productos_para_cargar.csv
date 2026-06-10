@@ -1,0 +1,147 @@
+sku,nombre,nombre_busqueda,categoria,precio,costo,stock,tiene_barcode,revisar,destacado,activo,posicion,unidad,origen,nombre_original
+BV-MAIN-PAN-FRESCO,Pan fresco,pan fresco,Panadería y Pastelería,0,0,0,FALSE,"Falta precio/formato: definir si es unidad, bolsa, kilo o marraqueta. | FALTA PRECIO: editar desde backend antes de vender.",TRUE,TRUE,10,unidad,Principal manual,
+7802900120016,Mantequilla Soprole Pan 125 g,mantequilla soprole pan 125 g,Lácteos y Embutidos,1750,1250,0,TRUE,Confirmar tamaño/formato antes de publicar definitivo.,TRUE,TRUE,20,unidad,Excel definitivo,MANTEQUILLA PAN SO
+7802900121013,Mantequilla Soprole Pan 250 g,mantequilla soprole pan 250 g,Lácteos y Embutidos,3486,2490,0,TRUE,Confirmar tamaño/formato antes de publicar definitivo.,TRUE,TRUE,21,unidad,Excel definitivo,MANTEQUILLA PAN C
+BV-MAIN-QUESO-NEGRETE,Queso Negrete,queso negrete,Lácteos y Embutidos,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,30,unidad,Principal manual,
+BV-MAIN-QUESO-QUILLAYES-LAMINADO,Queso Quillayes laminado,queso quillayes laminado,Lácteos y Embutidos,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,31,unidad,Principal manual,
+780197008402,Vienesas tradicionales pack chico,vienesas tradicionales pack chico,Lácteos y Embutidos,1288,920,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca. | Confirmar marca y cantidad del pack.,TRUE,TRUE,50,unidad,Excel definitivo,SALCHICHA TRADICIO
+780196500974,Vienesas tradicionales pack familiar,vienesas tradicionales pack familiar,Lácteos y Embutidos,4886,3490,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca. | Confirmar marca y cantidad del pack.,TRUE,TRUE,51,unidad,Excel definitivo,SALCHICHA TRADICIO
+BV-MAIN-PALTA,Palta,palta,Frutas y Verduras,0,0,0,FALSE,Falta precio y unidad de venta: unidad/kilo. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,60,unidad,Principal manual,
+BV-HUEVO-UNIDAD,Huevo unidad,huevo unidad,Lácteos y Embutidos,300,0,0,FALSE,,TRUE,TRUE,70,unidad,Principal manual,
+BV-HUEVO-MAPLE,Maple de huevos,maple de huevos,Lácteos y Embutidos,8500,0,0,FALSE,,TRUE,TRUE,71,maple,Principal manual,
+BV-MAIN-HARINA,Harina,harina,Abarrotes,0,0,0,FALSE,Falta precio y formato/peso. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,80,unidad,Principal manual,
+BV-MAIN-HARINA-TOSTADA,Harina tostada,harina tostada,Abarrotes,0,0,0,FALSE,Falta precio y formato/peso. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,81,unidad,Principal manual,
+BV-MAIN-CONFORT,Confort,confort,Higiene Personal,0,0,0,FALSE,Falta precio y formato: rollos/pack. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,90,unidad,Principal manual,
+BV-MAIN-CERVEZA-LATA-BOTELLA,Cerveza lata/botella,cerveza lata/botella,Bebidas y Licores,0,0,0,FALSE,"Falta precio, marca y formato. | FALTA PRECIO: editar desde backend antes de vender.",TRUE,TRUE,100,unidad,Principal manual,
+7807975003967,Arroz grado 1 grano largo,arroz grado 1 grano largo,Abarrotes,2226,1590,0,TRUE,,TRUE,TRUE,120,unidad,Excel definitivo,ARROZ G1 GRANO LAR
+7802615006551,Arroz grado 1 largo ancho,arroz grado 1 largo ancho,Abarrotes,2646,1890,0,TRUE,,TRUE,TRUE,121,unidad,Excel definitivo,ARROZ G1 LARGO ANC
+7804695410016,Arroz grado 2 largo delgado,arroz grado 2 largo delgado,Abarrotes,1330,950,0,TRUE,,TRUE,TRUE,122,unidad,Excel definitivo,ARROZ G2 LARGO DEL
+BV-MAIN-SALSA-DE-TOMATE-POMAROLA-SAN-REMO,Salsa de tomate Pomarola San Remo,salsa de tomate pomarola san remo,Abarrotes,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,130,unidad,Principal manual,
+BV-MAIN-COCA-COLA-LATA-350-ML,Coca-Cola lata 350 ml,coca-cola lata 350 ml,Bebidas y Licores,0,0,0,FALSE,Falta precio y confirmar formato disponible. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,140,unidad,Principal manual,
+BV-MAIN-COCA-COLA-500-ML,Coca-Cola 500 ml,coca-cola 500 ml,Bebidas y Licores,0,0,0,FALSE,Falta precio y confirmar formato disponible. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,141,unidad,Principal manual,
+BV-MAIN-COCA-COLA-1-5-L,Coca-Cola 1.5 L,coca-cola 1.5 l,Bebidas y Licores,0,0,0,FALSE,Falta precio y confirmar formato disponible. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,142,unidad,Principal manual,
+BV-MAIN-COCA-COLA-2-L,Coca-Cola 2 L,coca-cola 2 l,Bebidas y Licores,0,0,0,FALSE,Falta precio y confirmar formato disponible. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,143,unidad,Principal manual,
+BV-MAIN-COCA-COLA-3-L,Coca-Cola 3 L,coca-cola 3 l,Bebidas y Licores,0,0,0,FALSE,Falta precio y confirmar formato disponible. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,144,unidad,Principal manual,
+BV-MAIN-MONSTER-ENERGY,Monster Energy,monster energy,Bebidas y Licores,0,0,0,FALSE,Falta precio y formato/sabor. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,150,unidad,Principal manual,
+BV-MAIN-SCORE-ENERGY-DRINK,Score Energy Drink,score energy drink,Bebidas y Licores,0,0,0,FALSE,Falta precio y formato/sabor. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,151,unidad,Principal manual,
+780292077542,Leche entera larga vida 1 L,leche entera larga vida 1 l,Lácteos y Embutidos,1610,1150,0,TRUE,,TRUE,TRUE,170,unidad,Excel definitivo,LECHE ENTERA LARGA
+BV-MAIN-CABALLA-EN-CONSERVA,Caballa en conserva,caballa en conserva,Abarrotes,0,0,0,FALSE,"Falta precio, marca y formato. | FALTA PRECIO: editar desde backend antes de vender.",TRUE,TRUE,180,unidad,Principal manual,
+BV-KENT-IKON-MIX-20,Cigarros Kent Ikon Mix 20,cigarros kent ikon mix 20,Cigarros,7311,5222,0,FALSE,Sin código visible,TRUE,TRUE,190,unidad,Excel definitivo,KENT IKON MIX 20
+BV-KENT-ROSE,Cigarros Kent Rose 20,cigarros kent rose 20,Cigarros,7311,5222,0,FALSE,Sin código visible,TRUE,TRUE,191,unidad,Excel definitivo,KENT ROSE
+BV-KENT-TRUE,Cigarros Kent True 20,cigarros kent true 20,Cigarros,7311,5222,0,FALSE,Sin código visible / texto parcialmente borroso,TRUE,TRUE,192,unidad,Excel definitivo,KENT TRUE
+BV-LUCKY-STR-BLUE-BOX-20,Cigarros Lucky Strike Blue Box 20,cigarros lucky strike blue box 20,Cigarros,7669,5478,0,FALSE,Sin código visible,TRUE,TRUE,193,unidad,Excel definitivo,LUCKY STR BLUE BOX 20
+BV-PALL-MALL-CLICK-XL,Cigarros Pall Mall Click XL 20,cigarros pall mall click xl 20,Cigarros,6650,4750,0,FALSE,Sin código visible,TRUE,TRUE,194,unidad,Excel definitivo,PALL MALL CLICK XL
+BV-MAIN-JUGO-WATTS,Jugo Watts,jugo watts,Bebidas y Licores,0,0,0,FALSE,Falta precio y formato/sabor. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,200,unidad,Principal manual,
+BV-MAIN-PRESTOBARBA,Prestobarba,prestobarba,Higiene Personal,0,0,0,FALSE,Falta precio y confirmar marca/modelo. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,210,unidad,Principal manual,
+BV-MAIN-SAL,Sal,sal,Abarrotes,0,0,0,FALSE,Falta precio y formato/peso. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,220,unidad,Principal manual,
+7801505231912,Azúcar granulada,azucar granulada,Abarrotes,1722,1230,0,TRUE,,TRUE,TRUE,230,unidad,Excel definitivo,AZUCAR GRANULADA I
+BV-MAIN-ENDULZANTE,Endulzante,endulzante,Abarrotes,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,240,unidad,Principal manual,
+7801875069360,Bolsa de basura 70 x 90 cm,bolsa de basura 70 x 90 cm,Aseo y Hogar,1344,960,0,TRUE,,TRUE,TRUE,260,unidad,Excel definitivo,BOLSA BASURA 70X90
+7801875069153,Bolsa de basura 80 x 110 cm,bolsa de basura 80 x 110 cm,Aseo y Hogar,2016,1440,0,TRUE,,TRUE,TRUE,261,unidad,Excel definitivo,BOLSA BASURA 80X11
+BV-MAIN-CLORO,Cloro,cloro,Aseo y Hogar,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,270,unidad,Principal manual,
+BV-MAIN-CLORO-GEL,Cloro gel,cloro gel,Aseo y Hogar,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,271,unidad,Principal manual,
+BV-MAIN-DETERGENTE-OMO,Detergente Omo,detergente omo,Aseo y Hogar,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,280,unidad,Principal manual,
+BV-MAIN-QUIX-LAVALOZAS,Quix lavalozas,quix lavalozas,Aseo y Hogar,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,290,unidad,Principal manual,
+BV-MAIN-CIF-LIMPIADOR,Cif limpiador,cif limpiador,Aseo y Hogar,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,300,unidad,Principal manual,
+BV-MAIN-MATAMOSCAS,Matamoscas,matamoscas,Aseo y Hogar,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,310,unidad,Principal manual,
+7802950002119,Nescafé instantáneo,nescafe instantaneo,Abarrotes,3724,2660,0,TRUE,,TRUE,TRUE,330,unidad,Excel definitivo,NESCAFE INSTANTANE
+BV-MAIN-TE,Té,te,Abarrotes,0,0,0,FALSE,"Falta precio, marca y formato. | FALTA PRECIO: editar desde backend antes de vender.",TRUE,TRUE,340,unidad,Principal manual,
+BV-MAIN-CAFE-EN-SOBRE,Café en sobre,cafe en sobre,Abarrotes,0,0,0,FALSE,Falta precio y formato. | FALTA PRECIO: editar desde backend antes de vender.,TRUE,TRUE,341,unidad,Principal manual,
+780292000782,Leche Colun 200 cc,leche colun 200 cc,Lácteos y Embutidos,742,530,0,TRUE,,TRUE,TRUE,350,unidad,Excel definitivo,LECHE COLUN 200 CC
+7801320000007,Aceite maravilla,aceite maravilla,Abarrotes,3906,2790,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,ACEITE MARAVILLA M
+779027200058,Aceite vegetal,aceite vegetal,Abarrotes,2086,1490,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,ACEITE VEGETAL MER
+7802420011528,Aceituna azapa,aceituna azapa,Abarrotes,3010,2150,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,ACEITUNA AZAPA YEN
+780242006195,Aceituna sevillana,aceituna sevillana,Abarrotes,3038,2170,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,ACEITUNA SEVILLANA
+780264000142,Ají crema chileno,aji crema chileno,Abarrotes,840,600,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,AJI CREMA CHILENO
+7802950005943,Caldo Maggi 12 unidades,caldo maggi 12 unidades,Abarrotes,1666,1190,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,CALDO MAGGI 12 UN
+7802950005974,Caldo Maggi 12 unidades,caldo maggi 12 unidades,Abarrotes,1666,1190,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,CALDO MAGGI 12 UN
+7790580243678,Caramelo menta chocolate,caramelo menta chocolate,Abarrotes,4046,2890,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CARAMELO MENTA CHO
+780540005746,Chancaca 1 bloque,chancaca 1 bloque,Abarrotes,1638,1170,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CHANCACA 1 BLOQUE
+7613034279316,Chocolate Capri 30 g,chocolate capri 30 g,Abarrotes,1008,720,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,CHOCOLATE CAPRI 30
+7613034279750,Chocolate Capri 30 g,chocolate capri 30 g,Abarrotes,1008,720,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,CHOCOLATE CAPRI 30
+7802215121258,Chocolate Rolls,chocolate rolls,Abarrotes,2632,1880,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CHOCOLATE ROLLS C
+7802225428206,Chocolate confitado,chocolate confitado,Abarrotes,8470,6050,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CHOCOLATE CONFITAD
+7802225428361,Chocolate maní,chocolate mani,Abarrotes,8470,6050,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CHOCOLATE MANI ROC
+7802225538121,Chocolate tradicional,chocolate tradicional,Abarrotes,6706,4790,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CHOCOLATE TRADICIO
+7802225426718,Confite saquito chocolate,confite saquito chocolate,Abarrotes,7770,5550,0,TRUE,Media: nombre abreviado,FALSE,TRUE,1000,unidad,Excel definitivo,CONFITE SAQ CHOCOL
+780296017255,Discos de chocolate,discos de chocolate,Abarrotes,8946,6390,0,TRUE,Media: nombre/código parcialmente borroso,FALSE,TRUE,1000,unidad,Excel definitivo,DIS CHOCOLATE SANH
+7802575002235,Fideo Carozzi 400 g,fideo carozzi 400 g,Abarrotes,1050,750,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,FIDEO CAROZZI 400
+7802500001029,Fideo cabello de ángel Lucchetti,fideo cabello de angel lucchetti,Abarrotes,966,690,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CABELLO ANGEL LUCC
+7613030121046,Fortificante instantáneo,fortificante instantaneo,Abarrotes,4662,3330,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,FORTIFICANTE INSTA
+7613287755841,Galleta bañada chocolate,galleta banada chocolate,Abarrotes,8106,5790,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GALLETA BANADA CHO
+7805000322502,Ketchup Hellmann’s,ketchup hellmann’s,Abarrotes,3766,2690,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,KETCHUP HELLMANNS
+7803000000659,Levadura seca Lefersa,levadura seca lefersa,Abarrotes,2954,2110,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,LEVADURA SECA LEF
+7802200132696,Mentitas Florete,mentitas florete,Abarrotes,364,260,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MENTITAS FLORETE A
+7801916029726,Pasta de pollo La Preferida,pasta de pollo la preferida,Abarrotes,1162,830,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,PASTA POLLO LA PRE
+41789001925,Pasta instantánea Maruchan,pasta instantanea maruchan,Abarrotes,1344,960,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,PASTA INST MARUCHA
+780196000718,Paté de ternera La Preferida,pate de ternera la preferida,Abarrotes,1568,1120,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,PATE DE TERNERA LA
+780197004305,Paté de ternera San Jorge,pate de ternera san jorge,Abarrotes,812,580,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,PATE DE TERNERA SA
+41789002915,Sopa ramen Maruchan,sopa ramen maruchan,Abarrotes,826,590,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,SOPA RAMEN MARUCHA
+7801620005160,Bebida Gatorade 1 L,bebida gatorade 1 l,Bebidas y Licores,1778,1270,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,BEBIDA GATORADE 1
+7802575220158,Néctar Sprim pack 3 unidades,nectar sprim pack 3 unidades,Bebidas y Licores,966,690,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,NECTAR SPRIM 3 UN
+7802575220783,Néctar Sprim recreo,nectar sprim recreo,Bebidas y Licores,966,690,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,NECTAR SPRIM RECRE
+7809511721655,Pack hamburguesa,pack hamburguesa,Carnes y Congelados,1190,850,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,PACK HAMBURGUESA S
+780797500661,Frutilla congelada,frutilla congelada,Frutas y Verduras,4046,2890,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,FRUTILLA CONGELADA
+780797500647,Mix berries congelado,mix berries congelado,Frutas y Verduras,5306,3790,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MIX BERRIES CONGEL
+7801300001024,Mix de berries,mix de berries,Frutas y Verduras,4676,3340,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MIX DE BERRIES FRU
+7591066711014,Máquina de afeitar Xtreme,maquina de afeitar xtreme,Higiene Personal,1064,760,0,TRUE,Media: nombre abreviado,FALSE,TRUE,1000,unidad,Excel definitivo,MAQ AFEITAR XTREME
+7622201715236,Chocolate con leche,chocolate con leche,Lácteos y Embutidos,1820,1300,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CHOCOLATE C LECHE
+7613034276490,Chocolate de leche,chocolate de leche,Lácteos y Embutidos,798,570,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CHOCOLATE LECHE TR
+7613032415679,Crema de leche Nestlé,crema de leche nestle,Lácteos y Embutidos,1946,1390,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,CREMA DE LECHE NES
+761303241580,Crema de leche Nestlé,crema de leche nestle,Lácteos y Embutidos,1246,890,0,TRUE,Media: código/precio parcialmente borroso | Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,CREMA DE LECHE NES
+7613030120582,Fortificante para leche,fortificante para leche,Lácteos y Embutidos,13090,9350,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,FORTIFICANTE P LEC
+91678,Jamón pierna,jamon pierna,Lácteos y Embutidos,11368,8120,0,TRUE,Media: código PLU/peso,FALSE,TRUE,1000,unidad,Excel definitivo,JAMON PIERNA ACARA
+8445290118288,Leche Buen Día larga vida,leche buen dia larga vida,Lácteos y Embutidos,9030,6450,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,LECHE BUEN DIA LSP
+780290006025,Leche Soprole 200 cc,leche soprole 200 cc,Lácteos y Embutidos,560,400,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,LECHE SOPROLE 200
+7613030049803,Leche condensada Nestlé,leche condensada nestle,Lácteos y Embutidos,2170,1550,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,LECHE CONDENSADA N
+761328704460,Manjar bolsa Nestlé,manjar bolsa nestle,Lácteos y Embutidos,1470,1050,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,MANJAR BOLSA NESTL
+780295000492,Manjar bolsa Nestlé,manjar bolsa nestle,Lácteos y Embutidos,4746,3390,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,MANJAR BOLSA NESTL
+780295000915,Manjar bolsa Nestlé,manjar bolsa nestle,Lácteos y Embutidos,3388,2420,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,MANJAR BOLSA NESTL
+844529179238,Manjar sin lactosa,manjar sin lactosa,Lácteos y Embutidos,2730,1950,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MANJAR SIN LACTOSA
+789300065253,Margarina pote Quaker,margarina pote quaker,Lácteos y Embutidos,2926,2090,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MARGARINA POTE QUA
+780295001047,Queso crema Greenfield,queso crema greenfield,Lácteos y Embutidos,20230,14450,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,QUESO CREMA GREEN
+762220197560,Queso crema Philadelphia,queso crema philadelphia,Lácteos y Embutidos,4326,3090,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,QUESO CREMA PHILAD
+780290005896,Queso para fundir,queso para fundir,Lácteos y Embutidos,1946,1390,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,QUESO P FUNDIR ALE
+7802920005836,Queso para fundir,queso para fundir,Lácteos y Embutidos,2352,1680,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,QUESO P FUNDIR ALE
+7801907008402,Vienesas tradicionales (revisar formato),vienesas tradicionales (revisar formato),Lácteos y Embutidos,1232,880,0,TRUE,Media: código borroso | Nombre repetido o formato abreviado: revisar tamaño/sabor/marca. | Confirmar marca/formato; no destacado por ahora.,FALSE,TRUE,1000,unidad,Excel definitivo,SALCHICHA TRADICIO
+780290000220,Yoghurt 1+1,yoghurt 1+1,Lácteos y Embutidos,658,470,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,YOGHURT DEL 1+1 MA
+780290230227,Yoghurt batido Soprole,yoghurt batido soprole,Lácteos y Embutidos,350,250,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,YOGHURT BATIDO SOP
+780290230241,Yoghurt batido Soprole,yoghurt batido soprole,Lácteos y Embutidos,350,250,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,YOGHURT BATIDO SOP
+780290230258,Yoghurt batido Soprole,yoghurt batido soprole,Lácteos y Embutidos,350,250,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,YOGHURT BATIDO SUP
+780242001511,Chucrut Tentro 360 g,chucrut tentro 360 g,Otros,910,650,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CHUCRUT TENTO 360
+7802900105013,Crema espesa larga vida,crema espesa larga vida,Otros,1484,1060,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CREMA ESPESA LARGA
+7802575012210,Patrucas Carozzi,patrucas carozzi,Otros,854,610,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,PATRUCAS CAROZZI
+2050003512367,Set 2 asaderas vidrio,set 2 asaderas vidrio,Otros,6986,4990,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,SET 2 ASADERAS VID
+7802900600006,Margarina Soprole Pan,margarina soprole pan,Panadería y Pastelería,700,500,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MARGARINA PAN SOPR
+7802200230293,Caluga clásica Suny,caluga clasica suny,Snacks y Golosinas,2786,1990,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CALUGA CLASICA SUN
+7802225310185,Caramelo Alka 400 g,caramelo alka 400 g,Snacks y Golosinas,3430,2450,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,CARAMELO ALKA 400
+7802225310192,Caramelo Alka 400 g,caramelo alka 400 g,Snacks y Golosinas,3430,2450,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,CARAMELO ALKA 400
+780220013476,Caramelo Blan Flip,caramelo blan flip,Snacks y Golosinas,1358,970,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CARAMELO BLAN FLIP
+780220002015,Caramelo toffee Suny,caramelo toffee suny,Snacks y Golosinas,7630,5450,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CARAMELO TOFFEE SU
+7802225130882,Chicle sabores surtidos,chicle sabores surtidos,Snacks y Golosinas,19670,14050,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CHICLE SABORES SUR
+780215303401,Chokman Costa 33 g,chokman costa 33 g,Snacks y Golosinas,224,160,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,CHOKMAN COSTA 33 G
+7802230082503,Galleta Alteza McKay,galleta alteza mckay,Snacks y Golosinas,1666,1190,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,GALLETA ALTEZA MCK
+7802230082527,Galleta Alteza McKay,galleta alteza mckay,Snacks y Golosinas,1666,1190,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,GALLETA ALTEZA MCK
+7802230082534,Galleta Alteza McKay,galleta alteza mckay,Snacks y Golosinas,1666,1190,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,GALLETA ALTEZA MCK
+7802215512421,Galleta Frac Costa,galleta frac costa,Snacks y Golosinas,728,520,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GALLETA FRAC COSTA
+7802215514326,Galleta Obsesión,galleta obsesion,Snacks y Golosinas,1582,1130,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GALLETA OBSESION C
+7802225689014,Galleta cracker,galleta cracker,Snacks y Golosinas,658,470,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GALLETA CRACKER SE
+7802225614498,Galleta mini Arcor,galleta mini arcor,Snacks y Golosinas,294,210,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GALLETA MINI ARCOR
+780221550466,Galleta oblea Nik,galleta oblea nik,Snacks y Golosinas,700,500,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GALLETA OBLEA NIK
+7622201717629,Galleta salada Oreo,galleta salada oreo,Snacks y Golosinas,2226,1590,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GALLETA SALADA ORI
+7802225412131,Gomita Califrut,gomita califrut,Snacks y Golosinas,3752,2680,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GOMITA CALIFRUT EX
+7906220802761,Gomita tubo Twister,gomita tubo twister,Snacks y Golosinas,1386,990,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GOMITA TUBO TWISTE
+7896591453274,Gomitas Fini 90 g,gomitas fini 90 g,Snacks y Golosinas,1232,880,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GOMITAS FINI 90 GR
+8410525127465,Gomitas Roller Fini,gomitas roller fini,Snacks y Golosinas,658,470,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,GOMITAS ROLLER FIN
+841052519039,Gomitas Roller Fini,gomitas roller fini,Snacks y Golosinas,658,470,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,GOMITAS ROLLER FIN
+7896451921345,Gomitas aro ácidas,gomitas aro acidas,Snacks y Golosinas,840,600,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GOMITAS ARO ACIDAS
+7896591453106,Gomitas regaliz Fini,gomitas regaliz fini,Snacks y Golosinas,1386,990,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GOMITAS REGALIZ FI
+7896451921321,Gomitas tajada sabor,gomitas tajada sabor,Snacks y Golosinas,840,600,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,GOMITAS TAJADA SAB
+7802420170522,Maní salado Marco Polo,mani salado marco polo,Snacks y Golosinas,7546,5390,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MANI SALADO MARCO
+7807975009754,Maní tipo japonés,mani tipo japones,Snacks y Golosinas,2086,1490,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MANI TIPO JAPONES
+54300090018,Marshmallows Rocky Mountain,marshmallows rocky mountain,Snacks y Golosinas,3052,2180,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MARSHMALLOWS ROCKY
+7702011305510,Masticable Max Fruit,masticable max fruit,Snacks y Golosinas,2394,1710,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MASTIC MAX FRUIT CD
+7790580178208,Masticable fruta surtida,masticable fruta surtida,Snacks y Golosinas,5922,4230,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,MASTICABLE FRUTA S
+7801930025674,Mini snack Ramitas del Sur,mini snack ramitas del sur,Snacks y Golosinas,1484,1060,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,MINI SNACK R. DEL
+7801930025711,Mini snack Ramitas del Sur,mini snack ramitas del sur,Snacks y Golosinas,1484,1060,0,TRUE,Nombre repetido o formato abreviado: revisar tamaño/sabor/marca.,FALSE,TRUE,1000,unidad,Excel definitivo,MINI SNACK R. DEL
+7613030612346,Super 8 oblea,super 8 oblea,Snacks y Golosinas,8540,6100,0,TRUE,,FALSE,TRUE,1000,unidad,Excel definitivo,SUPER OCHO OBLEA B

@@ -593,7 +593,7 @@
 
   function openProductModal(p, cats) {
     const isNew = !p;
-    const f = p || { sku:'', ean:'', name:'', description:'', category_id: (cats[0] && cats[0].id) || '', price:0, stock:0, unit:'unidad', active:true, featured:false, image_url:'' };
+    const f = p || { sku:'', ean:'', name:'', description:'', category_id: (cats[0] && cats[0].id) || '', price:0, stock:0, unit:'unidad', active:true, featured:false, image_url:'', needs_review:'' };
 
     $('#modal-title').textContent = isNew ? 'Nuevo producto' : 'Editar producto';
     $('#modal-body').innerHTML = `
@@ -602,7 +602,8 @@
         <div><label>EAN (opcional)</label><input id="m-ean" value="${esc(f.ean)}" /></div>
       </div>
       <label>Nombre *</label><input id="m-name" value="${esc(f.name)}" />
-      <label>Descripción</label><textarea id="m-desc">${esc(f.description)}</textarea>
+      <label>Descripción</label><textarea id="m-desc">${esc(f.description || '')}</textarea>
+      <label>Revisión interna</label><textarea id="m-review" placeholder="Ej: falta precio, confirmar marca/formato">${esc(f.needs_review || '')}</textarea>
       <div class="modal-row">
         <div><label>Categoría</label><select id="m-cat">${cats.map(c => `<option value="${c.id}" ${c.id === f.category_id ? 'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>
         <div><label>Unidad</label><input id="m-unit" value="${esc(f.unit)}" placeholder="unidad, kg, L..." /></div>
@@ -664,6 +665,7 @@
         name_normalized: norm(name),
         slug: norm(name).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60) + '-' + sku.slice(-4),
         description: $('#m-desc').value.trim() || null,
+        needs_review: $('#m-review').value.trim() || null,
         category_id: $('#m-cat').value || null,
         unit: $('#m-unit').value.trim() || 'unidad',
         price: parseInt($('#m-price').value, 10) || 0,
