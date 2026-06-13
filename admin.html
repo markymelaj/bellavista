@@ -449,7 +449,7 @@
       window.bv.from('categories').select('id', { count:'exact', head:true }).eq('active', true),
       window.bv.from('orders').select('subtotal').gte('created_at', todayStart.toISOString()),
       window.bv.from('orders').select('id', { count:'exact', head:true }),
-      window.bv.from('orders').select('id, order_number, customer_name, subtotal, status, created_at').order('created_at', { ascending:false }).limit(8)
+      window.bv.from('orders').select('id, order_number, customer_name, subtotal, status, created_at, delivery_type, delivery_detail, notes, order_items(*)').order('created_at', { ascending:false }).limit(8)
     ]);
 
     const todayTotal = (today.data || []).reduce((s,o)=>s + (o.subtotal||0), 0);
@@ -468,7 +468,7 @@
       <h2 style="font-family:var(--f-d);font-size:1.3rem;font-weight:500;margin-bottom:0.6rem">Últimos pedidos</h2>
       ${(recent.data && recent.data.length) ? `
         <div class="table-wrap"><table>
-          <thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+          <thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></tr></thead>
           <tbody>
             ${recent.data.map(o => `
               <tr>
@@ -477,6 +477,17 @@
                 <td>${esc(o.customer_name) || '—'}</td>
                 <td>${fmt(o.subtotal)}</td>
                 <td><span class="pill ${pillFor(o.status)}">${o.status}</span></td>
+                <td><button class="btn ghost" data-dash-toggle="${o.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">Ver pedido</button></td>
+              </tr>
+              <tr id="dash-det-${o.id}" style="display:none">
+                <td colspan="6" style="background:var(--warm);padding:1rem">
+                  <strong>Productos:</strong>
+                  <ul style="margin:0.5rem 0 0 1.2rem">
+                    ${(o.order_items || []).map(it => `<li style="font-size:0.8rem;margin-bottom:0.2rem"><strong>${fmtItemQty(it.quantity, it.product_unit)}</strong> ${esc(it.product_name)} — ${fmt(it.unit_price)} ${fmtItemPriceUnit(it.product_unit)} = <strong>${fmt(it.subtotal)}</strong></li>`).join('') || '<li style="font-size:0.8rem">Sin productos asociados</li>'}
+                  </ul>
+                  <div style="font-size:0.78rem;margin-top:0.6rem"><strong>Entrega:</strong> ${deliveryLabel(o)}</div>
+                  ${o.notes ? `<div style="font-size:0.78rem;margin-top:0.6rem"><strong>Nota:</strong> ${esc(o.notes)}</div>` : ''}
+                </td>
               </tr>`).join('')}
           </tbody>
         </table></div>` : `<p class="empty">Aún no hay pedidos</p>`}
@@ -487,6 +498,14 @@
           <a href="/migrate" style="color:var(--mahogany);text-decoration:underline">migrate</a>.
         </div>` : ''}
     `;
+
+    main.querySelectorAll('button[data-dash-toggle]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const det = document.getElementById('dash-det-' + btn.dataset.dashToggle);
+        if (det) det.style.display = det.style.display === 'none' ? 'table-row' : 'none';
+      });
+    });
+
   }
 
   // =========================================================
@@ -909,6 +928,44 @@
     $('#new-cat').addEventListener('click', () => openCategoryModal(null));
   }
 
+
+  function setupCategoryPhotoUpload() {
+    const btn = $('#cm-upload-btn');
+    const input = $('#cm-file-input');
+    const status = $('#cm-upload-status');
+    const urlInput = $('#cm-img');
+    const preview = $('#cm-img-preview');
+    if (!btn || !input) return;
+    btn.addEventListener('click', () => input.click());
+    input.addEventListener('change', async e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        if (status) status.textContent = 'Subiendo imagen...';
+        const blob = await resizeImage(file, 1100, 0.84);
+        const path = 'categories/cat-' + Date.now() + '-' + Math.random().toString(36).slice(2,7) + '.jpg';
+        const { error: upErr } = await window.bv.storage
+          .from('product-images')
+          .upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+        if (upErr) throw upErr;
+        const { data: pub } = window.bv.storage.from('product-images').getPublicUrl(path);
+        const publicUrl = pub.publicUrl;
+        if (urlInput) urlInput.value = publicUrl;
+        if (preview) preview.innerHTML = `<img src="${esc(publicUrl)}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;border:1px solid rgba(26,14,6,0.12)"/>`;
+        if (status) status.textContent = 'Imagen cargada. Presiona Guardar.';
+      } catch (err) {
+        if (status) status.textContent = '';
+        alert('Error subiendo foto de categoría: ' + (err.message || err));
+      }
+    });
+    if (urlInput) {
+      urlInput.addEventListener('change', () => {
+        const u = urlInput.value.trim();
+        if (u && preview) preview.innerHTML = `<img src="${esc(u)}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;border:1px solid rgba(26,14,6,0.12)"/>`;
+      });
+    }
+  }
+
   function openCategoryModal(c) {
     const isNew = !c;
     const f = c || { name:'', slug:'', icon:'Package', image_url:'', position:100, active:true };
@@ -917,8 +974,16 @@
       <label>Nombre *</label><input id="cm-name" value="${esc(f.name)}" />
       <label>Slug</label><input id="cm-slug" value="${esc(f.slug)}" placeholder="se genera del nombre si está vacío" />
       <label>Ícono (lucide-react)</label><input id="cm-icon" value="${esc(f.icon)}" placeholder="Package, Wine, Milk..."/>
-      <label>Foto de categoría / portada</label><input id="cm-img" value="${esc(f.image_url || '')}" placeholder="https://..."/>
-      ${f.image_url ? `<img src="${esc(f.image_url)}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:0.5rem;border:1px solid rgba(26,14,6,0.12)"/>` : ''}
+      <label>Foto de categoría / portada</label>
+      <div style="border:1px dashed rgba(26,14,6,0.2);border-radius:6px;padding:0.8rem;background:#fff;margin-bottom:0.5rem">
+        <div id="cm-img-preview">
+          ${f.image_url ? `<img src="${esc(f.image_url)}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;border:1px solid rgba(26,14,6,0.12)"/>` : `<div style="font-size:0.8rem;color:rgba(26,14,6,0.45);padding:1rem;text-align:center">Sin foto de categoría</div>`}
+        </div>
+        <button class="btn ghost" type="button" id="cm-upload-btn" style="margin-top:0.7rem">Subir foto desde PC</button>
+        <input type="file" id="cm-file-input" accept="image/*" style="display:none"/>
+        <div id="cm-upload-status" style="font-size:0.72rem;color:rgba(26,14,6,0.5);margin-top:0.45rem"></div>
+      </div>
+      <details><summary style="font-size:0.72rem;color:rgba(26,14,6,0.55);cursor:pointer">O pegar URL de imagen</summary><input id="cm-img" value="${esc(f.image_url || '')}" placeholder="https://..." style="margin-top:0.5rem"/></details>
       <small style="font-size:0.7rem;color:rgba(26,14,6,0.5);display:block;margin-top:0.4rem">
         Sugeridos: Croissant, Wine, Milk, ShoppingBasket, Cookie, Apple, Beef, Sparkles, Bath, Cigarette, Pill, Package
       </small>
@@ -930,6 +995,7 @@
       <button class="btn" id="cm-save">${isNew ? 'Crear' : 'Guardar'}</button>
     `;
     $('#modal-bg').classList.add('open');
+    setupCategoryPhotoUpload();
 
     $('#cm-save').addEventListener('click', async () => {
       const name = $('#cm-name').value.trim();
