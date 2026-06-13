@@ -391,8 +391,21 @@
   const norm = s => (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+  function fmtItemQty(qty, unit) {
+    qty = Number(qty) || 0;
+    unit = String(unit || 'unidad').toLowerCase();
+    if (unit === 'kg') {
+      if (qty < 1) return Math.round(qty * 1000) + ' g';
+      return qty.toLocaleString('es-CL', { maximumFractionDigits: 3 }) + ' kg';
+    }
+    return Math.round(qty) + 'x';
+  }
+  function fmtItemPriceUnit(unit) {
+    return String(unit || 'unidad').toLowerCase() === 'kg' ? '/ kg' : 'c/u';
+  }
+
   function pillFor(status) {
-    return { nuevo:'amber', en_preparacion:'green', listo:'green', entregado:'gray', cancelado:'red' }[status] || 'gray';
+    return { nuevo:'amber', confirmado:'green', en_preparacion:'green', preparado:'green', enviado:'green', listo:'green', entregado:'gray', cancelado:'red' }[status] || 'gray';
   }
 
   // =========================================================
@@ -479,7 +492,7 @@
   // =========================================================
   // PRODUCTOS
   // =========================================================
-  let PROD_STATE = { items: [], q: '', cat: '', flag: '' };
+  let PROD_STATE = { items: [], q: '', cat: '', status: 'active', flag: '' };
 
   async function renderProductos() {
     const main = $('#main');
@@ -489,12 +502,22 @@
       <div class="filters-row">
         <input class="inp" id="prod-q" placeholder="Buscar por nombre o SKU..." />
         <select class="sel" id="prod-cat"><option value="">Todas las categorías</option></select>
-        <select class="sel" id="prod-flag"><option value="">Todos</option><option value="review">Para revisar</option></select>
+        <select class="sel" id="prod-status">
+          <option value="active">Usando ahora / visibles</option>
+          <option value="inactive">Catálogo oculto</option>
+          <option value="">Todos</option>
+        </select>
+        <select class="sel" id="prod-flag">
+          <option value="">Sin filtro extra</option>
+          <option value="featured">Destacados portada</option>
+          <option value="review">Para revisar</option>
+          <option value="no_price">Sin precio</option>
+        </select>
         <button class="btn" id="new-prod">+ Nuevo producto</button>
       </div>
       <div class="table-wrap"><table id="prod-table">
-        <thead><tr><th>SKU</th><th>Nombre</th><th>Categoría</th><th style="width:100px">Precio</th><th style="width:80px">Stock</th><th>Activo</th><th></th></tr></thead>
-        <tbody><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
+        <thead><tr><th>SKU</th><th>Nombre</th><th>Categoría</th><th style="width:100px">Precio</th><th style="width:80px">Unidad</th><th style="width:80px">Stock</th><th>Portada</th><th>Estado</th><th>Acción</th></tr></thead>
+        <tbody><tr><td colspan="9" class="empty">Cargando...</td></tr></tbody>
       </table></div>
     `;
 
@@ -516,6 +539,10 @@
       PROD_STATE.cat = e.target.value;
       renderProdRows();
     });
+    $('#prod-status').addEventListener('change', e => {
+      PROD_STATE.status = e.target.value;
+      renderProdRows();
+    });
     $('#prod-flag').addEventListener('change', e => {
       PROD_STATE.flag = e.target.value;
       renderProdRows();
@@ -532,7 +559,11 @@
       return;
     }
     PROD_STATE.items = data || [];
-    $('#prod-sub').textContent = PROD_STATE.items.length + ' productos en catálogo';
+    const activos = PROD_STATE.items.filter(p => p.active).length;
+    const ocultos = PROD_STATE.items.length - activos;
+    const destacados = PROD_STATE.items.filter(p => p.featured).length;
+    const sinPrecio = PROD_STATE.items.filter(p => Number(p.price) <= 0).length;
+    $('#prod-sub').textContent = activos + ' usando ahora · ' + ocultos + ' en catálogo oculto · ' + destacados + ' destacados · ' + sinPrecio + ' sin precio';
     renderProdRows();
   }
 
@@ -542,7 +573,11 @@
     const q = norm(PROD_STATE.q);
     const items = PROD_STATE.items.filter(p => {
       if (PROD_STATE.cat && p.category_id !== PROD_STATE.cat) return false;
+      if (PROD_STATE.status === 'active' && !p.active) return false;
+      if (PROD_STATE.status === 'inactive' && p.active) return false;
+      if (PROD_STATE.flag === 'featured' && !p.featured) return false;
       if (PROD_STATE.flag === 'review' && !p.needs_review) return false;
+      if (PROD_STATE.flag === 'no_price' && Number(p.price) > 0) return false;
       if (q) {
         const n = norm(p.name);
         if (n.indexOf(q) === -1 && p.sku.indexOf(q) === -1) return false;
@@ -551,22 +586,27 @@
     });
     const tbody = $('#prod-table tbody');
     if (items.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" class="empty">Sin resultados</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="9" class="empty">Sin resultados</td></tr>`;
       return;
     }
-    const shown = items.slice(0, 200);
+    const shown = items.slice(0, 300);
     tbody.innerHTML = shown.map(p => `
       <tr data-id="${p.id}">
         <td style="font-family:monospace;font-size:0.7rem">${esc(p.sku)}</td>
-        <td>${esc(p.name)} ${p.needs_review ? '<span class="pill amber" style="margin-left:6px">revisar</span>' : ''}</td>
+        <td>${esc(p.name)} ${p.needs_review ? '<span class="pill amber" style="margin-left:6px">revisar</span>' : ''} ${Number(p.price) <= 0 ? '<span class="pill amber" style="margin-left:6px">sin precio</span>' : ''}</td>
         <td>${esc(catMap[p.category_id]) || '—'}</td>
         <td><input type="number" value="${p.price}" data-field="price" data-id="${p.id}" /></td>
+        <td><span class="pill ${p.unit === 'kg' ? 'green' : 'gray'}">${esc(p.unit || 'unidad')}</span></td>
         <td><input type="number" value="${p.stock}" data-field="stock" data-id="${p.id}" /></td>
-        <td><span class="pill ${p.active ? 'green' : 'gray'}">${p.active ? 'activo' : 'inactivo'}</span></td>
-        <td><button class="btn ghost" data-edit="${p.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">Editar</button></td>
+        <td><span class="pill ${p.featured ? 'green' : 'gray'}">${p.featured ? 'sí' : 'no'}</span></td>
+        <td><span class="pill ${p.active ? 'green' : 'gray'}">${p.active ? 'usando ahora' : 'oculto'}</span></td>
+        <td>
+          <button class="btn ghost" data-toggle-active="${p.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">${p.active ? 'Ocultar' : 'Activar'}</button>
+          <button class="btn ghost" data-edit="${p.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">Editar</button>
+        </td>
       </tr>`).join('');
-    if (items.length > 200) {
-      tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="7" style="text-align:center;font-size:0.75rem;color:rgba(26,14,6,0.5);padding:1rem">... y ${items.length - 200} más (refiná la búsqueda)</td></tr>`);
+    if (items.length > 300) {
+      tbody.insertAdjacentHTML('beforeend', `<tr><td colspan="9" style="text-align:center;font-size:0.75rem;color:rgba(26,14,6,0.5);padding:1rem">... y ${items.length - 300} más (refiná la búsqueda)</td></tr>`);
     }
 
     // Inline edit (blur)
@@ -580,6 +620,21 @@
         const { error } = await window.bv.from('products').update({ [field]: value }).eq('id', id);
         if (error) { alert('Error: ' + error.message); return; }
         if (cur) cur[field] = value;
+      });
+    });
+    tbody.querySelectorAll('button[data-toggle-active]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.toggleActive;
+        const p = PROD_STATE.items.find(x => x.id === id);
+        if (!p) return;
+        const next = !p.active;
+        const msg = next ? '¿Activar este producto y dejarlo visible para clientes?' : '¿Ocultar este producto del minimarket?';
+        if (!confirm(msg)) return;
+        const { error } = await window.bv.from('products').update({ active: next, featured: next ? p.featured : false }).eq('id', id);
+        if (error) { alert('Error: ' + error.message); return; }
+        p.active = next;
+        if (!next) p.featured = false;
+        await reloadProds();
       });
     });
     tbody.querySelectorAll('button[data-edit]').forEach(btn => {
@@ -898,11 +953,22 @@
   // =========================================================
   const STATUSES = [
     { v:'nuevo', l:'Nuevo' },
+    { v:'confirmado', l:'Confirmado' },
     { v:'en_preparacion', l:'En preparación' },
-    { v:'listo', l:'Listo' },
+    { v:'preparado', l:'Preparado' },
+    { v:'enviado', l:'Enviado' },
+    { v:'listo', l:'Retiro listo' },
     { v:'entregado', l:'Entregado' },
     { v:'cancelado', l:'Cancelado' }
   ];
+
+
+  function deliveryLabel(o) {
+    if (!o) return '—';
+    if (o.delivery_type === 'envio_confirmar') return 'Envío a confirmar' + (o.delivery_detail ? ': ' + esc(o.delivery_detail) : '');
+    if (o.delivery_type === 'sitio_camping') return 'Sitio ' + esc(o.delivery_detail || '');
+    return 'Retiro';
+  }
 
   async function renderPedidos() {
     const main = $('#main');
@@ -946,7 +1012,7 @@
           <td><strong>#${o.order_number}</strong></td>
           <td>${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</td>
           <td>${esc(o.customer_name) || '—'}</td>
-          <td>${o.delivery_type === 'sitio_camping' ? 'Sitio ' + esc(o.delivery_detail || '') : 'Retiro'}</td>
+          <td>${deliveryLabel(o)}</td>
           <td>${esc({efectivo:'Efectivo',tarjeta:'Tarjeta',caja_vecina:'Caja Vecina'}[o.payment_method] || o.payment_method)}</td>
           <td>${fmt(o.subtotal)}</td>
           <td>
@@ -960,9 +1026,10 @@
           <td colspan="8" style="background:var(--warm);padding:1rem">
             <strong>Productos:</strong>
             <ul style="margin:0.5rem 0 0 1.2rem">
-              ${(o.order_items || []).map(it => `<li style="font-size:0.8rem;margin-bottom:0.2rem"><strong>${it.quantity}x</strong> ${esc(it.product_name)} — ${fmt(it.unit_price)} c/u = <strong>${fmt(it.subtotal)}</strong></li>`).join('')}
+              ${(o.order_items || []).map(it => `<li style="font-size:0.8rem;margin-bottom:0.2rem"><strong>${fmtItemQty(it.quantity, it.product_unit)}</strong> ${esc(it.product_name)} — ${fmt(it.unit_price)} ${fmtItemPriceUnit(it.product_unit)} = <strong>${fmt(it.subtotal)}</strong></li>`).join('')}
             </ul>
-            ${o.notes ? `<div style="font-size:0.78rem;margin-top:0.6rem"><strong>Nota:</strong> ${esc(o.notes)}</div>` : ''}
+            ${o.delivery_detail ? `<div style="font-size:0.78rem;margin-top:0.6rem"><strong>Entrega:</strong> ${deliveryLabel(o)}</div>` : ''}
+            ${o.notes ? `<div style="font-size:0.78rem;margin-top:0.6rem"><strong>Nota / otros productos:</strong> ${esc(o.notes)}</div>` : ''}
           </td>
         </tr>
       `).join('');

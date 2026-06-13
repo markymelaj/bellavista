@@ -1,0 +1,163 @@
+-- Bellavista Minimarket - PILOTO FINAL con venta por kilo/fracciones
+-- Ejecutar completo en Supabase SQL Editor.
+-- Deja activos solo los productos actuales. Oculta lo anterior, no borra datos.
+begin;
+
+-- 0) Preparar pedidos para productos vendidos por kilo
+alter table public.order_items add column if not exists product_unit text default 'unidad';
+alter table public.order_items alter column quantity type numeric(10,3) using quantity::numeric;
+
+-- 1) Categorías actuales
+insert into categories (slug, name, icon, position, active) values
+  ('panaderia', 'Panadería', 'Bread', 10, true),
+  ('lacteos-refrigerados', 'Lácteos y refrigerados', 'Milk', 20, true),
+  ('frutas-verduras', 'Frutas y verduras', 'Apple', 30, true),
+  ('abarrotes', 'Abarrotes', 'Package', 40, true),
+  ('bebidas', 'Bebidas', 'Bottle', 50, true),
+  ('bebidas-licores', 'Bebidas y licores', 'Beer', 55, true),
+  ('congelados', 'Congelados', 'Snowflake', 60, true),
+  ('snacks-golosinas', 'Snacks y golosinas', 'Cookie', 70, true),
+  ('cigarros', 'Cigarrillos', 'Package', 80, true),
+  ('aseo-hogar', 'Aseo y hogar', 'SprayCan', 90, true),
+  ('higiene-personal', 'Higiene personal', 'Heart', 100, true),
+  ('cafe-te', 'Café y té', 'Coffee', 110, true),
+  ('otros-productos', 'Otros productos', 'ShoppingBag', 120, true)
+on conflict (slug) do update set name = excluded.name, icon = excluded.icon, position = excluded.position, active = true;
+
+-- 2) Ocultar catálogo anterior por ahora
+update products set active = false, featured = false;
+
+-- 3) Activar lista piloto actual
+insert into products (sku, ean, name, name_normalized, slug, description, category_id, price, cost, stock, unit, active, featured, needs_review, image_url, image_source, position)
+select v.sku, v.ean, v.name, v.name_normalized, v.slug, v.description, c.id, v.price, v.cost, v.stock, v.unit, v.active, v.featured, v.needs_review, v.image_url, v.image_source, v.position
+from (values
+  ('BV-PIL-001', NULL, 'Pan fresco', 'pan fresco', 'pan-fresco', NULL, 'panaderia', 2500, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 10),
+  ('BV-PIL-002', NULL, 'Mantequilla Soprole 125 g', 'mantequilla soprole 125 g', 'mantequilla-soprole-125-g', NULL, 'lacteos-refrigerados', 1700, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 20),
+  ('BV-PIL-003', NULL, 'Mantequilla Soprole 250 g', 'mantequilla soprole 250 g', 'mantequilla-soprole-250-g', NULL, 'lacteos-refrigerados', 3200, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 30),
+  ('BV-PIL-004', NULL, 'Queso Negrete por kg', 'queso negrete por kg', 'queso-negrete-por-kg', 'Venta fraccionada habilitada en el carrito: suma/resta de 250 g.', 'lacteos-refrigerados', 10500, 0, 0, 'kg', true, true, 'Venta fraccionada habilitada en el carrito: suma/resta de 250 g.', NULL, 'pendiente_foto', 40),
+  ('BV-PIL-005', NULL, 'Queso Quillayes laminado chico', 'queso quillayes laminado chico', 'queso-quillayes-laminado-chico', NULL, 'lacteos-refrigerados', 3800, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 50),
+  ('BV-PIL-006', NULL, 'Queso Quillayes laminado grande', 'queso quillayes laminado grande', 'queso-quillayes-laminado-grande', NULL, 'lacteos-refrigerados', 6500, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 60),
+  ('BV-PIL-007', NULL, 'Vienesas tradicionales x5', 'vienesas tradicionales x5', 'vienesas-tradicionales-x5', NULL, 'lacteos-refrigerados', 1600, 0, 0, 'pack', true, true, NULL, NULL, 'pendiente_foto', 70),
+  ('BV-PIL-008', NULL, 'Vienesas tradicionales pack familiar', 'vienesas tradicionales pack familiar', 'vienesas-tradicionales-pack-familiar', NULL, 'lacteos-refrigerados', 4500, 0, 0, 'pack', true, true, NULL, NULL, 'pendiente_foto', 80),
+  ('BV-PIL-009', NULL, 'Leche entera Colun 1 L', 'leche entera colun 1 l', 'leche-entera-colun-1-l', NULL, 'lacteos-refrigerados', 1600, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 90),
+  ('BV-PIL-010', NULL, 'Yogurt batido Soprole', 'yogurt batido soprole', 'yogurt-batido-soprole', NULL, 'lacteos-refrigerados', 350, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1100),
+  ('BV-PIL-011', NULL, 'Crema de leche Soprole', 'crema de leche soprole', 'crema-de-leche-soprole', NULL, 'lacteos-refrigerados', 1700, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1110),
+  ('BV-PIL-012', NULL, 'Crema de leche Nestlé', 'crema de leche nestle', 'crema-de-leche-nestle', NULL, 'lacteos-refrigerados', 1600, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1120),
+  ('BV-PIL-013', NULL, 'Leche Buen Día en polvo 700 g', 'leche buen dia en polvo 700 g', 'leche-buen-dia-en-polvo-700-g', NULL, 'lacteos-refrigerados', 8000, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1130),
+  ('BV-PIL-014', NULL, 'Leche Buen Día en polvo 130 g', 'leche buen dia en polvo 130 g', 'leche-buen-dia-en-polvo-130-g', NULL, 'lacteos-refrigerados', 2000, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1140),
+  ('BV-PIL-015', NULL, 'Leche condensada Nestlé', 'leche condensada nestle', 'leche-condensada-nestle', NULL, 'lacteos-refrigerados', 2200, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1150),
+  ('BV-PIL-016', NULL, 'Manjar Nestlé 200 g', 'manjar nestle 200 g', 'manjar-nestle-200-g', NULL, 'lacteos-refrigerados', 1450, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1160),
+  ('BV-PIL-017', NULL, 'Manjar Nestlé 500 g', 'manjar nestle 500 g', 'manjar-nestle-500-g', NULL, 'lacteos-refrigerados', 3400, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1170),
+  ('BV-PIL-018', NULL, 'Manjar Nestlé 1 kg', 'manjar nestle 1 kg', 'manjar-nestle-1-kg', NULL, 'lacteos-refrigerados', 5000, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1180),
+  ('BV-PIL-019', NULL, 'Manjar sin lactosa', 'manjar sin lactosa', 'manjar-sin-lactosa', NULL, 'lacteos-refrigerados', 2700, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1190),
+  ('BV-PIL-020', NULL, 'Margarina pote Qualy', 'margarina pote qualy', 'margarina-pote-qualy', NULL, 'lacteos-refrigerados', 3300, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1200),
+  ('BV-PIL-021', NULL, 'Queso crema Philadelphia', 'queso crema philadelphia', 'queso-crema-philadelphia', NULL, 'lacteos-refrigerados', 3850, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1210),
+  ('BV-PIL-022', NULL, 'Yogurt 1+1', 'yogurt 1 1', 'yogurt-1-1', NULL, 'lacteos-refrigerados', 800, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1220),
+  ('BV-PIL-023', NULL, 'Leche Colun 200 cc', 'leche colun 200 cc', 'leche-colun-200-cc', NULL, 'lacteos-refrigerados', 600, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 230),
+  ('BV-PIL-024', NULL, 'Palta por kg', 'palta por kg', 'palta-por-kg', 'Venta fraccionada habilitada en el carrito: suma/resta de 250 g.', 'frutas-verduras', 5500, 0, 0, 'kg', true, true, 'Venta fraccionada habilitada en el carrito: suma/resta de 250 g.', NULL, 'pendiente_foto', 240),
+  ('BV-PIL-025', NULL, 'Huevo unidad', 'huevo unidad', 'huevo-unidad', NULL, 'abarrotes', 300, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 250),
+  ('BV-PIL-026', NULL, 'Huevos bandeja', 'huevos bandeja', 'huevos-bandeja', NULL, 'abarrotes', 8500, 0, 0, 'bandeja', true, true, NULL, NULL, 'pendiente_foto', 260),
+  ('BV-PIL-027', NULL, 'Frutilla congelada', 'frutilla congelada', 'frutilla-congelada', NULL, 'congelados', 4000, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1270),
+  ('BV-PIL-028', NULL, 'Mix berries congelados', 'mix berries congelados', 'mix-berries-congelados', NULL, 'congelados', 4500, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1280),
+  ('BV-PIL-029', NULL, 'Mix berries', 'mix berries', 'mix-berries', NULL, 'congelados', 5500, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1290),
+  ('BV-PIL-030', NULL, 'Pack hamburguesas x2', 'pack hamburguesas x2', 'pack-hamburguesas-x2', NULL, 'congelados', 1500, 0, 0, 'pack', true, false, NULL, NULL, 'pendiente_foto', 1300),
+  ('BV-PIL-031', NULL, 'Harina Merkat', 'harina merkat', 'harina-merkat', NULL, 'abarrotes', 1200, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 310),
+  ('BV-PIL-032', NULL, 'Harina tostada', 'harina tostada', 'harina-tostada', NULL, 'abarrotes', 2000, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 320),
+  ('BV-PIL-033', NULL, 'Arroz grano largo', 'arroz grano largo', 'arroz-grano-largo', NULL, 'abarrotes', 2000, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 330),
+  ('BV-PIL-034', NULL, 'Arroz ancho', 'arroz ancho', 'arroz-ancho', NULL, 'abarrotes', 2500, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 340),
+  ('BV-PIL-035', NULL, 'Arroz delgado', 'arroz delgado', 'arroz-delgado', NULL, 'abarrotes', 1900, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 350),
+  ('BV-PIL-036', NULL, 'Salsa de tomate Pomarola San Remo chica', 'salsa de tomate pomarola san remo chica', 'salsa-de-tomate-pomarola-san-remo-chica', 'Confirmar formato/tamaño: se cargó como versión chica por existir otro precio de $1.000.', 'abarrotes', 500, 0, 0, 'unidad', true, true, 'Confirmar formato/tamaño: se cargó como versión chica por existir otro precio de $1.000.', NULL, 'pendiente_foto', 360),
+  ('BV-PIL-037', NULL, 'Salsa de tomate Pomarola San Remo', 'salsa de tomate pomarola san remo', 'salsa-de-tomate-pomarola-san-remo', 'Confirmar formato/tamaño: se cargó como versión normal/grande por existir otro precio de $500.', 'abarrotes', 1000, 0, 0, 'unidad', true, true, 'Confirmar formato/tamaño: se cargó como versión normal/grande por existir otro precio de $500.', NULL, 'pendiente_foto', 370),
+  ('BV-PIL-038', NULL, 'Caballa en conserva', 'caballa en conserva', 'caballa-en-conserva', NULL, 'abarrotes', 1500, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 380),
+  ('BV-PIL-039', NULL, 'Sal', 'sal', 'sal', NULL, 'abarrotes', 800, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 390),
+  ('BV-PIL-040', NULL, 'Azúcar granulada', 'azucar granulada', 'azucar-granulada', NULL, 'abarrotes', 1700, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 400),
+  ('BV-PIL-041', NULL, 'Aceite maravilla Miraflores', 'aceite maravilla miraflores', 'aceite-maravilla-miraflores', NULL, 'abarrotes', 3200, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1410),
+  ('BV-PIL-042', NULL, 'Aceite maravilla Natura', 'aceite maravilla natura', 'aceite-maravilla-natura', NULL, 'abarrotes', 3750, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1420),
+  ('BV-PIL-043', NULL, 'Aceite vegetal', 'aceite vegetal', 'aceite-vegetal', NULL, 'abarrotes', 2200, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1430),
+  ('BV-PIL-044', NULL, 'Aceituna Azapa', 'aceituna azapa', 'aceituna-azapa', NULL, 'abarrotes', 3100, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1440),
+  ('BV-PIL-045', NULL, 'Aceituna sevillana', 'aceituna sevillana', 'aceituna-sevillana', NULL, 'abarrotes', 3100, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1450),
+  ('BV-PIL-046', NULL, 'Ají crema chileno', 'aji crema chileno', 'aji-crema-chileno', NULL, 'abarrotes', 1000, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1460),
+  ('BV-PIL-047', NULL, 'Chancaca 1 bloque', 'chancaca 1 bloque', 'chancaca-1-bloque', NULL, 'abarrotes', 1700, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1470),
+  ('BV-PIL-048', NULL, 'Pepinillos', 'pepinillos', 'pepinillos', NULL, 'abarrotes', 1900, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1480),
+  ('BV-PIL-049', NULL, 'Fideo Carozzi 400 g', 'fideo carozzi 400 g', 'fideo-carozzi-400-g', NULL, 'abarrotes', 1400, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1490),
+  ('BV-PIL-050', NULL, 'Fideo cabello de ángel Lucchetti', 'fideo cabello de angel lucchetti', 'fideo-cabello-de-angel-lucchetti', NULL, 'abarrotes', 1400, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1500),
+  ('BV-PIL-051', NULL, 'Ketchup Hellmann’s chico', 'ketchup hellmann s chico', 'ketchup-hellmann-s-chico', NULL, 'abarrotes', 1000, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1510),
+  ('BV-PIL-052', NULL, 'Levadura seca Lefersa chica', 'levadura seca lefersa chica', 'levadura-seca-lefersa-chica', NULL, 'abarrotes', 400, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1520),
+  ('BV-PIL-053', NULL, 'Pasta de pollo La Preferida', 'pasta de pollo la preferida', 'pasta-de-pollo-la-preferida', NULL, 'abarrotes', 1500, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1530),
+  ('BV-PIL-054', NULL, 'Pasta instantánea Maruchan', 'pasta instantanea maruchan', 'pasta-instantanea-maruchan', NULL, 'abarrotes', 1700, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1540),
+  ('BV-PIL-055', NULL, 'Paté de ternera La Preferida', 'pate de ternera la preferida', 'pate-de-ternera-la-preferida', NULL, 'abarrotes', 1600, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1550),
+  ('BV-PIL-056', NULL, 'Paté de ternera San Jorge', 'pate de ternera san jorge', 'pate-de-ternera-san-jorge', NULL, 'abarrotes', 800, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1560),
+  ('BV-PIL-057', NULL, 'Chucrut Tentro 360 g', 'chucrut tentro 360 g', 'chucrut-tentro-360-g', NULL, 'abarrotes', 1200, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1570),
+  ('BV-PIL-058', NULL, 'Pantrucas Carozzi', 'pantrucas carozzi', 'pantrucas-carozzi', NULL, 'abarrotes', 1700, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1580),
+  ('BV-PIL-059', NULL, 'Néctar Sprim pack 3 unidades', 'nectar sprim pack 3 unidades', 'nectar-sprim-pack-3-unidades', NULL, 'bebidas', 1000, 0, 0, 'pack', true, false, NULL, NULL, 'pendiente_foto', 1590),
+  ('BV-PIL-060', NULL, 'Caldo Maggi unidad', 'caldo maggi unidad', 'caldo-maggi-unidad', 'Comprado por pack/caja, vendido por unidad. Revisar stock y margen por unidad.', 'abarrotes', 250, 0, 0, 'unidad', true, false, 'Comprado por pack/caja, vendido por unidad. Revisar stock y margen por unidad.', NULL, 'pendiente_foto', 1600),
+  ('BV-PIL-061', NULL, 'Endulzante', 'endulzante', 'endulzante', NULL, 'abarrotes', 3500, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 610),
+  ('BV-PIL-062', NULL, 'Cerveza lata Cristal o Escudo', 'cerveza lata cristal o escudo', 'cerveza-lata-cristal-o-escudo', 'Confirmar marca elegida por WhatsApp según disponibilidad.', 'bebidas-licores', 1000, 0, 0, 'lata', true, true, 'Confirmar marca elegida por WhatsApp según disponibilidad.', NULL, 'pendiente_foto', 620),
+  ('BV-PIL-063', NULL, 'Coca-Cola lata 350 cc', 'coca cola lata 350 cc', 'coca-cola-lata-350-cc', NULL, 'bebidas', 1100, 0, 0, 'lata', true, true, NULL, NULL, 'pendiente_foto', 630),
+  ('BV-PIL-064', NULL, 'Coca-Cola 500 cc', 'coca cola 500 cc', 'coca-cola-500-cc', NULL, 'bebidas', 1500, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 640),
+  ('BV-PIL-065', NULL, 'Coca-Cola 1.5 L', 'coca cola 1 5 l', 'coca-cola-1-5-l', NULL, 'bebidas', 2300, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 650),
+  ('BV-PIL-066', NULL, 'Coca-Cola 2 L', 'coca cola 2 l', 'coca-cola-2-l', NULL, 'bebidas', 2100, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 660),
+  ('BV-PIL-067', NULL, 'Coca-Cola 3 L', 'coca cola 3 l', 'coca-cola-3-l', NULL, 'bebidas', 2700, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 670),
+  ('BV-PIL-068', NULL, 'Monster Energy', 'monster energy', 'monster-energy', NULL, 'bebidas', 2000, 0, 0, 'lata', true, true, NULL, NULL, 'pendiente_foto', 680),
+  ('BV-PIL-069', NULL, 'Score Energy', 'score energy', 'score-energy', NULL, 'bebidas', 1800, 0, 0, 'lata', true, true, NULL, NULL, 'pendiente_foto', 690),
+  ('BV-PIL-070', NULL, 'Jugo Watts 2 L', 'jugo watts 2 l', 'jugo-watts-2-l', NULL, 'bebidas', 2000, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 700),
+  ('BV-PIL-071', NULL, 'Gatorade 1 L', 'gatorade 1 l', 'gatorade-1-l', NULL, 'bebidas', 2000, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1710),
+  ('BV-PIL-072', NULL, 'Cigarrillos Kent Ikon Mix 20', 'cigarrillos kent ikon mix 20', 'cigarrillos-kent-ikon-mix-20', NULL, 'cigarros', 5900, 0, 0, 'cajetilla', true, true, NULL, NULL, 'pendiente_foto', 720),
+  ('BV-PIL-073', NULL, 'Cigarrillos Kent Rose 20', 'cigarrillos kent rose 20', 'cigarrillos-kent-rose-20', NULL, 'cigarros', 5900, 0, 0, 'cajetilla', true, true, NULL, NULL, 'pendiente_foto', 730),
+  ('BV-PIL-074', NULL, 'Cigarrillos Kent True 20', 'cigarrillos kent true 20', 'cigarrillos-kent-true-20', NULL, 'cigarros', 5900, 0, 0, 'cajetilla', true, true, NULL, NULL, 'pendiente_foto', 740),
+  ('BV-PIL-075', NULL, 'Cigarrillos Lucky Strike Blue Box 20', 'cigarrillos lucky strike blue box 20', 'cigarrillos-lucky-strike-blue-box-20', NULL, 'cigarros', 5800, 0, 0, 'cajetilla', true, true, NULL, NULL, 'pendiente_foto', 750),
+  ('BV-PIL-076', NULL, 'Cigarrillos Pall Mall Click XL 20', 'cigarrillos pall mall click xl 20', 'cigarrillos-pall-mall-click-xl-20', NULL, 'cigarros', 5700, 0, 0, 'cajetilla', true, true, NULL, NULL, 'pendiente_foto', 760),
+  ('BV-PIL-077', NULL, 'Cigarrillos Kent Neo 20', 'cigarrillos kent neo 20', 'cigarrillos-kent-neo-20', NULL, 'cigarros', 5300, 0, 0, 'cajetilla', true, true, NULL, NULL, 'pendiente_foto', 770),
+  ('BV-PIL-078', NULL, 'Chocolate Capri 30 g', 'chocolate capri 30 g', 'chocolate-capri-30-g', NULL, 'snacks-golosinas', 1000, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1780),
+  ('BV-PIL-079', NULL, 'Chocolate Rolls', 'chocolate rolls', 'chocolate-rolls', NULL, 'snacks-golosinas', 2400, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1790),
+  ('BV-PIL-080', NULL, 'Chocolate maní Nikolo', 'chocolate mani nikolo', 'chocolate-mani-nikolo', 'Confirmar nombre/marca: el apunte original decía “coholate manu nikolo”.', 'snacks-golosinas', 500, 0, 0, 'unidad', true, false, 'Confirmar nombre/marca: el apunte original decía “coholate manu nikolo”.', NULL, 'pendiente_foto', 1800),
+  ('BV-PIL-081', NULL, 'Mentitas Florete', 'mentitas florete', 'mentitas-florete', NULL, 'snacks-golosinas', 400, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1810),
+  ('BV-PIL-082', NULL, 'Chocman Costa 33 g', 'chocman costa 33 g', 'chocman-costa-33-g', NULL, 'snacks-golosinas', 400, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1820),
+  ('BV-PIL-083', NULL, 'Galleta Alteza McKay', 'galleta alteza mckay', 'galleta-alteza-mckay', NULL, 'snacks-golosinas', 1400, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1830),
+  ('BV-PIL-084', NULL, 'Galleta Frac Costa', 'galleta frac costa', 'galleta-frac-costa', NULL, 'snacks-golosinas', 800, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1840),
+  ('BV-PIL-085', NULL, 'Galleta Obsesión', 'galleta obsesion', 'galleta-obsesion', NULL, 'snacks-golosinas', 1500, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1850),
+  ('BV-PIL-086', NULL, 'Galleta cracker', 'galleta cracker', 'galleta-cracker', NULL, 'snacks-golosinas', 800, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1860),
+  ('BV-PIL-087', NULL, 'Galleta mini Arcor varias', 'galleta mini arcor varias', 'galleta-mini-arcor-varias', NULL, 'snacks-golosinas', 450, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1870),
+  ('BV-PIL-088', NULL, 'Oblea Nik', 'oblea nik', 'oblea-nik', NULL, 'snacks-golosinas', 700, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1880),
+  ('BV-PIL-089', NULL, 'Maní salado Marco Polo', 'mani salado marco polo', 'mani-salado-marco-polo', NULL, 'snacks-golosinas', 1200, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1890),
+  ('BV-PIL-090', NULL, 'Maní tipo japonés', 'mani tipo japones', 'mani-tipo-japones', NULL, 'snacks-golosinas', 2000, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1900),
+  ('BV-PIL-091', NULL, 'Mini snack Ramita', 'mini snack ramita', 'mini-snack-ramita', NULL, 'snacks-golosinas', 1500, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1910),
+  ('BV-PIL-092', NULL, 'Super 8', 'super 8', 'super-8', NULL, 'snacks-golosinas', 400, 0, 0, 'unidad', true, false, NULL, NULL, 'pendiente_foto', 1920),
+  ('BV-PIL-093', NULL, 'Papel higiénico Elite x4', 'papel higienico elite x4', 'papel-higienico-elite-x4', NULL, 'aseo-hogar', 3700, 0, 0, 'pack', true, true, NULL, NULL, 'pendiente_foto', 930),
+  ('BV-PIL-094', NULL, 'Confort x4', 'confort x4', 'confort-x4', NULL, 'aseo-hogar', 2400, 0, 0, 'pack', true, true, NULL, NULL, 'pendiente_foto', 940),
+  ('BV-PIL-095', NULL, 'Prestobarba', 'prestobarba', 'prestobarba', NULL, 'higiene-personal', 1500, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 950),
+  ('BV-PIL-096', NULL, 'Bolsa de basura 70x90', 'bolsa de basura 70x90', 'bolsa-de-basura-70x90', NULL, 'aseo-hogar', 1400, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 960),
+  ('BV-PIL-097', NULL, 'Bolsa de basura 80x110', 'bolsa de basura 80x110', 'bolsa-de-basura-80x110', NULL, 'aseo-hogar', 2000, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 970),
+  ('BV-PIL-098', NULL, 'Cloro', 'cloro', 'cloro', NULL, 'aseo-hogar', 1600, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 980),
+  ('BV-PIL-099', NULL, 'Cloro gel', 'cloro gel', 'cloro-gel', NULL, 'aseo-hogar', 1900, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 990),
+  ('BV-PIL-100', NULL, 'Detergente Omo 400 g', 'detergente omo 400 g', 'detergente-omo-400-g', NULL, 'aseo-hogar', 2500, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 1000),
+  ('BV-PIL-101', NULL, 'Quix lavalozas', 'quix lavalozas', 'quix-lavalozas', NULL, 'aseo-hogar', 2200, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 1010),
+  ('BV-PIL-102', NULL, 'Cif limpiador', 'cif limpiador', 'cif-limpiador', NULL, 'aseo-hogar', 2500, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 1020),
+  ('BV-PIL-103', NULL, 'Matamoscas Baygon', 'matamoscas baygon', 'matamoscas-baygon', NULL, 'aseo-hogar', 3500, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 1030),
+  ('BV-PIL-104', NULL, 'Nescafé instantáneo pequeño', 'nescafe instantaneo pequeno', 'nescafe-instantaneo-pequeno', NULL, 'cafe-te', 3990, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 1040),
+  ('BV-PIL-105', NULL, 'Té Lipton', 'te lipton', 'te-lipton', NULL, 'cafe-te', 2000, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 1050),
+  ('BV-PIL-106', NULL, 'Té Mildred', 'te mildred', 'te-mildred', NULL, 'cafe-te', 1100, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 1060),
+  ('BV-PIL-107', NULL, 'Café en sobre', 'cafe en sobre', 'cafe-en-sobre', NULL, 'cafe-te', 250, 0, 0, 'unidad', true, true, NULL, NULL, 'pendiente_foto', 1070),
+  ('BV-PIL-108', NULL, 'Set 2 asaderas de vidrio', 'set 2 asaderas de vidrio', 'set-2-asaderas-de-vidrio', 'Producto ocasional destacado. Usar esta categoría para novedades de tienda.', 'otros-productos', 8000, 0, 0, 'set', true, true, 'Producto ocasional destacado. Usar esta categoría para novedades de tienda.', NULL, 'pendiente_foto', 1080)
+) as v(sku, ean, name, name_normalized, slug, description, category_slug, price, cost, stock, unit, active, featured, needs_review, image_url, image_source, position)
+join categories c on c.slug = v.category_slug
+on conflict (sku) do update set
+  name = excluded.name,
+  name_normalized = excluded.name_normalized,
+  slug = excluded.slug,
+  description = excluded.description,
+  category_id = excluded.category_id,
+  price = excluded.price,
+  cost = excluded.cost,
+  unit = excluded.unit,
+  active = true,
+  featured = excluded.featured,
+  needs_review = excluded.needs_review,
+  image_url = coalesce(products.image_url, excluded.image_url),
+  image_source = coalesce(products.image_source, excluded.image_source),
+  position = excluded.position;
+
+-- 4) Control
+select active, featured, count(*) from products group by active, featured order by active desc, featured desc;
+select name, price, unit, needs_review from products where active = true order by featured desc, position, name;
+commit;

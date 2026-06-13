@@ -66,8 +66,9 @@ create table if not exists public.order_items (
   product_id    uuid references public.products(id) on delete set null,
   product_sku   text not null,
   product_name  text not null,
+  product_unit  text default 'unidad',
   unit_price    int  not null,
-  quantity      int  not null,
+  quantity      numeric(10,3) not null,
   subtotal      int  not null,
   created_at    timestamptz not null default now()
 );

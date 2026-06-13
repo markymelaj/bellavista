@@ -621,6 +621,38 @@
     .product-controls {
       display: flex; align-items: center; gap: 0;
     }
+
+
+    .product-unit-label {
+      font-family: var(--f-b);
+      font-size: 0.55rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(26,14,6,0.42);
+      margin-left: 0.25rem;
+      white-space: nowrap;
+    }
+    .qty-btn.kg-btn {
+      min-width: 3.8rem;
+      padding: 0 0.45rem;
+      border-radius: 999px;
+      font-size: 0.58rem;
+      letter-spacing: 0.02em;
+    }
+    .weight-helper {
+      display: block;
+      margin-top: 0.35rem;
+      font-size: 0.62rem;
+      color: rgba(26,14,6,0.52);
+      line-height: 1.25;
+    }
+    .cart-item-unit-note {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: 0.68rem;
+      color: rgba(26,14,6,0.52);
+    }
+
     .qty-btn {
       width: 26px; height: 26px;
       background: var(--amber); color: #fff;
@@ -788,6 +820,51 @@
       margin-bottom: 1rem;
     }
     .cart-notes:focus { outline: none; border-color: var(--amber); }
+
+
+
+    .cart-delivery-box {
+      background: #fff;
+      border: 1px solid var(--hairline);
+      border-radius: 5px;
+      padding: 0.85rem 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .cart-delivery-title {
+      font-size: 0.58rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(26,14,6,0.48); margin-bottom: 0.55rem;
+    }
+    .cart-choice-row { display: grid; grid-template-columns: 1fr; gap: 0.42rem; }
+    .cart-choice {
+      display: flex; align-items: flex-start; gap: 0.55rem;
+      padding: 0.58rem 0.65rem;
+      border: 1px solid rgba(26,14,6,0.12);
+      border-radius: 4px;
+      cursor: pointer;
+      background: rgba(245,240,232,0.35);
+    }
+    .cart-choice input { margin-top: 0.12rem; }
+    .cart-choice strong {
+      display: block; font-size: 0.78rem; color: var(--espresso); margin-bottom: 0.12rem;
+    }
+    .cart-choice span { display:block; font-size:0.68rem; color:rgba(26,14,6,0.58); line-height:1.3; }
+    .cart-delivery-detail {
+      width: 100%; padding: 0.65rem 0.75rem; margin-top: 0.65rem;
+      border: 1px solid var(--hairline); border-radius: 4px;
+      font-family: var(--f-b); font-size: 0.78rem; color: var(--ink);
+      background: #fff;
+    }
+    .cart-delivery-detail:focus { outline: none; border-color: var(--amber); }
+    .btn-location {
+      margin-top: 0.55rem; width: 100%; padding: 0.68rem 0.8rem;
+      border: 1px solid rgba(46,92,56,0.22); border-radius: 4px;
+      background: rgba(46,92,56,0.08); color: var(--moss);
+      font-family: var(--f-b); font-size: 0.62rem; font-weight:700;
+      letter-spacing:0.12em; text-transform:uppercase; cursor:pointer;
+    }
+    .btn-location:hover { background: rgba(46,92,56,0.14); }
+    .cart-inline-hint { margin-top:0.55rem; font-size:0.68rem; line-height:1.35; color:rgba(26,14,6,0.52); }
 
     .btn-wa-order {
       width: 100%;
@@ -984,11 +1061,12 @@
           <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/>
           </svg>
-          <input type="search" class="search-input" id="search-input" placeholder="Buscar productos..." autocomplete="off" />
+          <input type="search" class="search-input" id="search-input" placeholder="Buscar productos... Si no aparece, escríbelo en la nota del pedido" autocomplete="off" />
           <button class="search-clear" id="search-clear" onclick="clearSearch()" aria-label="Limpiar">&times;</button>
         </div>
         <span class="results-count" id="results-count"></span>
       </div>
+      <p style="font-size:0.72rem;color:rgba(26,14,6,0.58);margin:-0.4rem 0 0.9rem;line-height:1.5">¿No encontraste algo? Agrégalo en la nota del pedido y te confirmamos disponibilidad y precio por WhatsApp.</p>
 
       <!-- Tabs -->
       <div class="cat-tabs" id="cat-tabs">
@@ -1034,11 +1112,31 @@
           <span class="cart-total-note">Referencial</span>
         </div>
       </div>
-      <p class="cart-notes-label">Nota (opcional)</p>
-      <textarea class="cart-notes" id="cart-notes" placeholder="Ej: llego en 30 min, estoy en el sitio 12, lo paso a buscar..."></textarea>
+
+      <div class="cart-delivery-box">
+        <div class="cart-delivery-title">Forma de entrega</div>
+        <div class="cart-choice-row">
+          <label class="cart-choice">
+            <input type="radio" name="delivery-type" value="retiro" checked onchange="toggleDeliveryFields()">
+            <span><strong>Retiro en minimarket</strong><span>El local confirma el pedido por WhatsApp.</span></span>
+          </label>
+          <label class="cart-choice">
+            <input type="radio" name="delivery-type" value="envio_confirmar" onchange="toggleDeliveryFields()">
+            <span><strong>Env&iacute;o a confirmar</strong><span>La disponibilidad de reparto y el costo se confirman por WhatsApp.</span></span>
+          </label>
+        </div>
+        <div id="delivery-extra" style="display:none">
+          <input class="cart-delivery-detail" id="delivery-detail" placeholder="Direcci&oacute;n, sitio, caba&ntilde;a o referencia de entrega">
+          <button class="btn-location" type="button" onclick="useCurrentLocation()">Enviar mi ubicaci&oacute;n actual</button>
+          <div class="cart-inline-hint">Si no hay reparto disponible, el pedido queda tomado para retiro.</div>
+        </div>
+      </div>
+
+      <p class="cart-notes-label">Nota / productos no encontrados</p>
+      <textarea class="cart-notes" id="cart-notes" placeholder="Ej: también necesito fósforos, hielo o algo que no encontré en el catálogo. El local confirma por WhatsApp..."></textarea>
       <button class="btn-wa-order" id="wa-btn" onclick="sendWhatsApp()" disabled>
         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.107 1.508 5.836L.057 23.454a.75.75 0 00.918.918l5.618-1.451A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.732 9.732 0 01-5.034-1.4l-.362-.215-3.733.963.98-3.624-.235-.375A9.714 9.714 0 012.25 12C2.25 6.617 6.617 2.25 12 2.25S21.75 6.617 21.75 12 17.383 21.75 12 21.75z"/></svg>
-        Enviar pedido por WhatsApp
+        Guardar y enviar por WhatsApp
       </button>
       <div class="cart-pay-row">
         <span class="cart-pay-chip">&#128181; Efectivo</span>
@@ -1077,14 +1175,37 @@
       } catch(e) { cart = {}; }
     }
 
-    function fmt(n) { return '$' + n.toLocaleString('es-CL'); }
+    function fmt(n) { return '$' + Math.round(Number(n) || 0).toLocaleString('es-CL'); }
     function getProduct(id) {
       for (var i = 0; i < PRODUCTS.length; i++) if (PRODUCTS[i].id == id) return PRODUCTS[i];
       return null;
     }
     function norm(s) {
-      return s.toLowerCase()
+      return (s || '').toString().toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    function isKgProduct(p) {
+      return p && String(p.u || '').toLowerCase() === 'kg';
+    }
+    function unitPriceLabel(p) {
+      return isKgProduct(p) ? ' / kg' : ' c/u';
+    }
+    function formatQty(p, qty) {
+      qty = Number(qty) || 0;
+      if (isKgProduct(p)) {
+        if (qty < 1) return Math.round(qty * 1000) + ' g';
+        return qty.toLocaleString('es-CL', { maximumFractionDigits: 3 }) + ' kg';
+      }
+      return String(Math.round(qty));
+    }
+    function formatOrderQty(qty, unit) {
+      qty = Number(qty) || 0;
+      unit = String(unit || 'unidad').toLowerCase();
+      if (unit === 'kg') {
+        if (qty < 1) return Math.round(qty * 1000) + ' g';
+        return qty.toLocaleString('es-CL', { maximumFractionDigits: 3 }) + ' kg';
+      }
+      return Math.round(qty) + 'x';
     }
 
     function getFilteredProducts() {
@@ -1093,36 +1214,40 @@
       for (var i = 0; i < PRODUCTS.length; i++) {
         var p = PRODUCTS[i];
         if (activeCat !== 'all' && p.cat !== activeCat) continue;
-        if (q && (p.ns || norm(p.n)).indexOf(q) === -1) continue;
+        var haystack = (p.ns || norm(p.n)) + ' ' + norm(p.catName || '') + ' ' + norm(p.sku || '');
+        if (q && haystack.indexOf(q) === -1) continue;
         out.push(p);
       }
       return out;
     }
 
     function productCardHTML(p) {
-      var qty = cart[p.id] || 0;
+      var qty = Number(cart[p.id]) || 0;
       var imgHTML = p.img
         ? '<img src="' + p.img + '" alt="' + escapeAttr(p.n) + '" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{className:\'ico-fallback\',textContent:\'\\u{1F4E6}\'}))" />'
         : '<span class="ico-fallback">' + iconFor(p.cat) + '</span>';
       var hasPrice = Number(p.p) > 0;
+      var kg = isKgProduct(p);
       var html = '<div class="product-card' + (qty > 0 ? ' in-cart' : '') + '" id="card-' + p.id + '">';
       html += '<div class="product-image" data-cat="' + p.cat + '">' + imgHTML + '</div>';
       html += '<div class="product-body">';
       html += '<p class="product-name">' + escapeHtml(p.n) + '</p>';
       html += '<div class="product-price-row">';
       html += hasPrice
-        ? '<span class="product-price">' + fmt(p.p) + '</span>'
+        ? '<span class="product-price">' + fmt(p.p) + (kg ? '<span class="product-unit-label">/ kg</span>' : '') + '</span>'
         : '<span class="product-price pending">Consultar precio</span>';
       if (hasPrice) {
         html += '<div class="product-controls' + (qty === 0 ? ' empty' : '') + '">';
-        html += '<button class="qty-btn minus" onclick="changeQty(\'' + p.id + '\',-1)" aria-label="Quitar">&#8722;</button>';
-        html += '<span class="qty-display" id="qty-' + p.id + '">' + qty + '</span>';
-        html += '<button class="qty-btn" onclick="changeQty(\'' + p.id + '\',1)" aria-label="Agregar">+</button>';
+        html += '<button class="qty-btn minus' + (kg ? ' kg-btn' : '') + '" onclick="changeQty(\'' + p.id + '\',-1)" aria-label="Quitar">' + (kg ? '-250g' : '&#8722;') + '</button>';
+        html += '<span class="qty-display" id="qty-' + p.id + '">' + formatQty(p, qty) + '</span>';
+        html += '<button class="qty-btn' + (kg ? ' kg-btn' : '') + '" onclick="changeQty(\'' + p.id + '\',1)" aria-label="Agregar">' + (kg ? '+250g' : '+') + '</button>';
         html += '</div>';
       } else {
         html += '<div class="price-pending-note">editar en<br>backend</div>';
       }
-      html += '</div></div></div>';
+      html += '</div>';
+      if (kg) html += '<span class="weight-helper">Venta fraccionada: suma o resta de 250 g.</span>';
+      html += '</div></div>';
       return html;
     }
 
@@ -1141,7 +1266,7 @@
         grid.innerHTML = '<div class="empty-state">' +
           '<div class="empty-icon">&#128269;</div>' +
           '<div class="empty-text">Sin resultados</div>' +
-          '<div class="empty-sub">Probá con otra palabra o categoría</div>' +
+          '<div class="empty-sub">Prueba con otra palabra o escríbelo en la nota del pedido</div>' +
           '</div>';
         return;
       }
@@ -1154,9 +1279,9 @@
 
     function iconFor(catSlug) {
       var icons = {
-        'panaderia':'🥖','bebidas':'🍷','lacteos-embutidos':'🥛','abarrotes':'🛒',
-        'snacks':'🍪','frutas-verduras':'🍎','carnes-congelados':'🥩','aseo-hogar':'🧽',
-        'higiene-personal':'🧴','cigarros':'🚬','farmacia':'💊','otros':'📦'
+        'panaderia':'🥖','bebidas':'🥤','bebidas-licores':'🍺','lacteos-refrigerados':'🥛','lacteos-embutidos':'🥛','abarrotes':'🛒',
+        'snacks-golosinas':'🍪','snacks':'🍪','frutas-verduras':'🥑','congelados':'❄️','carnes-congelados':'🥩','aseo-hogar':'🧽',
+        'higiene-personal':'🧴','cigarros':'🚬','farmacia':'💊','cafe-te':'☕','otros-productos':'🛍️','otros':'📦'
       };
       return icons[catSlug] || '📦';
     }
@@ -1167,20 +1292,20 @@
         alert('Este producto todavía no tiene precio cargado. Editalo desde el backend antes de venderlo.');
         return;
       }
-      var cur = cart[id] || 0;
-      var next = cur + delta;
-      if (next <= 0) { delete cart[id]; next = 0; } else { cart[id] = next; }
+      var kg = isKgProduct(prod);
+      var step = kg ? 0.25 : 1;
+      var cur = Number(cart[id]) || 0;
+      var next = cur + (delta * step);
+      if (kg) next = Math.round(next * 1000) / 1000;
+      if (next <= 0.0001) { delete cart[id]; next = 0; } else { cart[id] = next; }
       saveCart();
-      // Update every instance of this product's qty display + card state
-      var qtyEls = document.querySelectorAll('#qty-' + cssEscape(id) + ', [id="qty-' + id + '"]');
       document.querySelectorAll('.qty-display').forEach(function(el){
-        if (el.id === 'qty-' + id) el.textContent = next;
+        if (el.id === 'qty-' + id) el.textContent = formatQty(prod, next);
       });
       document.querySelectorAll('.product-controls').forEach(function(ctrl){
         var disp = ctrl.querySelector('.qty-display');
         if (disp && disp.id === 'qty-' + id) ctrl.classList.toggle('empty', next === 0);
       });
-      document.querySelectorAll('#card-' + id + ', [id="card-' + id + '"]').forEach(function(){});
       document.querySelectorAll('.product-card').forEach(function(c){
         if (c.id === 'card-' + id) c.classList.toggle('in-cart', next > 0);
       });
@@ -1190,11 +1315,11 @@
 
     function calcTotal() {
       var t = 0;
-      for (var id in cart) { var p = getProduct(id); if (p) t += p.p * cart[id]; }
+      for (var id in cart) { var p = getProduct(id); if (p) t += Math.round(p.p * (Number(cart[id]) || 0)); }
       return t;
     }
     function calcCount() {
-      var n = 0; for (var k in cart) n += cart[k]; return n;
+      var n = 0; for (var k in cart) if ((Number(cart[k]) || 0) > 0) n += 1; return n;
     }
 
     function updateCartUI() {
@@ -1239,7 +1364,7 @@
           thumb +
           '<div class="cart-item-info">' +
             '<div class="cart-item-name">' + escapeHtml(p.n) + '</div>' +
-            '<div class="cart-item-price">' + fmt(p.p) + ' x ' + cart[id] + ' = ' + fmt(p.p * cart[id]) + '</div>' +
+            '<div class="cart-item-price">' + fmt(p.p) + unitPriceLabel(p) + ' x ' + formatQty(p, cart[id]) + ' = ' + fmt(Math.round(p.p * cart[id])) + '</div>' +
           '</div>' +
           '<div class="cart-item-right">' +
             '<span class="cart-item-qty">x' + cart[id] + '</span>' +
@@ -1251,7 +1376,7 @@
 
     function removeItem(id) {
       delete cart[id]; saveCart();
-      var el = document.getElementById('qty-' + id); if (el) el.textContent = '0';
+      var p = getProduct(id); var el = document.getElementById('qty-' + id); if (el && p) el.textContent = formatQty(p, 0);
       var cardEl = document.getElementById('card-' + id); if (cardEl) cardEl.classList.remove('in-cart');
       updateCartUI();
     }
@@ -1267,8 +1392,40 @@
       document.getElementById('cart-overlay').classList.toggle('open');
     }
 
-    function sendWhatsApp() {
+
+    function getSelectedDeliveryType() {
+      var el = document.querySelector('input[name="delivery-type"]:checked');
+      return el ? el.value : 'retiro';
+    }
+
+    function toggleDeliveryFields() {
+      var box = document.getElementById('delivery-extra');
+      if (!box) return;
+      box.style.display = getSelectedDeliveryType() === 'envio_confirmar' ? 'block' : 'none';
+    }
+
+    function useCurrentLocation() {
+      var detail = document.getElementById('delivery-detail');
+      if (!navigator.geolocation) {
+        alert('Este dispositivo no permite obtener ubicación. Puedes escribir dirección o referencia manualmente.');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(function(pos) {
+        var lat = pos.coords.latitude.toFixed(6);
+        var lng = pos.coords.longitude.toFixed(6);
+        var url = 'https://maps.google.com/?q=' + lat + ',' + lng;
+        if (detail) detail.value = 'Ubicación actual: ' + url;
+      }, function() {
+        alert('No se pudo obtener la ubicación. Puedes escribir dirección, sitio o referencia manualmente.');
+      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+    }
+
+    async function sendWhatsApp() {
+      var btn = document.getElementById('wa-btn');
       var notes = document.getElementById('cart-notes').value.trim();
+      var deliveryType = getSelectedDeliveryType();
+      var deliveryDetailEl = document.getElementById('delivery-detail');
+      var deliveryDetail = deliveryType === 'envio_confirmar' && deliveryDetailEl ? deliveryDetailEl.value.trim() : '';
       var items = [];
       for (var id in cart) {
         var p = getProduct(id);
@@ -1278,37 +1435,63 @@
           product_name: p.n,
           unit_price: p.p,
           quantity: cart[id],
-          subtotal: p.p * cart[id]
+          product_unit: p.u || 'unidad',
+          subtotal: Math.round(p.p * cart[id])
         });
       }
       if (items.length === 0) return;
+      if (deliveryType === 'envio_confirmar' && !deliveryDetail) {
+        if (!confirm('No agregaste dirección ni ubicación. ¿Enviar igual para coordinar por WhatsApp?')) return;
+      }
 
-      // 1) Persist order in Supabase (best-effort, no bloquea WA)
-      window.bv.from('orders').insert({
-        delivery_type: 'retiro',
-        payment_method: 'efectivo',
-        notes: notes || null,
-        subtotal: calcTotal(),
-        status: 'nuevo'
-      }).select().single().then(function(res) {
-        if (res.data && res.data.id) {
-          var rows = items.map(function(it) { return Object.assign({order_id: res.data.id}, it); });
-          window.bv.from('order_items').insert(rows).then(function(){});
+      if (btn) { btn.disabled = true; btn.textContent = 'Guardando pedido...'; }
+      var savedOrder = null;
+      var saveError = null;
+      try {
+        var res = await window.bv.from('orders').insert({
+          delivery_type: deliveryType,
+          delivery_detail: deliveryDetail || null,
+          payment_method: 'efectivo',
+          notes: notes || null,
+          subtotal: calcTotal(),
+          status: 'nuevo'
+        }).select().single();
+        if (res.error) throw res.error;
+        savedOrder = res.data;
+        if (savedOrder && savedOrder.id) {
+          var rows = items.map(function(it) { return Object.assign({order_id: savedOrder.id}, it); });
+          var itemRes = await window.bv.from('order_items').insert(rows);
+          if (itemRes.error) throw itemRes.error;
         }
-      });
+      } catch (err) {
+        saveError = err;
+        console.warn('Pedido no registrado en admin:', err);
+      }
 
-      // 2) Build WhatsApp message
-      var msg = '*PEDIDO MINIMARKET BELLAVISTA*\n\n';
+      var msg = '*PEDIDO MINIMARKET BELLAVISTA*\n';
+      if (savedOrder && savedOrder.order_number) msg += '*Pedido #' + savedOrder.order_number + '*\n';
+      msg += '\n';
       for (var i = 0; i < items.length; i++) {
         var it = items[i];
-        msg += '  ' + it.quantity + 'x ' + it.product_name + '\n';
-        msg += '      ' + fmt(it.unit_price) + ' c/u = ' + fmt(it.subtotal) + '\n';
+        msg += '  ' + formatOrderQty(it.quantity, it.product_unit) + ' ' + it.product_name + '\n';
+        msg += '      ' + fmt(it.unit_price) + (it.product_unit === 'kg' ? ' / kg' : ' c/u') + ' = ' + fmt(it.subtotal) + '\n';
       }
-      msg += '\n*TOTAL: ' + fmt(calcTotal()) + '*';
-      if (notes) msg += '\n\nNota: ' + notes;
-      msg += '\n\n_Pedido generado: ' + new Date().toLocaleString('es-CL') + '_';
+      msg += '\n*TOTAL ESTIMADO: ' + fmt(calcTotal()) + '*';
+      if (deliveryType === 'envio_confirmar') {
+        msg += '\n\nEntrega: Envío a confirmar';
+        if (deliveryDetail) msg += '\nUbicación / referencia: ' + deliveryDetail;
+        msg += '\n_Si no hay reparto disponible, retiro en local._';
+      } else {
+        msg += '\n\nEntrega: Retiro en minimarket';
+      }
+      if (notes) msg += '\n\nNota / otros productos: ' + notes;
+      msg += '\n\n_El catálogo se está completando. Si pediste algo no visible, el local confirma disponibilidad y precio por este WhatsApp._';
+      msg += '\n_Pedido generado: ' + new Date().toLocaleString('es-CL') + '_';
+      if (saveError) msg += '\n\n_ATENCIÓN: no se pudo guardar automáticamente en admin. Registrar manualmente este pedido._';
       window.open('https://api.whatsapp.com/send?phone=' + WA + '&text=' + encodeURIComponent(msg), '_blank', 'noopener');
+      if (btn) { btn.disabled = false; btn.textContent = 'Guardar y enviar por WhatsApp'; }
     }
+
 
     // ---- Search ----
     function clearSearch() {
@@ -1346,16 +1529,19 @@
 
     // ---- Category icons + portada images ----
     var CAT_ICONS = {
-      'panaderia':'🥖','bebidas':'🍷','lacteos-embutidos':'🥛','abarrotes':'🛒',
-      'snacks':'🍪','frutas-verduras':'🍎','carnes-congelados':'🥩','aseo-hogar':'🧽',
-      'higiene-personal':'🧴','cigarros':'🚬','farmacia':'💊','otros':'📦'
+      'panaderia':'🥖','bebidas':'🥤','bebidas-licores':'🍺','lacteos-refrigerados':'🥛','lacteos-embutidos':'🥛','abarrotes':'🛒',
+      'snacks-golosinas':'🍪','snacks':'🍪','frutas-verduras':'🥑','congelados':'❄️','carnes-congelados':'🥩','aseo-hogar':'🧽',
+      'higiene-personal':'🧴','cigarros':'🚬','farmacia':'💊','cafe-te':'☕','otros-productos':'🛍️','otros':'📦'
     };
     // Optional local cover images per category (fallback to emoji if missing)
     var CAT_COVERS = {
       'panaderia': '/img/hero/pan-marraqueta.jpg',
+      'lacteos-refrigerados': '/img/cat/lacteos.jpg',
       'lacteos-embutidos': '/img/cat/lacteos.jpg',
       'frutas-verduras': '/img/cat/frutas.jpg',
       'bebidas': '/img/cat/bebidas.jpg',
+      'bebidas-licores': '/img/cat/bebidas.jpg',
+      'snacks-golosinas': '/img/hero/snacks-wide.jpg',
       'snacks': '/img/hero/snacks-wide.jpg',
       'aseo-hogar': '/img/cat/extra1.jpg'
     };
@@ -1452,7 +1638,7 @@
       try {
         var [catsRes, prodsRes] = await Promise.all([
           window.bv.from('categories').select('id, name, slug, icon, position').eq('active', true).order('position'),
-          window.bv.from('products').select('id, sku, name, name_normalized, category_id, price, image_url, featured, position, needs_review').eq('active', true).order('position', { ascending: true }).order('name')
+          window.bv.from('products').select('id, sku, name, name_normalized, category_id, price, unit, image_url, featured, position, needs_review').eq('active', true).order('position', { ascending: true }).order('name')
         ]);
 
         if (catsRes.error) throw catsRes.error;
@@ -1482,9 +1668,9 @@
           var slug = cat ? cat.slug : 'otros';
           catCounts[slug] = (catCounts[slug] || 0) + 1;
           var prod = {
-            id: p.id, sku: p.sku, cat: slug,
+            id: p.id, sku: p.sku, cat: slug, catName: cat ? cat.name : '',
             n: p.name, ns: p.name_normalized || norm(p.name),
-            p: Number(p.price) || 0, img: p.image_url || '', pos: p.position || 1000
+            p: Number(p.price) || 0, u: p.unit || 'unidad', img: p.image_url || '', pos: p.position || 1000
           };
           if (p.featured) featured.push(prod);
           return prod;
