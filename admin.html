@@ -560,7 +560,7 @@
     });
     $('#prod-status').addEventListener('change', e => {
       PROD_STATE.status = e.target.value;
-      renderProdRows();
+      reloadProds();
     });
     $('#prod-flag').addEventListener('change', e => {
       PROD_STATE.flag = e.target.value;
@@ -570,19 +570,31 @@
   }
 
   async function reloadProds() {
-    const { data, error } = await window.bv.from('products')
+    let query = window.bv.from('products')
       .select('id, sku, ean, name, category_id, price, stock, active, featured, image_url, needs_review, unit, description')
-      .order('name');
+      .order('name')
+      .limit(2000);
+    // Importante: filtrar en Supabase evita perder productos por el límite de 1000 filas cuando hay mucho catálogo oculto.
+    if (PROD_STATE.status === 'active') query = query.eq('active', true);
+    if (PROD_STATE.status === 'inactive') query = query.eq('active', false);
+
+    const [{ data, error }, activosRes, ocultosRes, destacadosRes, sinPrecioRes] = await Promise.all([
+      query,
+      window.bv.from('products').select('id', { count:'exact', head:true }).eq('active', true),
+      window.bv.from('products').select('id', { count:'exact', head:true }).eq('active', false),
+      window.bv.from('products').select('id', { count:'exact', head:true }).eq('featured', true),
+      window.bv.from('products').select('id', { count:'exact', head:true }).lte('price', 0)
+    ]);
     if (error) {
       $('#prod-sub').textContent = 'Error: ' + error.message;
       return;
     }
     PROD_STATE.items = data || [];
-    const activos = PROD_STATE.items.filter(p => p.active).length;
-    const ocultos = PROD_STATE.items.length - activos;
-    const destacados = PROD_STATE.items.filter(p => p.featured).length;
-    const sinPrecio = PROD_STATE.items.filter(p => Number(p.price) <= 0).length;
-    $('#prod-sub').textContent = activos + ' usando ahora · ' + ocultos + ' en catálogo oculto · ' + destacados + ' destacados · ' + sinPrecio + ' sin precio';
+    const activos = activosRes.count || 0;
+    const ocultos = ocultosRes.count || 0;
+    const destacados = destacadosRes.count || 0;
+    const sinPrecio = sinPrecioRes.count || 0;
+    $('#prod-sub').textContent = activos + ' usando ahora · ' + ocultos + ' en catálogo oculto · ' + destacados + ' destacados · ' + sinPrecio + ' sin precio · mostrando ' + PROD_STATE.items.length;
     renderProdRows();
   }
 
