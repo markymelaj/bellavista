@@ -867,8 +867,8 @@
       <div class="sub" id="cat-sub">Cargando...</div>
       <div class="actions"><button class="btn" id="new-cat">+ Nueva categoría</button></div>
       <div class="table-wrap"><table id="cat-table">
-        <thead><tr><th style="width:60px">Orden</th><th>Nombre</th><th>Slug</th><th>Ícono</th><th>Productos</th><th>Activa</th><th></th></tr></thead>
-        <tbody><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
+        <thead><tr><th style="width:60px">Orden</th><th>Foto</th><th>Nombre</th><th>Slug</th><th>Ícono</th><th>Productos</th><th>Activa</th><th></th></tr></thead>
+        <tbody><tr><td colspan="8" class="empty">Cargando...</td></tr></tbody>
       </table></div>
     `;
 
@@ -885,6 +885,7 @@
     tbody.innerHTML = cats.map(c => `
       <tr data-id="${c.id}">
         <td>${c.position}</td>
+        <td>${c.image_url ? `<img src="${esc(c.image_url)}" style="width:56px;height:40px;object-fit:cover;border-radius:4px;border:1px solid rgba(26,14,6,0.12)"/>` : '—'}</td>
         <td><strong>${esc(c.name)}</strong></td>
         <td style="font-family:monospace;font-size:0.7rem">${esc(c.slug)}</td>
         <td style="font-family:monospace;font-size:0.7rem">${esc(c.icon)}</td>
@@ -910,12 +911,14 @@
 
   function openCategoryModal(c) {
     const isNew = !c;
-    const f = c || { name:'', slug:'', icon:'Package', position:100, active:true };
+    const f = c || { name:'', slug:'', icon:'Package', image_url:'', position:100, active:true };
     $('#modal-title').textContent = isNew ? 'Nueva categoría' : 'Editar categoría';
     $('#modal-body').innerHTML = `
       <label>Nombre *</label><input id="cm-name" value="${esc(f.name)}" />
       <label>Slug</label><input id="cm-slug" value="${esc(f.slug)}" placeholder="se genera del nombre si está vacío" />
       <label>Ícono (lucide-react)</label><input id="cm-icon" value="${esc(f.icon)}" placeholder="Package, Wine, Milk..."/>
+      <label>Foto de categoría / portada</label><input id="cm-img" value="${esc(f.image_url || '')}" placeholder="https://..."/>
+      ${f.image_url ? `<img src="${esc(f.image_url)}" style="width:100%;max-height:150px;object-fit:cover;border-radius:6px;margin-top:0.5rem;border:1px solid rgba(26,14,6,0.12)"/>` : ''}
       <small style="font-size:0.7rem;color:rgba(26,14,6,0.5);display:block;margin-top:0.4rem">
         Sugeridos: Croissant, Wine, Milk, ShoppingBasket, Cookie, Apple, Beef, Sparkles, Bath, Cigarette, Pill, Package
       </small>
@@ -935,6 +938,7 @@
       const payload = {
         name, slug,
         icon: $('#cm-icon').value.trim() || 'Package',
+        image_url: $('#cm-img').value.trim() || null,
         position: parseInt($('#cm-pos').value, 10) || 100,
         active: $('#cm-active').checked
       };

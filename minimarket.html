@@ -714,6 +714,19 @@
     }
     .cart-panel.open { transform: translateX(0); }
 
+    @media (min-width: 1024px) {
+      body.cart-open { padding-right: min(420px, 30vw); transition: padding-right 0.25s ease; }
+      body.cart-open .cart-toggle { right: calc(min(420px, 30vw) + 1.2rem); }
+      .cart-overlay.open { background: transparent; backdrop-filter: none; pointer-events: none; }
+      .cart-panel { width: min(420px, 30vw); min-width: 360px; }
+    }
+    @media (max-width: 520px) {
+      .cart-panel { width: 100vw; }
+      .cart-panel-header { padding: 1rem 1.1rem; }
+      .cart-footer { padding: 1rem 1.05rem; }
+    }
+
+
     .cart-panel-header {
       background: var(--espresso);
       padding: 1.2rem 1.5rem;
@@ -822,6 +835,28 @@
     .cart-notes:focus { outline: none; border-color: var(--amber); }
 
 
+
+
+
+    .cart-customer-box {
+      background: #fff;
+      border: 1px solid var(--hairline);
+      border-radius: 5px;
+      padding: 0.85rem 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .cart-input-label {
+      display:block;
+      font-size: 0.58rem; font-weight: 700;
+      letter-spacing: 0.16em; text-transform: uppercase;
+      color: rgba(26,14,6,0.48); margin-bottom: 0.45rem;
+    }
+    .cart-text-input {
+      width: 100%; padding: 0.7rem 0.85rem;
+      border: 1px solid var(--hairline); border-radius: 4px;
+      background: #fff; color: var(--ink); font-family: var(--f-b); font-size: 0.82rem;
+    }
+    .cart-text-input:focus { outline:none; border-color:var(--amber); }
 
     .cart-delivery-box {
       background: #fff;
@@ -1113,6 +1148,12 @@
         </div>
       </div>
 
+
+      <div class="cart-customer-box">
+        <label class="cart-input-label" for="customer-name">Nombre del pedido *</label>
+        <input class="cart-text-input" id="customer-name" placeholder="Ej: Camila / Caba&ntilde;a 4 / Sitio 12" autocomplete="name">
+      </div>
+
       <div class="cart-delivery-box">
         <div class="cart-delivery-title">Forma de entrega</div>
         <div class="cart-choice-row">
@@ -1388,8 +1429,12 @@
     }
 
     function toggleCart() {
-      document.getElementById('cart-panel').classList.toggle('open');
-      document.getElementById('cart-overlay').classList.toggle('open');
+      var panel = document.getElementById('cart-panel');
+      var overlay = document.getElementById('cart-overlay');
+      var willOpen = !panel.classList.contains('open');
+      panel.classList.toggle('open', willOpen);
+      overlay.classList.toggle('open', willOpen);
+      document.body.classList.toggle('cart-open', willOpen);
     }
 
 
@@ -1423,6 +1468,8 @@
     async function sendWhatsApp() {
       var btn = document.getElementById('wa-btn');
       var notes = document.getElementById('cart-notes').value.trim();
+      var customerNameEl = document.getElementById('customer-name');
+      var customerName = customerNameEl ? customerNameEl.value.trim() : '';
       var deliveryType = getSelectedDeliveryType();
       var deliveryDetailEl = document.getElementById('delivery-detail');
       var deliveryDetail = deliveryType === 'envio_confirmar' && deliveryDetailEl ? deliveryDetailEl.value.trim() : '';
@@ -1440,6 +1487,7 @@
         });
       }
       if (items.length === 0) return;
+      if (!customerName) { alert('Agrega el nombre de la persona que hace el pedido.'); if (customerNameEl) customerNameEl.focus(); return; }
       if (deliveryType === 'envio_confirmar' && !deliveryDetail) {
         if (!confirm('No agregaste dirección ni ubicación. ¿Enviar igual para coordinar por WhatsApp?')) return;
       }
@@ -1449,6 +1497,7 @@
       var saveError = null;
       try {
         var res = await window.bv.from('orders').insert({
+          customer_name: customerName,
           delivery_type: deliveryType,
           delivery_detail: deliveryDetail || null,
           payment_method: 'efectivo',
@@ -1470,6 +1519,7 @@
 
       var msg = '*PEDIDO MINIMARKET BELLAVISTA*\n';
       if (savedOrder && savedOrder.order_number) msg += '*Pedido #' + savedOrder.order_number + '*\n';
+      msg += 'Nombre: ' + customerName + '\n';
       msg += '\n';
       for (var i = 0; i < items.length; i++) {
         var it = items[i];
@@ -1609,7 +1659,7 @@
         var c = CATEGORIES[i];
         var count = catCounts[c.slug] || 0;
         if (count === 0) continue;
-        var cover = CAT_COVERS[c.slug];
+        var cover = c.image_url || CAT_COVERS[c.slug];
         var visual = cover
           ? '<div class="cat-card-img" style="background-image:url(\'' + cover + '\')"></div>'
           : '<div class="cat-card-emoji">' + (CAT_ICONS[c.slug] || '📦') + '</div>';
@@ -1637,7 +1687,7 @@
     async function bootFromSupabase() {
       try {
         var [catsRes, prodsRes] = await Promise.all([
-          window.bv.from('categories').select('id, name, slug, icon, position').eq('active', true).order('position'),
+          window.bv.from('categories').select('id, name, slug, icon, position, image_url').eq('active', true).order('position'),
           window.bv.from('products').select('id, sku, name, name_normalized, category_id, price, unit, image_url, featured, position, needs_review').eq('active', true).order('position', { ascending: true }).order('name')
         ]);
 

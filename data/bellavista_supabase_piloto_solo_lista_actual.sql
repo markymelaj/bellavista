@@ -3,7 +3,8 @@
 -- Deja activos solo los productos actuales. Oculta lo anterior, no borra datos.
 begin;
 
--- 0) Preparar pedidos para productos vendidos por kilo
+-- 0) Preparar base para entrega final
+alter table public.categories add column if not exists image_url text;
 alter table public.order_items add column if not exists product_unit text default 'unidad';
 alter table public.order_items alter column quantity type numeric(10,3) using quantity::numeric;
 

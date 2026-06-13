@@ -11,6 +11,7 @@ create table if not exists public.categories (
   name        text not null,
   slug        text not null unique,
   icon        text default 'Package',
+  image_url   text,
   position    int  not null default 100,
   active      boolean not null default true,
   created_at  timestamptz not null default now(),
