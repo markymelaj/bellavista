@@ -945,6 +945,12 @@
       let res;
       if (isNew) res = await window.bv.from('categories').insert(payload).select().single();
       else res = await window.bv.from('categories').update(payload).eq('id', f.id).select().single();
+      if (res.error && String(res.error.message || '').indexOf('image_url') !== -1) {
+        delete payload.image_url;
+        if (isNew) res = await window.bv.from('categories').insert(payload).select().single();
+        else res = await window.bv.from('categories').update(payload).eq('id', f.id).select().single();
+        alert('La categoría se guardó, pero falta ejecutar el SQL final para habilitar fotos de categorías.');
+      }
       if (res.error) { alert(res.error.message); return; }
       CATS_CACHE = null;
       closeModal();

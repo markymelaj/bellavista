@@ -1684,10 +1684,27 @@
     }
 
     // ---- Boot from Supabase ----
+
+    async function fetchActiveCategoriesSafe() {
+      var res = await window.bv.from('categories')
+        .select('id, name, slug, icon, position, image_url')
+        .eq('active', true)
+        .order('position');
+      if (res.error && String(res.error.message || '').indexOf('image_url') !== -1) {
+        console.warn('categories.image_url no existe todavía. Ejecutar SQL final para habilitar fotos de categorías. Se usa fallback sin foto.');
+        res = await window.bv.from('categories')
+          .select('id, name, slug, icon, position')
+          .eq('active', true)
+          .order('position');
+        if (res.data) res.data = res.data.map(function(c){ c.image_url = null; return c; });
+      }
+      return res;
+    }
+
     async function bootFromSupabase() {
       try {
         var [catsRes, prodsRes] = await Promise.all([
-          window.bv.from('categories').select('id, name, slug, icon, position, image_url').eq('active', true).order('position'),
+          fetchActiveCategoriesSafe(),
           window.bv.from('products').select('id, sku, name, name_normalized, category_id, price, unit, image_url, featured, position, needs_review').eq('active', true).order('position', { ascending: true }).order('name')
         ]);
 
