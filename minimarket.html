@@ -429,6 +429,8 @@
     .catalog { max-width: 1200px; margin: 0 auto; padding: 1.5rem 1.5rem 6rem; }
 
     /* SEARCH */
+    .home-search-row { margin-bottom: 1rem; padding-bottom: 0.8rem; }
+
     .search-row {
       display: flex; gap: 0.8rem; align-items: center;
       padding: 0.4rem 0 1.4rem;
@@ -1084,6 +1086,16 @@
     <!-- CATEGORÍAS DESTACADAS (portada) -->
     <section id="home-section">
       <h2 class="section-title">¿Qué necesitas hoy?</h2>
+      <div class="search-row home-search-row">
+        <div class="search-wrap">
+          <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/>
+          </svg>
+          <input type="search" class="search-input" id="home-search-input" placeholder="Buscar artículo: pan, Coca-Cola, queso, confort..." autocomplete="off" />
+          <button class="search-clear visible" onclick="submitHomeSearch()" aria-label="Buscar">→</button>
+        </div>
+      </div>
+
       <div class="cat-grid" id="cat-grid"></div>
 
       <div class="section-head">
@@ -1486,6 +1498,14 @@
       }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
     }
 
+    function makeOrderId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
     async function sendWhatsApp() {
       var btn = document.getElementById('wa-btn');
       var notes = document.getElementById('cart-notes').value.trim();
@@ -1532,8 +1552,10 @@
       var saveError = null;
       var itemSaveError = null;
       var adminNotes = buildAdminSnapshot();
+      var orderId = makeOrderId();
       try {
         var res = await window.bv.from('orders').insert({
+          id: orderId,
           customer_name: customerName,
           delivery_type: deliveryType,
           delivery_detail: deliveryDetail || null,
@@ -1541,24 +1563,20 @@
           notes: adminNotes,
           subtotal: calcTotal(),
           status: 'nuevo'
-        }).select().single();
+        });
         if (res.error) throw res.error;
-        savedOrder = res.data;
-        if (savedOrder && savedOrder.id) {
-          var rows = items.map(function(it) { return Object.assign({order_id: savedOrder.id}, it); });
-          var itemRes = await window.bv.from('order_items').insert(rows);
-          if (itemRes.error) {
-            // Compatibilidad: si la BD aún no tiene product_unit, reintenta sin esa columna.
-            if (String(itemRes.error.message || '').indexOf('product_unit') !== -1) {
-              var legacyRows = rows.map(function(r) { var c = Object.assign({}, r); delete c.product_unit; return c; });
-              itemRes = await window.bv.from('order_items').insert(legacyRows);
-            }
-            if (itemRes.error) itemSaveError = itemRes.error;
+        savedOrder = { id: orderId };
+        var rows = items.map(function(it) { return Object.assign({order_id: orderId}, it); });
+        var itemRes = await window.bv.from('order_items').insert(rows);
+        if (itemRes.error) {
+          // Compatibilidad: si la BD aún no tiene product_unit, reintenta sin esa columna.
+          if (String(itemRes.error.message || '').indexOf('product_unit') !== -1) {
+            var legacyRows = rows.map(function(r) { var c = Object.assign({}, r); delete c.product_unit; return c; });
+            itemRes = await window.bv.from('order_items').insert(legacyRows);
           }
-          if (itemSaveError) {
-            console.warn('Pedido guardado, pero detalle en order_items falló:', itemSaveError);
-          }
+          if (itemRes.error) itemSaveError = itemRes.error;
         }
+        if (itemSaveError) console.warn('Pedido guardado, pero detalle en order_items falló:', itemSaveError);
       } catch (err) {
         saveError = err;
         console.warn('Pedido no registrado en admin:', err);
@@ -1587,7 +1605,11 @@
       if (saveError) msg += '\n\n_ATENCIÓN: no se pudo guardar automáticamente en admin. Error: ' + (saveError.message || saveError) + '._';
       else if (itemSaveError) msg += '\n\n_ATENCIÓN: pedido guardado en admin, pero el detalle quedó respaldado en nota. Error detalle: ' + (itemSaveError.message || itemSaveError) + '._';
       window.open('https://api.whatsapp.com/send?phone=' + WA + '&text=' + encodeURIComponent(msg), '_blank', 'noopener');
-      if (btn) { btn.disabled = false; btn.textContent = 'Guardar y enviar por WhatsApp'; }
+      cart = {}; saveCart();
+      var notesEl = document.getElementById('cart-notes'); if (notesEl) notesEl.value = '';
+      var deliveryDetailInput = document.getElementById('delivery-detail'); if (deliveryDetailInput) deliveryDetailInput.value = '';
+      renderProducts(); updateCartUI();
+      if (btn) { btn.disabled = true; btn.textContent = 'Guardar y enviar por WhatsApp'; }
     }
 
 
@@ -1598,6 +1620,9 @@
       document.getElementById('search-clear').classList.remove('visible');
       renderProducts();
     }
+
+    var homeSearchInput = document.getElementById('home-search-input');
+    if (homeSearchInput) homeSearchInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') submitHomeSearch(); });
 
     document.getElementById('search-input').addEventListener('input', function(e) {
       searchTerm = e.target.value;
@@ -1663,6 +1688,23 @@
       renderProducts();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    function submitHomeSearch() {
+      var hs = document.getElementById('home-search-input');
+      var val = hs ? hs.value.trim() : '';
+      document.getElementById('home-section').style.display = 'none';
+      document.getElementById('catalog-section').style.display = '';
+      activeCat = 'all';
+      document.querySelectorAll('.cat-tab').forEach(function(t) {
+        t.classList.toggle('active', t.dataset.cat === 'all');
+      });
+      searchTerm = val;
+      var si = document.getElementById('search-input');
+      if (si) si.value = val;
+      document.getElementById('search-clear').classList.toggle('visible', val.length > 0);
+      renderProducts();
+      if (si) si.focus();
+    }
+
     function openSearch() {
       document.getElementById('home-section').style.display = 'none';
       document.getElementById('catalog-section').style.display = '';
