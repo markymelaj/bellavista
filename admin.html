@@ -404,8 +404,14 @@
     return String(unit || 'unidad').toLowerCase() === 'kg' ? '/ kg' : 'c/u';
   }
 
+  const STATUS_LABELS = {
+    nuevo:'Nuevo', confirmado:'Confirmado', en_preparacion:'En preparación', preparado:'Preparado',
+    listo:'Retiro listo', despachado:'Despachado', retirado:'Retirado', enviado:'Enviado', entregado:'Entregado', cancelado:'Cancelado'
+  };
+  function statusText(status) { return STATUS_LABELS[status] || status || '—'; }
+  function isClosedStatus(status) { return ['despachado','retirado','entregado'].includes(status); }
   function pillFor(status) {
-    return { nuevo:'amber', confirmado:'green', en_preparacion:'green', preparado:'green', enviado:'green', listo:'green', entregado:'gray', cancelado:'red' }[status] || 'gray';
+    return { nuevo:'amber', confirmado:'green', en_preparacion:'green', preparado:'green', listo:'green', despachado:'gray', retirado:'gray', enviado:'gray', entregado:'gray', cancelado:'red' }[status] || 'gray';
   }
 
   // =========================================================
@@ -444,16 +450,44 @@
 
     const todayStart = new Date(); todayStart.setHours(0,0,0,0);
 
-    const [prods, cats, today, total, recent] = await Promise.all([
+    const [prods, cats, today, total, recent, analytics] = await Promise.all([
       window.bv.from('products').select('id', { count:'exact', head:true }).eq('active', true),
       window.bv.from('categories').select('id', { count:'exact', head:true }).eq('active', true),
-      window.bv.from('orders').select('subtotal').gte('created_at', todayStart.toISOString()),
+      window.bv.from('orders').select('subtotal,status').gte('created_at', todayStart.toISOString()),
       window.bv.from('orders').select('id', { count:'exact', head:true }),
-      window.bv.from('orders').select('id, order_number, customer_name, subtotal, status, created_at, delivery_type, delivery_detail, notes, order_items(*)').order('created_at', { ascending:false }).limit(8)
+      window.bv.from('orders').select('id, order_number, customer_name, subtotal, status, created_at, delivery_type, delivery_detail, notes, order_items(*)').order('created_at', { ascending:false }).limit(8),
+      window.bv.from('orders').select('id, customer_name, subtotal, status, created_at, order_items(product_name, product_unit, quantity, subtotal)').order('created_at', { ascending:false }).limit(500)
     ]);
 
-    const todayTotal = (today.data || []).reduce((s,o)=>s + (o.subtotal||0), 0);
-    const todayCount = (today.data || []).length;
+    const todayRows = (today.data || []).filter(o => o.status !== 'cancelado');
+    const todayTotal = todayRows.reduce((s,o)=>s + (o.subtotal||0), 0);
+    const todayCount = todayRows.length;
+    const analyticsOrders = (analytics.data || []).filter(o => o.status !== 'cancelado');
+    const closedOrders = analyticsOrders.filter(o => isClosedStatus(o.status));
+    const retiredCount = analyticsOrders.filter(o => o.status === 'retirado').length;
+    const dispatchedCount = analyticsOrders.filter(o => o.status === 'despachado').length;
+
+    const productMap = {};
+    analyticsOrders.forEach(o => (o.order_items || []).forEach(it => {
+      const key = (it.product_name || 'Producto') + '|' + (it.product_unit || 'unidad');
+      if (!productMap[key]) productMap[key] = { name: it.product_name || 'Producto', unit: it.product_unit || 'unidad', qty: 0, total: 0, orders: 0 };
+      productMap[key].qty += Number(it.quantity) || 0;
+      productMap[key].total += Number(it.subtotal) || 0;
+      productMap[key].orders += 1;
+    }));
+    const topProducts = Object.values(productMap).sort((a,b) => b.total - a.total).slice(0, 8);
+
+    const customerMap = {};
+    analyticsOrders.forEach(o => {
+      const name = (o.customer_name || '').trim();
+      if (!name) return;
+      const key = norm(name);
+      if (!customerMap[key]) customerMap[key] = { name, orders: 0, total: 0, last: o.created_at };
+      customerMap[key].orders += 1;
+      customerMap[key].total += Number(o.subtotal) || 0;
+      if (new Date(o.created_at) > new Date(customerMap[key].last)) customerMap[key].last = o.created_at;
+    });
+    const repeatCustomers = Object.values(customerMap).filter(c => c.orders > 1).sort((a,b) => b.orders - a.orders || b.total - a.total).slice(0, 8);
 
     main.innerHTML = `
       <h1>Dashboard</h1>
@@ -464,6 +498,8 @@
         <div class="stat"><div class="stat-label">Pedidos hoy</div><div class="stat-value">${todayCount}</div></div>
         <div class="stat"><div class="stat-label">Ingreso hoy</div><div class="stat-value">${fmt(todayTotal)}</div></div>
         <div class="stat"><div class="stat-label">Pedidos totales</div><div class="stat-value">${total.count || 0}</div></div>
+        <div class="stat"><div class="stat-label">Retirados</div><div class="stat-value">${retiredCount}</div></div>
+        <div class="stat"><div class="stat-label">Despachados</div><div class="stat-value">${dispatchedCount}</div></div>
       </div>
       <h2 style="font-family:var(--f-d);font-size:1.3rem;font-weight:500;margin-bottom:0.6rem">Últimos pedidos</h2>
       ${(recent.data && recent.data.length) ? `
@@ -476,7 +512,7 @@
                 <td>${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</td>
                 <td>${esc(o.customer_name) || '—'}</td>
                 <td>${fmt(o.subtotal)}</td>
-                <td><span class="pill ${pillFor(o.status)}">${o.status}</span></td>
+                <td><span class="pill ${pillFor(o.status)}">${statusText(o.status)}</span></td>
                 <td><button class="btn ghost" data-dash-toggle="${o.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">Ver pedido</button></td>
               </tr>
               <tr id="dash-det-${o.id}" style="display:none">
@@ -491,6 +527,24 @@
               </tr>`).join('')}
           </tbody>
         </table></div>` : `<p class="empty">Aún no hay pedidos</p>`}
+
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1rem;margin-top:1.5rem">
+        <div>
+          <h2 style="font-family:var(--f-d);font-size:1.3rem;font-weight:500;margin-bottom:0.6rem">Productos más vendidos</h2>
+          ${topProducts.length ? `<div class="table-wrap"><table>
+            <thead><tr><th>Producto</th><th>Cantidad</th><th>Pedidos</th><th>Total</th></tr></thead>
+            <tbody>${topProducts.map(p => `<tr><td>${esc(p.name)}</td><td>${fmtItemQty(p.qty, p.unit)}</td><td>${p.orders}</td><td>${fmt(p.total)}</td></tr>`).join('')}</tbody>
+          </table></div>` : `<p class="empty">Aún no hay ventas con productos asociados</p>`}
+        </div>
+        <div>
+          <h2 style="font-family:var(--f-d);font-size:1.3rem;font-weight:500;margin-bottom:0.6rem">Clientes que repiten</h2>
+          ${repeatCustomers.length ? `<div class="table-wrap"><table>
+            <thead><tr><th>Cliente</th><th>Pedidos</th><th>Total</th><th>Último</th></tr></thead>
+            <tbody>${repeatCustomers.map(c => `<tr><td>${esc(c.name)}</td><td>${c.orders}</td><td>${fmt(c.total)}</td><td>${new Date(c.last).toLocaleDateString('es-CL')}</td></tr>`).join('')}</tbody>
+          </table></div>` : `<p class="empty">Todavía no hay clientes con más de un pedido</p>`}
+        </div>
+      </div>
 
       ${(prods.count === 0) ? `
         <div class="setup-warning" style="margin-top:1.5rem">
@@ -1044,9 +1098,9 @@
     { v:'confirmado', l:'Confirmado' },
     { v:'en_preparacion', l:'En preparación' },
     { v:'preparado', l:'Preparado' },
-    { v:'enviado', l:'Enviado' },
     { v:'listo', l:'Retiro listo' },
-    { v:'entregado', l:'Entregado' },
+    { v:'despachado', l:'Despachado' },
+    { v:'retirado', l:'Retirado' },
     { v:'cancelado', l:'Cancelado' }
   ];
 
@@ -1126,9 +1180,11 @@
         sel.addEventListener('change', async e => {
           const id = e.target.dataset.setStatus;
           const status = e.target.value;
-          await window.bv.from('orders').update({ status }).eq('id', id);
+          const payload = { status };
+          if (isClosedStatus(status)) payload.completed_at = new Date().toISOString();
+          await window.bv.from('orders').update(payload).eq('id', id);
           const ord = orders.find(x => x.id === id);
-          if (ord) ord.status = status;
+          if (ord) { ord.status = status; if (payload.completed_at) ord.completed_at = payload.completed_at; }
           // refresh pill class
           e.target.className = 'sel pill ' + pillFor(status);
         });

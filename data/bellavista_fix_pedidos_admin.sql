@@ -13,6 +13,7 @@ alter table public.orders add column if not exists payment_method text default '
 alter table public.orders add column if not exists notes text;
 alter table public.orders add column if not exists subtotal int default 0;
 alter table public.orders add column if not exists status text default 'nuevo';
+alter table public.orders add column if not exists completed_at timestamptz;
 alter table public.order_items add column if not exists product_unit text default 'unidad';
 alter table public.order_items alter column quantity type numeric(10,3) using quantity::numeric;
 
