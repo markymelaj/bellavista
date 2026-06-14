@@ -1513,16 +1513,32 @@
         if (!confirm('No agregaste dirección ni ubicación. ¿Enviar igual para coordinar por WhatsApp?')) return;
       }
 
+      function buildAdminSnapshot() {
+        var out = [];
+        out.push('PRODUCTOS DEL PEDIDO:');
+        for (var s = 0; s < items.length; s++) {
+          var x = items[s];
+          out.push('- ' + formatOrderQty(x.quantity, x.product_unit) + ' ' + x.product_name + ' = ' + fmt(x.subtotal));
+        }
+        out.push('TOTAL ESTIMADO: ' + fmt(calcTotal()));
+        if (deliveryType === 'envio_confirmar') out.push('ENTREGA: Envío a confirmar' + (deliveryDetail ? ' / ' + deliveryDetail : ''));
+        else out.push('ENTREGA: Retiro en minimarket');
+        if (notes) out.push('NOTA CLIENTE: ' + notes);
+        return out.join('\n');
+      }
+
       if (btn) { btn.disabled = true; btn.textContent = 'Guardando pedido...'; }
       var savedOrder = null;
       var saveError = null;
+      var itemSaveError = null;
+      var adminNotes = buildAdminSnapshot();
       try {
         var res = await window.bv.from('orders').insert({
           customer_name: customerName,
           delivery_type: deliveryType,
           delivery_detail: deliveryDetail || null,
           payment_method: 'efectivo',
-          notes: notes || null,
+          notes: adminNotes,
           subtotal: calcTotal(),
           status: 'nuevo'
         }).select().single();
@@ -1531,7 +1547,17 @@
         if (savedOrder && savedOrder.id) {
           var rows = items.map(function(it) { return Object.assign({order_id: savedOrder.id}, it); });
           var itemRes = await window.bv.from('order_items').insert(rows);
-          if (itemRes.error) throw itemRes.error;
+          if (itemRes.error) {
+            // Compatibilidad: si la BD aún no tiene product_unit, reintenta sin esa columna.
+            if (String(itemRes.error.message || '').indexOf('product_unit') !== -1) {
+              var legacyRows = rows.map(function(r) { var c = Object.assign({}, r); delete c.product_unit; return c; });
+              itemRes = await window.bv.from('order_items').insert(legacyRows);
+            }
+            if (itemRes.error) itemSaveError = itemRes.error;
+          }
+          if (itemSaveError) {
+            console.warn('Pedido guardado, pero detalle en order_items falló:', itemSaveError);
+          }
         }
       } catch (err) {
         saveError = err;
@@ -1558,7 +1584,8 @@
       if (notes) msg += '\n\nNota / otros productos: ' + notes;
       msg += '\n\n_El catálogo se está completando. Si pediste algo no visible, el local confirma disponibilidad y precio por este WhatsApp._';
       msg += '\n_Pedido generado: ' + new Date().toLocaleString('es-CL') + '_';
-      if (saveError) msg += '\n\n_ATENCIÓN: no se pudo guardar automáticamente en admin. Registrar manualmente este pedido._';
+      if (saveError) msg += '\n\n_ATENCIÓN: no se pudo guardar automáticamente en admin. Error: ' + (saveError.message || saveError) + '._';
+      else if (itemSaveError) msg += '\n\n_ATENCIÓN: pedido guardado en admin, pero el detalle quedó respaldado en nota. Error detalle: ' + (itemSaveError.message || itemSaveError) + '._';
       window.open('https://api.whatsapp.com/send?phone=' + WA + '&text=' + encodeURIComponent(msg), '_blank', 'noopener');
       if (btn) { btn.disabled = false; btn.textContent = 'Guardar y enviar por WhatsApp'; }
     }
