@@ -1109,7 +1109,7 @@
   <!-- DELIVERY STRIP -->
   <div class="delivery-strip">
     <div class="delivery-strip-inner">
-      <span class="ds-item">🛒 Armá tu pedido y envíalo por WhatsApp</span>
+      <span class="ds-item">🛒 Armá tu pedido y el local lo gestiona desde admin</span>
       <span class="ds-sep">·</span>
       <span class="ds-item">🏕️ Te lo acercamos al sitio del camping</span>
       <span class="ds-sep">·</span>
@@ -1207,6 +1207,9 @@
       <div class="cart-customer-box">
         <label class="cart-input-label" for="customer-name">Nombre del pedido *</label>
         <input class="cart-text-input" id="customer-name" placeholder="Ej: Camila / Caba&ntilde;a 4 / Sitio 12" autocomplete="name">
+        <label class="cart-input-label" for="customer-phone" style="margin-top:0.75rem">WhatsApp de contacto *</label>
+        <input class="cart-text-input" id="customer-phone" placeholder="Ej: 9 1234 5678" inputmode="tel" autocomplete="tel">
+        <div class="cart-inline-hint" style="margin-top:0.45rem">Se usa para confirmar faltantes, despacho o retiro. No reemplaza el pedido del admin.</div>
       </div>
 
       <div class="cart-delivery-box">
@@ -1214,11 +1217,11 @@
         <div class="cart-choice-row">
           <label class="cart-choice">
             <input type="radio" name="delivery-type" value="retiro" checked onchange="toggleDeliveryFields()">
-            <span><strong>Retiro en minimarket</strong><span>El local confirma el pedido por WhatsApp.</span></span>
+            <span><strong>Retiro en minimarket</strong><span>El local confirma disponibilidad si hace falta.</span></span>
           </label>
           <label class="cart-choice">
             <input type="radio" name="delivery-type" value="envio_confirmar" onchange="toggleDeliveryFields()">
-            <span><strong>Env&iacute;o a confirmar</strong><span>La disponibilidad de reparto y el costo se confirman por WhatsApp.</span></span>
+            <span><strong>Env&iacute;o a confirmar</strong><span>El reparto y costo se confirman antes de despachar.</span></span>
           </label>
         </div>
         <div id="delivery-extra" style="display:none">
@@ -1229,10 +1232,10 @@
       </div>
 
       <p class="cart-notes-label">Nota / productos no encontrados</p>
-      <textarea class="cart-notes" id="cart-notes" placeholder="Ej: también necesito fósforos, hielo o algo que no encontré en el catálogo. El local confirma por WhatsApp..."></textarea>
+      <textarea class="cart-notes" id="cart-notes" placeholder="Ej: también necesito fósforos, hielo o algo que no encontré en el catálogo. El local confirma disponibilidad..."></textarea>
       <button class="btn-wa-order" id="wa-btn" onclick="sendWhatsApp()" disabled>
         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.117.549 4.107 1.508 5.836L.057 23.454a.75.75 0 00.918.918l5.618-1.451A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.732 9.732 0 01-5.034-1.4l-.362-.215-3.733.963.98-3.624-.235-.375A9.714 9.714 0 012.25 12C2.25 6.617 6.617 2.25 12 2.25S21.75 6.617 21.75 12 17.383 21.75 12 21.75z"/></svg>
-        Guardar y enviar por WhatsApp
+        Registrar pedido
       </button>
       <div class="cart-pay-row">
         <span class="cart-pay-chip">&#128181; Efectivo</span>
@@ -1246,13 +1249,13 @@
   <div class="order-complete-overlay" id="order-complete">
     <div class="order-complete-card">
       <div class="order-complete-icon">✅</div>
-      <div class="order-complete-title">Pedido enviado</div>
+      <div class="order-complete-title">Pedido registrado</div>
       <p class="order-complete-text" id="order-complete-text">
-        Se abrió WhatsApp para enviar el pedido. Esta página quedó lista para tomar otro pedido.
+        El pedido quedó registrado para que el minimarket lo prepare. También puedes avisar por WhatsApp como respaldo.
       </p>
       <div class="order-complete-actions">
         <button class="order-complete-btn primary" onclick="closeOrderCompleteAndShop()">Volver al catálogo</button>
-        <button class="order-complete-btn secondary" onclick="reopenLastWhatsApp()">Abrir WhatsApp nuevamente</button>
+        <button class="order-complete-btn secondary" onclick="reopenLastWhatsApp()">Avisar por WhatsApp</button>
       </div>
     </div>
   </div>
@@ -1320,6 +1323,20 @@
         return qty.toLocaleString('es-CL', { maximumFractionDigits: 3 }) + ' kg';
       }
       return Math.round(qty) + 'x';
+    }
+
+    function cleanPhone(raw) {
+      var digits = String(raw || '').replace(/\D/g, '');
+      if (!digits) return '';
+      if (digits.length === 8) digits = '9' + digits;
+      if (digits.length === 9) digits = '56' + digits;
+      return digits;
+    }
+    function displayPhone(raw) {
+      var d = cleanPhone(raw);
+      if (!d) return '';
+      if (d.indexOf('56') === 0) return '+' + d;
+      return d;
     }
 
     function getFilteredProducts() {
@@ -1565,10 +1582,14 @@
       lastOrderSavedOk = !!savedOk;
       var el = document.getElementById('order-complete');
       var text = document.getElementById('order-complete-text');
+      var title = el ? el.querySelector('.order-complete-title') : null;
+      var secondary = el ? el.querySelector('.order-complete-btn.secondary') : null;
+      if (title) title.textContent = savedOk ? 'Pedido registrado' : 'Pedido enviado por WhatsApp';
+      if (secondary) secondary.textContent = savedOk ? 'Avisar por WhatsApp' : 'Abrir WhatsApp nuevamente';
       if (text) {
         text.innerHTML = savedOk
-          ? 'Se abrió WhatsApp para enviar el pedido. También quedó registrado en el admin para prepararlo y cambiar estado.'
-          : 'Se abrió WhatsApp, pero el pedido no quedó registrado en admin. Revisa permisos de Supabase. Error: ' + escapeHtml(errorText || 'desconocido');
+          ? 'El pedido quedó guardado en el admin. El minimarket puede cambiarlo a preparado, retirado, despachado o cancelado. Puedes avisar por WhatsApp como respaldo.'
+          : 'No se pudo guardar en el admin, por eso se abrió WhatsApp como respaldo. Error: ' + escapeHtml(errorText || 'desconocido');
       }
       if (el) el.classList.add('open');
     }
@@ -1588,6 +1609,9 @@
       var notes = document.getElementById('cart-notes').value.trim();
       var customerNameEl = document.getElementById('customer-name');
       var customerName = customerNameEl ? customerNameEl.value.trim() : '';
+      var customerPhoneEl = document.getElementById('customer-phone');
+      var customerPhoneRaw = customerPhoneEl ? customerPhoneEl.value.trim() : '';
+      var customerPhone = cleanPhone(customerPhoneRaw);
       var deliveryType = getSelectedDeliveryType();
       var deliveryDetailEl = document.getElementById('delivery-detail');
       var deliveryDetail = deliveryType === 'envio_confirmar' && deliveryDetailEl ? deliveryDetailEl.value.trim() : '';
@@ -1606,6 +1630,7 @@
       }
       if (items.length === 0) return;
       if (!customerName) { alert('Agrega el nombre de la persona que hace el pedido.'); if (customerNameEl) customerNameEl.focus(); return; }
+      if (!customerPhone || customerPhone.length < 9) { alert('Agrega un WhatsApp válido para poder confirmar el pedido.'); if (customerPhoneEl) customerPhoneEl.focus(); return; }
       if (deliveryType === 'envio_confirmar' && !deliveryDetail) {
         if (!confirm('No agregaste dirección ni ubicación. ¿Enviar igual para coordinar por WhatsApp?')) return;
       }
@@ -1617,6 +1642,7 @@
           var x = items[s];
           out.push('- ' + formatOrderQty(x.quantity, x.product_unit) + ' ' + x.product_name + ' = ' + fmt(x.subtotal));
         }
+        out.push('CLIENTE: ' + customerName + ' / WhatsApp: ' + displayPhone(customerPhone));
         out.push('TOTAL ESTIMADO: ' + fmt(calcTotal()));
         if (deliveryType === 'envio_confirmar') out.push('ENTREGA: Envío a confirmar' + (deliveryDetail ? ' / ' + deliveryDetail : ''));
         else out.push('ENTREGA: Retiro en minimarket');
@@ -1624,7 +1650,7 @@
         return out.join('\n');
       }
 
-      if (btn) { btn.disabled = true; btn.textContent = 'Guardando pedido...'; }
+      if (btn) { btn.disabled = true; btn.textContent = 'Registrando pedido...'; }
       var savedOrder = null;
       var saveError = null;
       var itemSaveError = null;
@@ -1634,6 +1660,7 @@
         var res = await window.bv.from('orders').insert({
           id: orderId,
           customer_name: customerName,
+          customer_phone: customerPhone,
           delivery_type: deliveryType,
           delivery_detail: deliveryDetail || null,
           payment_method: 'efectivo',
@@ -1662,6 +1689,7 @@
       var msg = '*PEDIDO MINIMARKET BELLAVISTA*\n';
       if (savedOrder && savedOrder.order_number) msg += '*Pedido #' + savedOrder.order_number + '*\n';
       msg += 'Nombre: ' + customerName + '\n';
+      msg += 'WhatsApp contacto: ' + displayPhone(customerPhone) + '\n';
       msg += '\n';
       for (var i = 0; i < items.length; i++) {
         var it = items[i];
@@ -1682,17 +1710,18 @@
       if (saveError) msg += '\n\n_ATENCIÓN: no se pudo guardar automáticamente en admin. Error: ' + (saveError.message || saveError) + '._';
       else if (itemSaveError) msg += '\n\n_ATENCIÓN: pedido guardado en admin, pero el detalle quedó respaldado en nota. Error detalle: ' + (itemSaveError.message || itemSaveError) + '._';
       lastWhatsAppUrl = 'https://api.whatsapp.com/send?phone=' + WA + '&text=' + encodeURIComponent(msg);
-      window.open(lastWhatsAppUrl, '_blank', 'noopener');
+      if (saveError) window.open(lastWhatsAppUrl, '_blank', 'noopener');
       cart = {}; saveCart();
       var notesEl = document.getElementById('cart-notes'); if (notesEl) notesEl.value = '';
       var deliveryDetailInput = document.getElementById('delivery-detail'); if (deliveryDetailInput) deliveryDetailInput.value = '';
       var customerNameInput = document.getElementById('customer-name'); if (customerNameInput) customerNameInput.value = '';
+      var customerPhoneInput = document.getElementById('customer-phone'); if (customerPhoneInput) customerPhoneInput.value = '';
       var panel = document.getElementById('cart-panel'); if (panel) panel.classList.remove('open');
       var overlay = document.getElementById('cart-overlay'); if (overlay) overlay.classList.remove('open');
       document.body.classList.remove('cart-open');
       renderProducts(); updateCartUI();
       showOrderComplete(!saveError, saveError ? (saveError.message || saveError) : '');
-      if (btn) { btn.disabled = true; btn.textContent = 'Guardar y enviar por WhatsApp'; }
+      if (btn) { btn.disabled = true; btn.textContent = 'Registrar pedido'; }
     }
 
 

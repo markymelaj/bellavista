@@ -391,6 +391,19 @@
   const norm = s => (s || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+  function cleanPhone(raw) {
+    let digits = String(raw || '').replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.length === 8) digits = '9' + digits;
+    if (digits.length === 9) digits = '56' + digits;
+    return digits;
+  }
+  function phoneLink(raw) {
+    const d = cleanPhone(raw);
+    if (!d) return '—';
+    return `<a href="https://wa.me/${d}" target="_blank" rel="noopener" style="color:var(--moss);text-decoration:underline">+${d}</a>`;
+  }
+
   function fmtItemQty(qty, unit) {
     qty = Number(qty) || 0;
     unit = String(unit || 'unidad').toLowerCase();
@@ -521,8 +534,8 @@
       window.bv.from('categories').select('id', { count:'exact', head:true }).eq('active', true),
       window.bv.from('orders').select('subtotal,status').gte('created_at', todayStart.toISOString()),
       window.bv.from('orders').select('id', { count:'exact', head:true }),
-      window.bv.from('orders').select('id, order_number, customer_name, subtotal, status, created_at, delivery_type, delivery_detail, payment_method, notes, order_items(*)').order('created_at', { ascending:false }).limit(8),
-      window.bv.from('orders').select('id, customer_name, subtotal, status, created_at, delivery_type, order_items(product_name, product_unit, quantity, subtotal)').order('created_at', { ascending:false }).limit(500),
+      window.bv.from('orders').select('id, order_number, customer_name, customer_phone, subtotal, status, created_at, delivery_type, delivery_detail, payment_method, notes, order_items(*)').order('created_at', { ascending:false }).limit(8),
+      window.bv.from('orders').select('id, customer_name, customer_phone, subtotal, status, created_at, delivery_type, order_items(product_name, product_unit, quantity, subtotal)').order('created_at', { ascending:false }).limit(500),
       window.bv.from('orders').select('id', { count:'exact', head:true }).eq('status','cancelado')
     ]);
 
@@ -552,8 +565,9 @@
     validOrders.forEach(o => {
       const name = (o.customer_name || '').trim();
       if (!name) return;
-      const key = norm(name);
-      if (!customerMap[key]) customerMap[key] = { name, orders: 0, total: 0, last: o.created_at };
+      const phone = cleanPhone(o.customer_phone);
+      const key = phone || norm(name);
+      if (!customerMap[key]) customerMap[key] = { name, phone, orders: 0, total: 0, last: o.created_at };
       customerMap[key].orders += 1;
       customerMap[key].total += Number(o.subtotal) || 0;
       if (new Date(o.created_at) > new Date(customerMap[key].last)) customerMap[key].last = o.created_at;
@@ -585,7 +599,7 @@
             ${recentOrders.map(o => `
               <tr>
                 <td><strong>#${o.order_number}</strong><br><span style="font-size:0.68rem;color:rgba(26,14,6,0.45)">${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</span></td>
-                <td>${esc(o.customer_name) || '—'}</td>
+                <td>${esc(o.customer_name) || '—'}<br><span style="font-size:0.68rem">${phoneLink(o.customer_phone)}</span></td>
                 <td>${fmt(isCancelledStatus(o.status) ? 0 : o.subtotal)}${isCancelledStatus(o.status) ? '<br><span style="font-size:0.65rem;color:#a04830">No suma venta</span>' : ''}</td>
                 <td>${statusSelectHTML(o.id, o.status, true)}</td>
                 <td style="font-size:0.78rem">${deliveryLabel(o)}</td>
@@ -614,8 +628,8 @@
         <div>
           <h2 style="font-family:var(--f-d);font-size:1.2rem;font-weight:500;margin-bottom:0.55rem">Clientes que repiten</h2>
           ${repeatCustomers.length ? `<div class="table-wrap"><table>
-            <thead><tr><th>Cliente</th><th>Pedidos</th><th>Total</th><th>Último</th></tr></thead>
-            <tbody>${repeatCustomers.map(c => `<tr><td>${esc(c.name)}</td><td>${c.orders}</td><td>${fmt(c.total)}</td><td>${new Date(c.last).toLocaleDateString('es-CL')}</td></tr>`).join('')}</tbody>
+            <thead><tr><th>Cliente</th><th>WhatsApp</th><th>Pedidos</th><th>Total</th><th>Último</th></tr></thead>
+            <tbody>${repeatCustomers.map(c => `<tr><td>${esc(c.name)}</td><td>${phoneLink(c.phone)}</td><td>${c.orders}</td><td>${fmt(c.total)}</td><td>${new Date(c.last).toLocaleDateString('es-CL')}</td></tr>`).join('')}</tbody>
           </table></div>` : `<p class="empty">Todavía no hay clientes con más de un pedido</p>`}
         </div>
       </div>
@@ -625,7 +639,7 @@
           <h2 style="font-family:var(--f-d);font-size:1.2rem;font-weight:500;margin-bottom:0.55rem">Cancelados recientes para recuperar</h2>
           <div class="table-wrap"><table>
             <thead><tr><th>N°</th><th>Cliente</th><th>Total original</th><th>Fecha</th><th></th></tr></thead>
-            <tbody>${cancelledRecent.map(o => `<tr><td>#${o.id ? (o.order_number || '—') : '—'}</td><td>${esc(o.customer_name) || '—'}</td><td>${fmt(o.subtotal)}</td><td>${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</td><td><a class="btn ghost" href="#pedidos" style="padding:0.3rem 0.6rem;font-size:0.55rem">Revisar</a></td></tr>`).join('')}</tbody>
+            <tbody>${cancelledRecent.map(o => `<tr><td>#${o.id ? (o.order_number || '—') : '—'}</td><td>${esc(o.customer_name) || '—'}<br><span style="font-size:0.68rem">${phoneLink(o.customer_phone)}</span></td><td>${fmt(o.subtotal)}</td><td>${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</td><td><a class="btn ghost" href="#pedidos" style="padding:0.3rem 0.6rem;font-size:0.55rem">Revisar</a></td></tr>`).join('')}</tbody>
           </table></div>
         </div>` : ''}
 
@@ -1239,7 +1253,7 @@
       const items = orders.filter(o => {
         if (filter && o.status !== filter) return false;
         if (!q) return true;
-        const hay = [o.order_number, o.customer_name, o.delivery_detail, o.notes, o.status, ...(o.order_items || []).map(it => it.product_name)].join(' ');
+        const hay = [o.order_number, o.customer_name, o.customer_phone, o.delivery_detail, o.notes, o.status, ...(o.order_items || []).map(it => it.product_name)].join(' ');
         return norm(hay).includes(q);
       });
       const validTotal = items.filter(o => isRevenueStatus(o.status)).reduce((s,o)=>s + (Number(o.subtotal)||0),0);
@@ -1254,7 +1268,7 @@
         <tr data-id="${o.id}">
           <td><strong>#${o.order_number}</strong></td>
           <td>${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</td>
-          <td>${esc(o.customer_name) || '—'}</td>
+          <td>${esc(o.customer_name) || '—'}<br><span style="font-size:0.68rem">${phoneLink(o.customer_phone)}</span></td>
           <td style="font-size:0.78rem">${deliveryLabel(o)}</td>
           <td>${fmt(isCancelledStatus(o.status) ? 0 : o.subtotal)}${isCancelledStatus(o.status) ? '<br><span style="font-size:0.65rem;color:#a04830">Cancelado: no suma</span>' : ''}</td>
           <td>${statusSelectHTML(o.id, o.status)}</td>
@@ -1265,6 +1279,7 @@
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0.7rem;margin-bottom:0.7rem;font-size:0.78rem">
               <div><strong>Pago:</strong> ${esc({efectivo:'Efectivo',tarjeta:'Tarjeta',caja_vecina:'Caja Vecina'}[o.payment_method] || o.payment_method || '—')}</div>
               <div><strong>Entrega:</strong> ${deliveryLabel(o)}</div>
+              <div><strong>WhatsApp:</strong> ${phoneLink(o.customer_phone)}</div>
               <div><strong>Total original:</strong> ${fmt(o.subtotal)}</div>
             </div>
             <strong>Productos:</strong>

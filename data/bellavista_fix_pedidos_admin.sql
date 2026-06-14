@@ -41,6 +41,12 @@ grant select, update, delete on public.orders to authenticated;
 grant select, update, delete on public.order_items to authenticated;
 grant usage, select on all sequences in schema public to anon, authenticated;
 
+-- Índices útiles para dashboard y búsqueda operativa
+create index if not exists idx_orders_customer_phone on public.orders (customer_phone);
+create index if not exists idx_orders_status_created_at on public.orders (status, created_at desc);
+create index if not exists idx_order_items_order_id on public.order_items (order_id);
+
+
 commit;
 
 -- Verificación
