@@ -414,6 +414,72 @@
     return { nuevo:'amber', confirmado:'green', en_preparacion:'green', preparado:'green', listo:'green', despachado:'gray', retirado:'gray', enviado:'gray', entregado:'gray', cancelado:'red' }[status] || 'gray';
   }
 
+  function isCancelledStatus(status) { return status === 'cancelado'; }
+  function isRevenueStatus(status) { return status !== 'cancelado'; }
+  function isPendingStatus(status) { return !isClosedStatus(status) && !isCancelledStatus(status); }
+  function orderStatusPayload(status) {
+    const payload = { status };
+    if (isClosedStatus(status)) {
+      payload.completed_at = new Date().toISOString();
+      payload.canceled_at = null;
+    } else if (isCancelledStatus(status)) {
+      payload.completed_at = null;
+      payload.canceled_at = new Date().toISOString();
+    } else {
+      payload.completed_at = null;
+      payload.canceled_at = null;
+    }
+    return payload;
+  }
+  async function saveOrderStatus(id, status) {
+    const payload = orderStatusPayload(status);
+    let { error } = await window.bv.from('orders').update(payload).eq('id', id);
+    // Compatibilidad si el SQL nuevo aún no se ejecutó: se guarda el estado igual.
+    if (error && /canceled_at/i.test(error.message || '')) {
+      delete payload.canceled_at;
+      ({ error } = await window.bv.from('orders').update(payload).eq('id', id));
+    }
+    if (error && /completed_at/i.test(error.message || '')) {
+      delete payload.completed_at;
+      ({ error } = await window.bv.from('orders').update(payload).eq('id', id));
+    }
+    if (error) throw error;
+    return payload;
+  }
+  function updateOrderObject(order, status, payload) {
+    if (!order) return;
+    order.status = status;
+    if ('completed_at' in payload) order.completed_at = payload.completed_at;
+    if ('canceled_at' in payload) order.canceled_at = payload.canceled_at;
+  }
+  function statusSelectHTML(orderId, status, compact=false) {
+    return `<select class="sel pill ${pillFor(status)}" data-set-status="${orderId}" style="padding:${compact ? '0.2rem 0.45rem' : '0.25rem 0.55rem'};font-weight:700;letter-spacing:0.08em;min-width:${compact ? '128px' : '150px'}">
+      ${STATUSES.map(s => `<option value="${s.v}" ${status === s.v ? 'selected':''}>${s.l}</option>`).join('')}
+    </select>`;
+  }
+  function bindStatusControls(root, orders, afterSave) {
+    root.querySelectorAll('select[data-set-status]').forEach(sel => {
+      sel.addEventListener('change', async e => {
+        const id = e.target.dataset.setStatus;
+        const previous = (orders.find(x => x.id === id) || {}).status || 'nuevo';
+        const status = e.target.value;
+        e.target.disabled = true;
+        try {
+          const payload = await saveOrderStatus(id, status);
+          updateOrderObject(orders.find(x => x.id === id), status, payload);
+          e.target.className = 'sel pill ' + pillFor(status);
+          if (typeof afterSave === 'function') afterSave(id, status, payload);
+        } catch (err) {
+          e.target.value = previous;
+          e.target.className = 'sel pill ' + pillFor(previous);
+          alert('No se pudo cambiar el estado. Revisa que estés logueado en admin y que el SQL de pedidos esté ejecutado. Error: ' + (err.message || err));
+        } finally {
+          e.target.disabled = false;
+        }
+      });
+    });
+  }
+
   // =========================================================
   // ROUTER
   // =========================================================
@@ -450,35 +516,40 @@
 
     const todayStart = new Date(); todayStart.setHours(0,0,0,0);
 
-    const [prods, cats, today, total, recent, analytics] = await Promise.all([
+    const [prods, cats, today, total, recent, analytics, cancelledExact] = await Promise.all([
       window.bv.from('products').select('id', { count:'exact', head:true }).eq('active', true),
       window.bv.from('categories').select('id', { count:'exact', head:true }).eq('active', true),
       window.bv.from('orders').select('subtotal,status').gte('created_at', todayStart.toISOString()),
       window.bv.from('orders').select('id', { count:'exact', head:true }),
-      window.bv.from('orders').select('id, order_number, customer_name, subtotal, status, created_at, delivery_type, delivery_detail, notes, order_items(*)').order('created_at', { ascending:false }).limit(8),
-      window.bv.from('orders').select('id, customer_name, subtotal, status, created_at, order_items(product_name, product_unit, quantity, subtotal)').order('created_at', { ascending:false }).limit(500)
+      window.bv.from('orders').select('id, order_number, customer_name, subtotal, status, created_at, delivery_type, delivery_detail, payment_method, notes, order_items(*)').order('created_at', { ascending:false }).limit(8),
+      window.bv.from('orders').select('id, customer_name, subtotal, status, created_at, delivery_type, order_items(product_name, product_unit, quantity, subtotal)').order('created_at', { ascending:false }).limit(500),
+      window.bv.from('orders').select('id', { count:'exact', head:true }).eq('status','cancelado')
     ]);
 
-    const todayRows = (today.data || []).filter(o => o.status !== 'cancelado');
-    const todayTotal = todayRows.reduce((s,o)=>s + (o.subtotal||0), 0);
-    const todayCount = todayRows.length;
-    const analyticsOrders = (analytics.data || []).filter(o => o.status !== 'cancelado');
-    const closedOrders = analyticsOrders.filter(o => isClosedStatus(o.status));
-    const retiredCount = analyticsOrders.filter(o => o.status === 'retirado').length;
-    const dispatchedCount = analyticsOrders.filter(o => o.status === 'despachado').length;
+    const todayAll = today.data || [];
+    const todayValid = todayAll.filter(o => isRevenueStatus(o.status));
+    const todayTotal = todayValid.reduce((s,o)=>s + (Number(o.subtotal)||0), 0);
+    const todayCount = todayAll.length;
+    const todayCancelled = todayAll.filter(o => isCancelledStatus(o.status)).length;
+    const allAnalytics = analytics.data || [];
+    const validOrders = allAnalytics.filter(o => isRevenueStatus(o.status));
+    const pendingCount = allAnalytics.filter(o => isPendingStatus(o.status)).length;
+    const retiredCount = allAnalytics.filter(o => o.status === 'retirado').length;
+    const dispatchedCount = allAnalytics.filter(o => o.status === 'despachado').length;
+    const canceledCount = cancelledExact.count || allAnalytics.filter(o => o.status === 'cancelado').length;
 
     const productMap = {};
-    analyticsOrders.forEach(o => (o.order_items || []).forEach(it => {
+    validOrders.forEach(o => (o.order_items || []).forEach(it => {
       const key = (it.product_name || 'Producto') + '|' + (it.product_unit || 'unidad');
-      if (!productMap[key]) productMap[key] = { name: it.product_name || 'Producto', unit: it.product_unit || 'unidad', qty: 0, total: 0, orders: 0 };
+      if (!productMap[key]) productMap[key] = { name: it.product_name || 'Producto', unit: it.product_unit || 'unidad', qty: 0, total: 0, orders: new Set() };
       productMap[key].qty += Number(it.quantity) || 0;
       productMap[key].total += Number(it.subtotal) || 0;
-      productMap[key].orders += 1;
+      productMap[key].orders.add(o.id);
     }));
-    const topProducts = Object.values(productMap).sort((a,b) => b.total - a.total).slice(0, 8);
+    const topProducts = Object.values(productMap).map(p => ({...p, ordersCount:p.orders.size})).sort((a,b) => b.total - a.total).slice(0, 5);
 
     const customerMap = {};
-    analyticsOrders.forEach(o => {
+    validOrders.forEach(o => {
       const name = (o.customer_name || '').trim();
       if (!name) return;
       const key = norm(name);
@@ -487,58 +558,61 @@
       customerMap[key].total += Number(o.subtotal) || 0;
       if (new Date(o.created_at) > new Date(customerMap[key].last)) customerMap[key].last = o.created_at;
     });
-    const repeatCustomers = Object.values(customerMap).filter(c => c.orders > 1).sort((a,b) => b.orders - a.orders || b.total - a.total).slice(0, 8);
+    const repeatCustomers = Object.values(customerMap).filter(c => c.orders > 1).sort((a,b) => b.orders - a.orders || b.total - a.total).slice(0, 5);
+    const cancelledRecent = allAnalytics.filter(o => isCancelledStatus(o.status)).slice(0, 4);
+    const recentOrders = recent.data || [];
 
     main.innerHTML = `
       <h1>Dashboard</h1>
-      <div class="sub">Vista general · Minimarket Bellavista</div>
-      <div class="stats">
-        <div class="stat"><div class="stat-label">Productos activos</div><div class="stat-value">${prods.count || 0}</div></div>
-        <div class="stat"><div class="stat-label">Categorías</div><div class="stat-value">${cats.count || 0}</div></div>
-        <div class="stat"><div class="stat-label">Pedidos hoy</div><div class="stat-value">${todayCount}</div></div>
-        <div class="stat"><div class="stat-label">Ingreso hoy</div><div class="stat-value">${fmt(todayTotal)}</div></div>
-        <div class="stat"><div class="stat-label">Pedidos totales</div><div class="stat-value">${total.count || 0}</div></div>
+      <div class="sub">Vista operativa · Minimarket Bellavista</div>
+      <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0.7rem">
+        <div class="stat"><div class="stat-label">Venta válida hoy</div><div class="stat-value">${fmt(todayTotal)}</div><div style="font-size:0.7rem;color:rgba(26,14,6,0.45);margin-top:0.2rem">No suma cancelados</div></div>
+        <div class="stat"><div class="stat-label">Pedidos hoy</div><div class="stat-value">${todayCount}</div><div style="font-size:0.7rem;color:rgba(26,14,6,0.45);margin-top:0.2rem">Cancelados hoy: ${todayCancelled}</div></div>
+        <div class="stat"><div class="stat-label">Pendientes</div><div class="stat-value">${pendingCount}</div><div style="font-size:0.7rem;color:rgba(26,14,6,0.45);margin-top:0.2rem">Nuevo / preparando</div></div>
         <div class="stat"><div class="stat-label">Retirados</div><div class="stat-value">${retiredCount}</div></div>
         <div class="stat"><div class="stat-label">Despachados</div><div class="stat-value">${dispatchedCount}</div></div>
+        <div class="stat"><div class="stat-label">Cancelados</div><div class="stat-value">${canceledCount}</div><div style="font-size:0.7rem;color:rgba(26,14,6,0.45);margin-top:0.2rem">Para recuperar</div></div>
       </div>
-      <h2 style="font-family:var(--f-d);font-size:1.3rem;font-weight:500;margin-bottom:0.6rem">Últimos pedidos</h2>
-      ${(recent.data && recent.data.length) ? `
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin:1.4rem 0 0.55rem">
+        <h2 style="font-family:var(--f-d);font-size:1.3rem;font-weight:500;margin:0">Últimos pedidos</h2>
+        <a href="#pedidos" class="btn ghost" style="padding:0.35rem 0.7rem;font-size:0.58rem">Ver todos</a>
+      </div>
+      ${(recentOrders.length) ? `
         <div class="table-wrap"><table>
-          <thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+          <thead><tr><th>N°</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Entrega</th><th></th></tr></thead>
           <tbody>
-            ${recent.data.map(o => `
+            ${recentOrders.map(o => `
               <tr>
-                <td><strong>#${o.order_number}</strong></td>
-                <td>${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</td>
+                <td><strong>#${o.order_number}</strong><br><span style="font-size:0.68rem;color:rgba(26,14,6,0.45)">${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</span></td>
                 <td>${esc(o.customer_name) || '—'}</td>
-                <td>${fmt(o.subtotal)}</td>
-                <td><span class="pill ${pillFor(o.status)}">${statusText(o.status)}</span></td>
-                <td><button class="btn ghost" data-dash-toggle="${o.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">Ver pedido</button></td>
+                <td>${fmt(isCancelledStatus(o.status) ? 0 : o.subtotal)}${isCancelledStatus(o.status) ? '<br><span style="font-size:0.65rem;color:#a04830">No suma venta</span>' : ''}</td>
+                <td>${statusSelectHTML(o.id, o.status, true)}</td>
+                <td style="font-size:0.78rem">${deliveryLabel(o)}</td>
+                <td><button class="btn ghost" data-dash-toggle="${o.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">Ver</button></td>
               </tr>
               <tr id="dash-det-${o.id}" style="display:none">
-                <td colspan="6" style="background:var(--warm);padding:1rem">
+                <td colspan="6" style="background:var(--warm);padding:0.85rem 1rem">
                   <strong>Productos:</strong>
-                  <ul style="margin:0.5rem 0 0 1.2rem">
-                    ${(o.order_items || []).map(it => `<li style="font-size:0.8rem;margin-bottom:0.2rem"><strong>${fmtItemQty(it.quantity, it.product_unit)}</strong> ${esc(it.product_name)} — ${fmt(it.unit_price)} ${fmtItemPriceUnit(it.product_unit)} = <strong>${fmt(it.subtotal)}</strong></li>`).join('') || '<li style="font-size:0.8rem">Sin productos asociados</li>'}
+                  <ul style="margin:0.45rem 0 0 1.2rem">
+                    ${(o.order_items || []).map(it => `<li style="font-size:0.8rem;margin-bottom:0.2rem"><strong>${fmtItemQty(it.quantity, it.product_unit)}</strong> ${esc(it.product_name)} — ${fmt(it.unit_price)} ${fmtItemPriceUnit(it.product_unit)} = <strong>${fmt(it.subtotal)}</strong></li>`).join('') || '<li style="font-size:0.8rem">Sin productos asociados. Revisar nota del pedido.</li>'}
                   </ul>
-                  <div style="font-size:0.78rem;margin-top:0.6rem"><strong>Entrega:</strong> ${deliveryLabel(o)}</div>
                   ${o.notes ? `<div style="font-size:0.78rem;margin-top:0.6rem"><strong>Nota:</strong> ${esc(o.notes)}</div>` : ''}
                 </td>
               </tr>`).join('')}
           </tbody>
         </table></div>` : `<p class="empty">Aún no hay pedidos</p>`}
 
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1rem;margin-top:1.5rem">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1rem;margin-top:1.25rem">
         <div>
-          <h2 style="font-family:var(--f-d);font-size:1.3rem;font-weight:500;margin-bottom:0.6rem">Productos más vendidos</h2>
+          <h2 style="font-family:var(--f-d);font-size:1.2rem;font-weight:500;margin-bottom:0.55rem">Productos más vendidos</h2>
           ${topProducts.length ? `<div class="table-wrap"><table>
-            <thead><tr><th>Producto</th><th>Cantidad</th><th>Pedidos</th><th>Total</th></tr></thead>
-            <tbody>${topProducts.map(p => `<tr><td>${esc(p.name)}</td><td>${fmtItemQty(p.qty, p.unit)}</td><td>${p.orders}</td><td>${fmt(p.total)}</td></tr>`).join('')}</tbody>
+            <thead><tr><th>Producto</th><th>Cant.</th><th>Pedidos</th><th>Total</th></tr></thead>
+            <tbody>${topProducts.map(p => `<tr><td>${esc(p.name)}</td><td>${fmtItemQty(p.qty, p.unit)}</td><td>${p.ordersCount}</td><td>${fmt(p.total)}</td></tr>`).join('')}</tbody>
           </table></div>` : `<p class="empty">Aún no hay ventas con productos asociados</p>`}
         </div>
         <div>
-          <h2 style="font-family:var(--f-d);font-size:1.3rem;font-weight:500;margin-bottom:0.6rem">Clientes que repiten</h2>
+          <h2 style="font-family:var(--f-d);font-size:1.2rem;font-weight:500;margin-bottom:0.55rem">Clientes que repiten</h2>
           ${repeatCustomers.length ? `<div class="table-wrap"><table>
             <thead><tr><th>Cliente</th><th>Pedidos</th><th>Total</th><th>Último</th></tr></thead>
             <tbody>${repeatCustomers.map(c => `<tr><td>${esc(c.name)}</td><td>${c.orders}</td><td>${fmt(c.total)}</td><td>${new Date(c.last).toLocaleDateString('es-CL')}</td></tr>`).join('')}</tbody>
@@ -546,20 +620,27 @@
         </div>
       </div>
 
-      ${(prods.count === 0) ? `
-        <div class="setup-warning" style="margin-top:1.5rem">
-          ⚠️ No hay productos cargados. Para subir los del Excel, usa la página
-          <a href="/migrate" style="color:var(--mahogany);text-decoration:underline">migrate</a>.
+      ${cancelledRecent.length ? `
+        <div style="margin-top:1.25rem">
+          <h2 style="font-family:var(--f-d);font-size:1.2rem;font-weight:500;margin-bottom:0.55rem">Cancelados recientes para recuperar</h2>
+          <div class="table-wrap"><table>
+            <thead><tr><th>N°</th><th>Cliente</th><th>Total original</th><th>Fecha</th><th></th></tr></thead>
+            <tbody>${cancelledRecent.map(o => `<tr><td>#${o.id ? (o.order_number || '—') : '—'}</td><td>${esc(o.customer_name) || '—'}</td><td>${fmt(o.subtotal)}</td><td>${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</td><td><a class="btn ghost" href="#pedidos" style="padding:0.3rem 0.6rem;font-size:0.55rem">Revisar</a></td></tr>`).join('')}</tbody>
+          </table></div>
         </div>` : ''}
+
+      <div style="margin-top:1.25rem;font-size:0.78rem;color:rgba(26,14,6,0.55);line-height:1.5">
+        Métrica: la venta válida excluye pedidos cancelados. Los cancelados quedan visibles para poder retomarlos después.
+      </div>
     `;
 
+    bindStatusControls(main, recentOrders, () => setTimeout(renderDashboard, 250));
     main.querySelectorAll('button[data-dash-toggle]').forEach(btn => {
       btn.addEventListener('click', () => {
         const det = document.getElementById('dash-det-' + btn.dataset.dashToggle);
         if (det) det.style.display = det.style.display === 'none' ? 'table-row' : 'none';
       });
     });
-
   }
 
   // =========================================================
@@ -1117,24 +1198,36 @@
     main.innerHTML = `
       <h1>Pedidos</h1>
       <div class="sub" id="ord-sub">Cargando...</div>
-      <div class="actions">
+      <div id="ord-msg" style="display:none;margin:0 0 0.8rem;padding:0.65rem 0.8rem;border:1px solid var(--hairline);background:var(--warm);font-size:0.78rem"></div>
+      <div class="actions" style="align-items:center;gap:0.6rem;flex-wrap:wrap">
         <select class="sel" id="ord-filter">
           <option value="">Todos los estados</option>
           ${STATUSES.map(s => `<option value="${s.v}">${s.l}</option>`).join('')}
         </select>
+        <input class="inp" id="ord-q" placeholder="Buscar cliente, nota o pedido..." style="max-width:320px" />
       </div>
       <div class="table-wrap"><table id="ord-table">
-        <thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Entrega</th><th>Pago</th><th>Total</th><th>Estado</th><th></th></tr></thead>
-        <tbody><tr><td colspan="8" class="empty">Cargando...</td></tr></tbody>
+        <thead><tr><th>N°</th><th>Fecha</th><th>Cliente</th><th>Entrega</th><th>Total</th><th>Estado</th><th></th></tr></thead>
+        <tbody><tr><td colspan="7" class="empty">Cargando...</td></tr></tbody>
       </table></div>
     `;
 
     let orders = [];
+    const showMsg = (msg, danger=false) => {
+      const el = $('#ord-msg');
+      if (!el) return;
+      el.style.display = 'block';
+      el.style.borderColor = danger ? 'rgba(160,72,48,0.4)' : 'rgba(46,92,56,0.25)';
+      el.style.color = danger ? '#a04830' : 'var(--moss)';
+      el.textContent = msg;
+      if (!danger) setTimeout(() => { if (el) el.style.display = 'none'; }, 2500);
+    };
+
     async function reload() {
       const { data, error } = await window.bv.from('orders')
         .select('*, order_items(*)')
         .order('created_at', { ascending:false })
-        .limit(200);
+        .limit(300);
       if (error) { $('#ord-sub').textContent = 'Error: ' + error.message; return; }
       orders = data || [];
       paint();
@@ -1142,11 +1235,19 @@
 
     function paint() {
       const filter = $('#ord-filter').value;
-      const items = filter ? orders.filter(o => o.status === filter) : orders;
-      $('#ord-sub').textContent = items.length + ' pedido' + (items.length === 1 ? '' : 's');
+      const q = norm($('#ord-q').value);
+      const items = orders.filter(o => {
+        if (filter && o.status !== filter) return false;
+        if (!q) return true;
+        const hay = [o.order_number, o.customer_name, o.delivery_detail, o.notes, o.status, ...(o.order_items || []).map(it => it.product_name)].join(' ');
+        return norm(hay).includes(q);
+      });
+      const validTotal = items.filter(o => isRevenueStatus(o.status)).reduce((s,o)=>s + (Number(o.subtotal)||0),0);
+      const cancelled = items.filter(o => isCancelledStatus(o.status)).length;
+      $('#ord-sub').textContent = `${items.length} pedido${items.length === 1 ? '' : 's'} · venta válida ${fmt(validTotal)} · cancelados ${cancelled}`;
       const tbody = $('#ord-table tbody');
       if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="empty">No hay pedidos</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="empty">No hay pedidos</td></tr>`;
         return;
       }
       tbody.innerHTML = items.map(o => `
@@ -1154,40 +1255,32 @@
           <td><strong>#${o.order_number}</strong></td>
           <td>${new Date(o.created_at).toLocaleString('es-CL', {dateStyle:'short', timeStyle:'short'})}</td>
           <td>${esc(o.customer_name) || '—'}</td>
-          <td>${deliveryLabel(o)}</td>
-          <td>${esc({efectivo:'Efectivo',tarjeta:'Tarjeta',caja_vecina:'Caja Vecina'}[o.payment_method] || o.payment_method)}</td>
-          <td>${fmt(o.subtotal)}</td>
-          <td>
-            <select class="sel pill ${pillFor(o.status)}" data-set-status="${o.id}" style="padding:0.2rem 0.5rem;font-weight:700;letter-spacing:0.1em">
-              ${STATUSES.map(s => `<option value="${s.v}" ${o.status === s.v ? 'selected':''}>${s.l}</option>`).join('')}
-            </select>
-          </td>
+          <td style="font-size:0.78rem">${deliveryLabel(o)}</td>
+          <td>${fmt(isCancelledStatus(o.status) ? 0 : o.subtotal)}${isCancelledStatus(o.status) ? '<br><span style="font-size:0.65rem;color:#a04830">Cancelado: no suma</span>' : ''}</td>
+          <td>${statusSelectHTML(o.id, o.status)}</td>
           <td><button class="btn ghost" data-toggle="${o.id}" style="padding:0.3rem 0.6rem;font-size:0.55rem">Ver</button></td>
         </tr>
         <tr id="det-${o.id}" style="display:none">
-          <td colspan="8" style="background:var(--warm);padding:1rem">
+          <td colspan="7" style="background:var(--warm);padding:1rem">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0.7rem;margin-bottom:0.7rem;font-size:0.78rem">
+              <div><strong>Pago:</strong> ${esc({efectivo:'Efectivo',tarjeta:'Tarjeta',caja_vecina:'Caja Vecina'}[o.payment_method] || o.payment_method || '—')}</div>
+              <div><strong>Entrega:</strong> ${deliveryLabel(o)}</div>
+              <div><strong>Total original:</strong> ${fmt(o.subtotal)}</div>
+            </div>
             <strong>Productos:</strong>
             <ul style="margin:0.5rem 0 0 1.2rem">
-              ${(o.order_items || []).map(it => `<li style="font-size:0.8rem;margin-bottom:0.2rem"><strong>${fmtItemQty(it.quantity, it.product_unit)}</strong> ${esc(it.product_name)} — ${fmt(it.unit_price)} ${fmtItemPriceUnit(it.product_unit)} = <strong>${fmt(it.subtotal)}</strong></li>`).join('')}
+              ${(o.order_items || []).map(it => `<li style="font-size:0.8rem;margin-bottom:0.2rem"><strong>${fmtItemQty(it.quantity, it.product_unit)}</strong> ${esc(it.product_name)} — ${fmt(it.unit_price)} ${fmtItemPriceUnit(it.product_unit)} = <strong>${fmt(it.subtotal)}</strong></li>`).join('') || '<li style="font-size:0.8rem">Sin productos asociados. Revisar nota del pedido.</li>'}
             </ul>
-            ${o.delivery_detail ? `<div style="font-size:0.78rem;margin-top:0.6rem"><strong>Entrega:</strong> ${deliveryLabel(o)}</div>` : ''}
             ${o.notes ? `<div style="font-size:0.78rem;margin-top:0.6rem"><strong>Nota / otros productos:</strong> ${esc(o.notes)}</div>` : ''}
           </td>
         </tr>
       `).join('');
 
-      tbody.querySelectorAll('select[data-set-status]').forEach(sel => {
-        sel.addEventListener('change', async e => {
-          const id = e.target.dataset.setStatus;
-          const status = e.target.value;
-          const payload = { status };
-          if (isClosedStatus(status)) payload.completed_at = new Date().toISOString();
-          await window.bv.from('orders').update(payload).eq('id', id);
-          const ord = orders.find(x => x.id === id);
-          if (ord) { ord.status = status; if (payload.completed_at) ord.completed_at = payload.completed_at; }
-          // refresh pill class
-          e.target.className = 'sel pill ' + pillFor(status);
-        });
+      bindStatusControls(tbody, orders, (id, status, payload) => {
+        const ord = orders.find(x => x.id === id);
+        updateOrderObject(ord, status, payload);
+        showMsg('Estado actualizado: ' + statusText(status));
+        paint();
       });
       tbody.querySelectorAll('button[data-toggle]').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1198,6 +1291,7 @@
     }
 
     $('#ord-filter').addEventListener('change', paint);
+    $('#ord-q').addEventListener('input', paint);
     await reload();
   }
 
