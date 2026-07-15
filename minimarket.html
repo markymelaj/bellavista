@@ -346,22 +346,38 @@
     }
     .see-all:hover { color: var(--mahogany); }
 
+    /* ===== OFERTA (precio tachado + globo) ===== */
+    .promo-badge {
+      position: absolute; top: 5px; left: 5px; z-index: 3;
+      background: #c0392b; color: #fff;
+      font-family: var(--f-b); font-size: 0.56rem; font-weight: 700;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 7px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.28);
+      max-width: 88%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .product-was { color: #9a8c7d; font-weight: 500; font-size: 0.72em; margin-right: 2px; }
+    .product-card[role="button"] { cursor: pointer; }
+    .product-card[role="button"]:active { transform: scale(0.985); }
+
     /* ===== CATEGORY GRID (portada) ===== */
+    /* Chips compactos: en el teléfono no pueden comerse la pantalla. */
     .cat-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.7rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.45rem;
     }
-    @media (min-width: 600px) { .cat-grid { grid-template-columns: repeat(3, 1fr); gap: 0.9rem; } }
-    @media (min-width: 960px) { .cat-grid { grid-template-columns: repeat(4, 1fr); } }
+    @media (min-width: 600px) { .cat-grid { grid-template-columns: repeat(5, 1fr); gap: 0.6rem; } }
+    @media (min-width: 960px) { .cat-grid { grid-template-columns: repeat(7, 1fr); } }
 
     .cat-card {
       position: relative;
-      aspect-ratio: 4 / 3;
-      border-radius: 8px;
+      aspect-ratio: auto;
+      min-height: 62px;
+      border-radius: 10px;
       overflow: hidden;
       cursor: pointer;
-      border: none;
+      border: 1px solid rgba(30,15,4,0.10);
       background: var(--parchment);
       display: block; width: 100%;
       padding: 0;
@@ -375,24 +391,24 @@
     .cat-card-emoji {
       position: absolute; inset: 0;
       display: flex; align-items: center; justify-content: center;
-      font-size: 2.8rem;
+      font-size: 1.5rem;
       background: var(--parchment);
     }
     .cat-card::after {
       content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(180deg, rgba(30,15,4,0) 35%, rgba(30,15,4,0.78) 100%);
+      background: linear-gradient(180deg, rgba(30,15,4,0) 30%, rgba(30,15,4,0.82) 100%);
     }
     .cat-card-label {
       position: absolute; bottom: 0; left: 0; right: 0;
       z-index: 2;
-      padding: 0.7rem 0.7rem 0.6rem;
-      text-align: left;
+      padding: 0.3rem 0.35rem 0.28rem;
+      text-align: center;
     }
     .cat-card-name {
       font-family: var(--f-b);
-      font-size: 0.82rem; font-weight: 600;
-      color: #fff; line-height: 1.2;
+      font-size: 0.64rem; font-weight: 600;
+      color: #fff; line-height: 1.15;
       display: block;
     }
     .cat-card-count {
@@ -1134,6 +1150,13 @@
 
       <div class="cat-grid" id="cat-grid"></div>
 
+      <section id="ofertas-section" style="display:none">
+        <div class="section-head">
+          <h2 class="section-title">🔥 Ofertas de la semana</h2>
+        </div>
+        <div class="products-grid" id="ofertas-grid"></div>
+      </section>
+
       <div class="section-head">
         <h2 class="section-title">Destacados</h2>
         <button class="see-all" onclick="showCategory('all')">Ver todo el catálogo →</button>
@@ -1206,9 +1229,9 @@
 
       <div class="cart-customer-box">
         <label class="cart-input-label" for="customer-name">Nombre del pedido *</label>
-        <input class="cart-text-input" id="customer-name" placeholder="Ej: Camila / Caba&ntilde;a 4 / Sitio 12" autocomplete="name">
+        <input class="cart-text-input" id="customer-name" placeholder="Ej: Camila / Caba&ntilde;a 4 / Sitio 12" autocomplete="name" oninput="saveCustomer()">
         <label class="cart-input-label" for="customer-phone" style="margin-top:0.75rem">WhatsApp de contacto *</label>
-        <input class="cart-text-input" id="customer-phone" placeholder="Ej: 9 1234 5678" inputmode="tel" autocomplete="tel">
+        <input class="cart-text-input" id="customer-phone" placeholder="Ej: 9 1234 5678" inputmode="tel" autocomplete="tel" oninput="saveCustomer()">
         <div class="cart-inline-hint" style="margin-top:0.45rem">Se usa para confirmar faltantes, despacho o retiro. No reemplaza el pedido del admin.</div>
       </div>
 
@@ -1359,13 +1382,16 @@
         : '<span class="ico-fallback">' + iconFor(p.cat) + '</span>';
       var hasPrice = Number(p.p) > 0;
       var kg = isKgProduct(p);
-      var html = '<div class="product-card' + (qty > 0 ? ' in-cart' : '') + '" id="card-' + p.id + '">';
-      html += '<div class="product-image" data-cat="' + p.cat + '">' + imgHTML + '</div>';
+      var enOferta = Number(p.was) > 0 && Number(p.was) > Number(p.p);
+      var promoHTML = enOferta ? '<span class="promo-badge">' + escapeHtml(p.promo || 'OFERTA') + '</span>' : '';
+      var tapAttr = hasPrice ? ' onclick="tapCard(event,\'' + p.id + '\')" role="button" tabindex="0"' : '';
+      var html = '<div class="product-card' + (qty > 0 ? ' in-cart' : '') + '" id="card-' + p.id + '"' + tapAttr + '>';
+      html += '<div class="product-image" data-cat="' + p.cat + '">' + imgHTML + (promoHTML || '') + '</div>';
       html += '<div class="product-body">';
       html += '<p class="product-name">' + escapeHtml(p.n) + '</p>';
       html += '<div class="product-price-row">';
       html += hasPrice
-        ? '<span class="product-price">' + fmt(p.p) + (kg ? '<span class="product-unit-label">/ kg</span>' : '') + '</span>'
+        ? '<span class="product-price">' + (enOferta ? '<s class="product-was">' + fmt(p.was) + '</s> ' : '') + fmt(p.p) + (kg ? '<span class="product-unit-label">/ kg</span>' : '') + '</span>'
         : '<span class="product-price pending">Consultar precio</span>';
       if (hasPrice) {
         html += '<div class="product-controls' + (qty === 0 ? ' empty' : '') + '">';
@@ -1415,6 +1441,13 @@
         'higiene-personal':'🧴','cigarros':'🚬','farmacia':'💊','cafe-te':'☕','otros-productos':'🛍️','otros':'📦'
       };
       return icons[catSlug] || '📦';
+    }
+
+    // Tocar la tarjeta = agregar uno (lo mismo que el botón +). Los botones + / - siguen
+    // funcionando: se evita que el toque del botón dispare además el de la tarjeta.
+    function tapCard(ev, id) {
+      if (ev && ev.target && ev.target.closest && ev.target.closest('.qty-btn')) return;
+      changeQty(id, 1);
     }
 
     function changeQty(id, delta) {
@@ -1853,7 +1886,7 @@
     }
 
     // ---- Render portada (category cards + featured) ----
-    function renderHome(catById, catCounts, featured) {
+    function renderHome(catById, catCounts, featured, ofertas) {
       // Category cards
       var grid = document.getElementById('cat-grid');
       var html = '';
@@ -1875,13 +1908,27 @@
       }
       grid.innerHTML = html;
 
+      // OFERTAS primero: es lo que trae gente. Se cargan desde el PDV.
+      var os = document.getElementById('ofertas-section');
+      var og = document.getElementById('ofertas-grid');
+      ofertas = ofertas || [];
+      if (os && og) {
+        if (ofertas.length) {
+          og.innerHTML = ofertas.slice(0, 8).map(productCardHTML).join('');
+          wireProductCards(og);
+          os.style.display = '';
+        } else {
+          os.style.display = 'none';
+        }
+      }
+
       // Featured products
       var fg = document.getElementById('featured-grid');
       if (featured.length === 0) {
         // No featured set yet — show a sample from popular categories
         featured = PRODUCTS.slice(0, 10);
       }
-      fg.innerHTML = featured.map(productCardHTML).join('');
+      fg.innerHTML = featured.slice(0, 10).map(productCardHTML).join('');
       wireProductCards(fg);
     }
 
@@ -1903,11 +1950,29 @@
       return res;
     }
 
+    // Trae los productos pidiendo las columnas de oferta; si la base todavía no las tiene,
+    // reintenta sin ellas. Así la tienda NUNCA deja de cargar por una columna que falte.
+    var PROD_COLS_BASE = 'id, sku, name, name_normalized, category_id, price, unit, image_url, featured, position, needs_review';
+    async function fetchProductsSafe() {
+      var res = await window.bv.from('products')
+        .select(PROD_COLS_BASE + ', compare_at_price, promo_label')
+        .eq('active', true).order('position', { ascending: true }).order('name');
+      if (res.error) {
+        var m = String(res.error.message || '');
+        if (m.indexOf('compare_at_price') !== -1 || m.indexOf('promo_label') !== -1 || res.error.code === '42703') {
+          res = await window.bv.from('products')
+            .select(PROD_COLS_BASE)
+            .eq('active', true).order('position', { ascending: true }).order('name');
+        }
+      }
+      return res;
+    }
+
     async function bootFromSupabase() {
       try {
         var [catsRes, prodsRes] = await Promise.all([
           fetchActiveCategoriesSafe(),
-          window.bv.from('products').select('id, sku, name, name_normalized, category_id, price, unit, image_url, featured, position, needs_review').eq('active', true).order('position', { ascending: true }).order('name')
+          fetchProductsSafe()
         ]);
 
         if (catsRes.error) throw catsRes.error;
@@ -1931,6 +1996,7 @@
 
         // Map products
         var featured = [];
+        var ofertas = [];
         var catCounts = {};
         PRODUCTS = (prodsRes.data || []).map(function(p) {
           var cat = catById[p.category_id];
@@ -1939,13 +2005,16 @@
           var prod = {
             id: p.id, sku: p.sku, cat: slug, catName: cat ? cat.name : '',
             n: p.name, ns: p.name_normalized || norm(p.name),
-            p: Number(p.price) || 0, u: p.unit || 'unidad', img: p.image_url || '', pos: p.position || 1000
+            p: Number(p.price) || 0, u: p.unit || 'unidad', img: p.image_url || '', pos: p.position || 1000,
+            was: Number(p.compare_at_price) || 0,   // precio normal tachado (viene del PDV)
+            promo: p.promo_label || ''
           };
-          if (p.featured) featured.push(prod);
+          if (prod.was > prod.p) ofertas.push(prod);
+          else if (p.featured) featured.push(prod);
           return prod;
         });
 
-        renderHome(catById, catCounts, featured);
+        renderHome(catById, catCounts, featured, ofertas);
         initSlider();
       } catch (e) {
         console.error('Boot error:', e);
@@ -1956,8 +2025,28 @@
       }
     }
 
+    // ---- Datos de quien pide: quedan guardados en SU teléfono ----
+    var CUST_KEY = 'bv_customer_v1';
+    function saveCustomer() {
+      try {
+        var n = document.getElementById('customer-name');
+        var p = document.getElementById('customer-phone');
+        localStorage.setItem(CUST_KEY, JSON.stringify({ n: n ? n.value.trim() : '', p: p ? p.value.trim() : '' }));
+      } catch(e) {}
+    }
+    function loadCustomer() {
+      try {
+        var d = JSON.parse(localStorage.getItem(CUST_KEY) || '{}');
+        var n = document.getElementById('customer-name');
+        var p = document.getElementById('customer-phone');
+        if (n && d.n) n.value = d.n;
+        if (p && d.p) p.value = d.p;
+      } catch(e) {}
+    }
+
     // ---- Init ----
     loadCart();
+    loadCustomer();
     updateCartUI();
     updateStatus();
     bootFromSupabase();
