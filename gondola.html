@@ -20,7 +20,7 @@
     .mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.mode button,.actions button{min-height:50px;border:0;border-radius:14px;font-size:16px;font-weight:700;color:var(--c);background:#442817}.mode button.active{background:var(--green)}
     .result{min-height:110px;background:#28150b;border:1px solid #4b2f1c;border-radius:18px;padding:16px;margin:10px 0}.result h2{font-family:Georgia,serif;margin:0 0 8px;font-size:1.35rem}.price{font-size:2rem;font-weight:800;color:var(--gold)}.stock{opacity:.8}.message{line-height:1.45}
     .actions{display:grid;grid-template-columns:1fr auto;gap:8px}.actions input{width:100%;min-width:0;border:1px solid #65452f;border-radius:14px;background:#fff;color:#19100a;padding:0 14px;font-size:16px}.actions button{padding:0 18px;background:#885426}.small{font-size:.76rem;opacity:.65;text-align:center;margin-top:12px}.hidden{display:none!important}
-  .fotoBtn{display:block;text-align:center;margin-top:14px;padding:13px;border-radius:12px;background:#2d1505;color:#f5f0e8;cursor:pointer}#fotoMsg{margin-top:8px;text-align:center}
+  .nuevoBox{margin-top:14px;display:flex;flex-direction:column;gap:9px}.nuevoBox input{padding:13px;font-size:1.05rem;border:1px solid #cbbfae;border-radius:10px}.nvOk{padding:14px;border:0;border-radius:12px;background:#7a3f10;color:#fff;font-size:1.05rem}#nvMsg{text-align:center}.fotoBtn{display:block;text-align:center;margin-top:14px;padding:13px;border-radius:12px;background:#2d1505;color:#f5f0e8;cursor:pointer}#fotoMsg{margin-top:8px;text-align:center}
 </style>
   <script src="vendor/supabase.min.js"></script>
   <script src="config.js"></script>
@@ -79,7 +79,17 @@
       var r=await window.bv.rpc('mobile_send_scan',{p_session_id:pair.s,p_token:pair.t,p_request_id:uuid(),p_action:action,p_barcode:code});
       if(r.error)throw r.error;
       var out=await waitResult(r.data),p=out.product;
-      if(!out.found||!p){feedback(false);result.innerHTML='<h2>No encontrado</h2><div class="message">Código '+esc(code)+' no existe en el catálogo del POS.</div>';}
+      if(out.pos_version)setState('Caja '+out.pos_version,true);
+      if(!out.found||!p){feedback(false);lastFound='';result.innerHTML='<h2>No encontrado</h2>'+
+        '<div class="message">El código '+esc(code)+' no está en el POS. Puedes crearlo ahora:</div>'+
+        '<div class="nuevoBox">'+
+          '<input id="nvNombre" placeholder="Nombre del producto" autocomplete="off">'+
+          '<input id="nvPrecio" placeholder="Precio ($)" inputmode="numeric">'+
+          '<label class="fotoBtn" id="nvFotoBtn">📷 Sacarle la foto (opcional)'+
+            '<input type="file" accept="image/*" capture="environment" style="display:none" onchange="window._nvFoto(this)"></label>'+
+          '<button class="nvOk" onclick="window._crearProducto(\''+esc(code)+'\')">Crear y publicar</button>'+
+          '<div id="nvMsg"></div>'+
+        '</div>';}
       else{feedback(true);lastFound=code;result.innerHTML='<h2>'+esc(p.name)+'</h2><div class="price">'+money(p.price)+'</div><div class="stock">Stock: '+esc(p.stock==null?'sin dato':p.stock)+' '+esc(p.unit||'')+'</div>'+(action==='add_cart'?'<div class="message">✓ Enviado al carrito de la caja</div>':'')+'<label class="fotoBtn">📷 Sacarle la foto para la web<input type="file" accept="image/*" capture="environment" style="display:none" onchange="window._gFoto(this)"></label><div id="fotoMsg"></div>';}
     }catch(e){feedback(false);setState('Sin respuesta',false);result.innerHTML='<h2>No se pudo consultar</h2><div class="message">'+esc(e.message||e)+'</div>';}
     finally{busy=false;hint.textContent='Apunta al próximo código de barras';}
@@ -93,23 +103,51 @@
   document.getElementById('lookupMode').onclick=function(){setMode('lookup');};document.getElementById('cartMode').onclick=function(){setMode('add_cart');};
   document.getElementById('sendManual').onclick=function(){scan(document.getElementById('manual').value);};document.getElementById('manual').onkeydown=function(e){if(e.key==='Enter')scan(e.target.value);};
   loadPair();verify().then(camera).catch(function(e){result.innerHTML='<h2>Emparejamiento necesario</h2><div class="message">'+esc(e.message||e)+'</div>';});
+  var _nvFotoData='';
+  window._nvFoto=async function(input){
+    var f=input.files&&input.files[0];if(!f)return;
+    _nvFotoData=await comprimir(f);
+    document.getElementById('nvFotoBtn').innerHTML='✓ Foto lista';
+  };
+  window._crearProducto=async function(code){
+    var nombre=(document.getElementById('nvNombre').value||'').trim();
+    var precio=Number(String(document.getElementById('nvPrecio').value||'').replace(/[^0-9]/g,''))||0;
+    var msg=document.getElementById('nvMsg');
+    if(nombre.length<2){msg.textContent='Escribe el nombre';return;}
+    if(precio<=0){msg.textContent='Escribe el precio';return;}
+    msg.textContent='Creando en la caja…';
+    try{
+      var r=await window.bv.rpc('mobile_send_new_product',{p_session_id:pair.s,p_token:pair.t,
+        p_request_id:uuid(),p_barcode:code,p_name:nombre,p_price:precio,p_photo:_nvFotoData});
+      if(r.error)throw r.error;
+      var out=await waitResult(r.data);
+      if(out.created){feedback(true);_nvFotoData='';
+        msg.innerHTML='✓ <b>'+esc(out.product.name)+'</b> creado en la caja y publicado en la web';}
+      else{feedback(false);msg.textContent=out.message||'No se pudo crear';}
+    }catch(e){feedback(false);msg.textContent=e.message||'No se pudo crear';}
+  };
+  async function comprimir(f){
+    return await new Promise(function(res,rej){
+      var img=new Image(),fr=new FileReader();
+      fr.onload=function(){img.onload=function(){
+        var m=1000,w=img.width,h=img.height,k=Math.min(1,m/Math.max(w,h));
+        var c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        res(c.toDataURL('image/jpeg',0.8));};img.onerror=rej;img.src=fr.result;};
+      fr.onerror=rej;fr.readAsDataURL(f);});
+  }
   window._gFoto=async function(input){
     var f=input.files&&input.files[0];var msg=document.getElementById('fotoMsg');
     if(!f||!lastFound){return;}
     msg.textContent='Subiendo la foto…';
     try{
-      var dataUrl=await new Promise(function(res,rej){
-        var img=new Image(),fr=new FileReader();
-        fr.onload=function(){img.onload=function(){
-          var m=1000,w=img.width,h=img.height,k=Math.min(1,m/Math.max(w,h));
-          var c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
-          c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-          res(c.toDataURL('image/jpeg',0.8));};img.onerror=rej;img.src=fr.result;};
-        fr.onerror=rej;fr.readAsDataURL(f);});
+      var dataUrl=await comprimir(f);
       var r=await window.bv.rpc('mobile_send_photo',{p_session_id:pair.s,p_token:pair.t,p_request_id:uuid(),p_barcode:lastFound,p_photo:dataUrl});
       if(r.error)throw r.error;
       var out=await waitResult(r.data);
       if(out.photo_ok){feedback(true);msg.innerHTML='✓ Foto publicada en la página';}
+      else if(!out.pos_version){feedback(false);
+        msg.innerHTML='La caja que contestó es una <b>versión anterior</b> y no sabe recibir fotos.<br>En el computador de la caja: abrir <b>ABRIR_POS.bat</b> de la carpeta nueva y reintentar.';}
       else{feedback(false);msg.textContent=out.message||'La caja no pudo subir la foto';}
     }catch(e){feedback(false);msg.textContent=e.message||'No se pudo mandar la foto';}
   };
