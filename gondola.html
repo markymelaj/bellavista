@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#241106">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Góndola BV">
+  <link rel="manifest" href="gondola.webmanifest">
+  <title>Góndola móvil · Bellavista</title>
+  <style>
+    :root{color-scheme:dark;--c:#f5efe4;--gold:#e7b768;--green:#2f8d55;--red:#d85b4b}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#170b04;color:var(--c);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{min-height:100dvh;padding:calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 18px)}
+    main{max-width:620px;margin:auto}.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.brand{font-family:Georgia,serif;font-size:1.28rem;color:var(--gold)}
+    #state{font-size:.78rem;padding:7px 10px;border-radius:999px;background:#49301f}.ok{background:#183e29!important;color:#b7f4ca}.bad{background:#54231d!important;color:#ffd1ca}
+    .camera{position:relative;overflow:hidden;border-radius:20px;background:#050302;min-height:52dvh;border:1px solid #4b2f1c;box-shadow:0 14px 40px #0008}
+    video{display:block;width:100%;height:52dvh;object-fit:cover;background:#000}.guide{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}.guide:after{content:"";width:82%;height:28%;border:3px solid var(--gold);border-radius:18px;box-shadow:0 0 0 999px #0005}.hint{position:absolute;bottom:16px;left:16px;right:16px;text-align:center;font-size:.86rem;text-shadow:0 2px 5px #000}
+    .mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.mode button,.actions button{min-height:50px;border:0;border-radius:14px;font-size:16px;font-weight:700;color:var(--c);background:#442817}.mode button.active{background:var(--green)}
+    .result{min-height:110px;background:#28150b;border:1px solid #4b2f1c;border-radius:18px;padding:16px;margin:10px 0}.result h2{font-family:Georgia,serif;margin:0 0 8px;font-size:1.35rem}.price{font-size:2rem;font-weight:800;color:var(--gold)}.stock{opacity:.8}.message{line-height:1.45}
+    .actions{display:grid;grid-template-columns:1fr auto;gap:8px}.actions input{width:100%;min-width:0;border:1px solid #65452f;border-radius:14px;background:#fff;color:#19100a;padding:0 14px;font-size:16px}.actions button{padding:0 18px;background:#885426}.small{font-size:.76rem;opacity:.65;text-align:center;margin-top:12px}.hidden{display:none!important}
+  </style>
+  <script src="vendor/supabase.min.js"></script>
+  <script src="config.js"></script>
+  <script src="vendor/zxing-browser.min.js"></script>
+</head>
+<body>
+<main>
+  <div class="head"><div class="brand">Bellavista · Góndola</div><div id="state">Conectando…</div></div>
+  <div class="camera"><video id="video" playsinline muted></video><div class="guide"></div><div class="hint" id="hint">Apunta al código de barras</div></div>
+  <div class="mode">
+    <button id="lookupMode" class="active" type="button">Ver precio</button>
+    <button id="cartMode" type="button">Agregar a Caja</button>
+  </div>
+  <section class="result" id="result"><div class="message">Escanea un producto. El precio y el stock vienen directamente del POS.</div></section>
+  <div class="actions"><input id="manual" inputmode="numeric" autocomplete="off" placeholder="Código manual"><button id="sendManual" type="button">Consultar</button></div>
+  <div class="small">Sesión temporal cifrada · no contiene la clave administrativa · puedes revocarla desde Configuración</div>
+</main>
+<script>
+(function(){
+  'use strict';
+  var KEY='bv_gondola_pair_v1', pair={}, action='lookup', reader=null, controls=null, busy=false, lastCode='', lastAt=0;
+  var state=document.getElementById('state'), result=document.getElementById('result'), hint=document.getElementById('hint');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function money(n){return '$'+Math.round(Number(n)||0).toLocaleString('es-CL');}
+  function uuid(){return crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c==='x'?r:(r&3|8);return v.toString(16);});}
+  function loadPair(){
+    var h=new URLSearchParams(location.hash.slice(1));
+    if(h.get('s')&&h.get('t')){pair={s:h.get('s'),t:h.get('t')};localStorage.setItem(KEY,JSON.stringify(pair));history.replaceState(null,'',location.pathname+location.search);}
+    else{try{pair=JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){pair={};}}
+  }
+  function setState(txt,ok){state.textContent=txt;state.className=ok===true?'ok':ok===false?'bad':'';}
+  async function verify(){
+    if(!pair.s||!pair.t){setState('Sin emparejar',false);throw new Error('Abre esta página escaneando el QR que muestra el POS.');}
+    var r=await window.bv.rpc('mobile_session_status',{p_session_id:pair.s,p_token:pair.t});
+    if(r.error||!r.data){localStorage.removeItem(KEY);setState('Sesión vencida',false);throw new Error((r.error&&r.error.message)||'Vuelve a emparejar el iPhone desde el POS.');}
+    setState('Caja '+(r.data.register_id||'conectada'),true);
+  }
+  function feedback(ok){
+    try{navigator.vibrate&&navigator.vibrate(ok?[45]:[80,50,80]);var C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.frequency.value=ok?920:220;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.11);}catch(e){}
+  }
+  async function waitResult(id){
+    for(var i=0;i<55;i++){
+      await new Promise(function(resolve){setTimeout(resolve,550);});
+      var r=await window.bv.rpc('mobile_command_result',{p_session_id:pair.s,p_token:pair.t,p_command_id:id});
+      if(r.error)throw r.error;
+      if(r.data&&r.data.status==='completed')return r.data.result||{};
+      if(r.data&&r.data.status==='failed')throw new Error((r.data.result||{}).message||'La caja rechazó el escaneo');
+    }
+    throw new Error('La caja no respondió. Revisa que el POS esté encendido y vuelve a intentar.');
+  }
+  async function scan(code){
+    code=String(code||'').trim();if(!code||busy)return;
+    var now=Date.now();if(code===lastCode&&now-lastAt<2200)return;lastCode=code;lastAt=now;busy=true;
+    hint.textContent='Consultando '+code+'…';result.innerHTML='<div class="message">Consultando el POS…</div>';
+    try{
+      var r=await window.bv.rpc('mobile_send_scan',{p_session_id:pair.s,p_token:pair.t,p_request_id:uuid(),p_action:action,p_barcode:code});
+      if(r.error)throw r.error;
+      var out=await waitResult(r.data),p=out.product;
+      if(!out.found||!p){feedback(false);result.innerHTML='<h2>No encontrado</h2><div class="message">Código '+esc(code)+' no existe en el catálogo del POS.</div>';}
+      else{feedback(true);result.innerHTML='<h2>'+esc(p.name)+'</h2><div class="price">'+money(p.price)+'</div><div class="stock">Stock: '+esc(p.stock==null?'sin dato':p.stock)+' '+esc(p.unit||'')+'</div>'+(action==='add_cart'?'<div class="message">✓ Enviado al carrito de la caja</div>':'');}
+    }catch(e){feedback(false);setState('Sin respuesta',false);result.innerHTML='<h2>No se pudo consultar</h2><div class="message">'+esc(e.message||e)+'</div>';}
+    finally{busy=false;hint.textContent='Apunta al próximo código de barras';}
+  }
+  function setMode(next){action=next;document.getElementById('lookupMode').classList.toggle('active',next==='lookup');document.getElementById('cartMode').classList.toggle('active',next==='add_cart');hint.textContent=next==='lookup'?'Apunta al código para ver precio':'Cada escaneo se agregará a la Caja';}
+  async function camera(){
+    if(!window.ZXingBrowser)throw new Error('No se cargó el lector de códigos.');
+    reader=new ZXingBrowser.BrowserMultiFormatReader();
+    controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}},document.getElementById('video'),function(found){if(found)scan(found.getText());});
+  }
+  document.getElementById('lookupMode').onclick=function(){setMode('lookup');};document.getElementById('cartMode').onclick=function(){setMode('add_cart');};
+  document.getElementById('sendManual').onclick=function(){scan(document.getElementById('manual').value);};document.getElementById('manual').onkeydown=function(e){if(e.key==='Enter')scan(e.target.value);};
+  loadPair();verify().then(camera).catch(function(e){result.innerHTML='<h2>Emparejamiento necesario</h2><div class="message">'+esc(e.message||e)+'</div>';});
+  window.addEventListener('pagehide',function(){if(controls)controls.stop();});
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('gondola-sw.js').catch(function(){});
+})();
+</script>
+</body></html>

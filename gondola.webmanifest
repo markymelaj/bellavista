@@ -1,0 +1,9 @@
+{
+  "name": "Góndola móvil Bellavista",
+  "short_name": "Góndola BV",
+  "start_url": "./gondola.html",
+  "display": "standalone",
+  "background_color": "#170b04",
+  "theme_color": "#241106",
+  "icons": []
+}

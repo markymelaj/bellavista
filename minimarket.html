@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Minimarket Bellavista — Cercano a Saltos del Laja</title>
   <meta name="description" content="Pan recién horneado, bebidas, abarrotes, carbón y más. Abierto 9 a 20h. Efectivo, tarjetas y Caja Vecina." />
 
@@ -262,6 +262,9 @@
     .footer-back { font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(245,240,232,0.28); text-decoration: none; }
 
     @media (max-width: 640px) {
+      html, body { min-height: 100dvh; }
+      input, textarea, select { font-size: 16px !important; }
+      button, .cart-choice { min-height: 44px; touch-action: manipulation; }
       .hero-sub { display: none; }
       .hero-tag { margin-bottom: 0.25rem; }
       .delivery-strip-inner { padding: 0.5rem 1rem; font-size: 0.64rem; }
@@ -512,8 +515,9 @@
    ============================================================ */
 
 var CFG = window.BELLAVISTA_CONFIG || {};
-var WA = CFG.WHATSAPP || '56974984220';
+var WA = CFG.WHATSAPP_MINIMARKET || '56920630698';   // minimarket y pedidos; el del camping es otro
 var STORAGE_KEY = 'bellavista_cart_v3';
+var ORDER_REQUEST_KEY = 'bellavista_order_request_v5';
 var PAGE = 60;
 
 var PRODUCTS = [], CATEGORIES = [], INDEX = {}, cart = {},
@@ -553,7 +557,9 @@ function getProduct(id){ for (var i=0;i<PRODUCTS.length;i++) if (PRODUCTS[i].id=
 function isKg(p){ return p && String(p.u||'').toLowerCase()==='kg'; }
 function qtyLabel(p,q){ q=Number(q)||0; if(isKg(p)) return q<1 ? Math.round(q*1000)+' g' : q.toLocaleString('es-CL',{maximumFractionDigits:3})+' kg'; return String(Math.round(q)); }
 function cleanPhone(raw){ var d=String(raw||'').replace(/\D/g,''); if(!d) return ''; if(d.length===8) d='9'+d; if(d.length===9) d='56'+d; return d; }
-function showPhone(raw){ var d=cleanPhone(raw); return d ? '+'+d : ''; }
+function showPhone(raw){ var d=cleanPhone(raw); if(!d) return '';
+  if (d.length===11 && d.slice(0,3)==='569') return '+56 9 '+d.slice(3,7)+' '+d.slice(7);
+  return '+'+d; }
 
 /* ---------- Buscador tolerante ----------
    Índice invertido por token. Acepta acentos, plurales, marcas mal
@@ -843,7 +849,7 @@ function showOrderComplete(ok, err){
   document.getElementById('order-complete-title').textContent = ok ? 'Pedido enviado' : 'Pedido enviado por WhatsApp';
   document.getElementById('order-complete-text').innerHTML = ok
     ? 'El minimarket ya lo tiene y lo está preparando. Te escribimos al WhatsApp para confirmarte los faltantes y el total final.'
-    : 'No pudimos registrarlo en el sistema del local, así que abrimos WhatsApp para que llegue igual. Detalle: ' + esc(err||'sin conexión');
+    : 'No pudimos registrarlo en el sistema del local. Tu carrito quedó guardado para reintentar y abrimos WhatsApp como respaldo. Detalle: ' + esc(err||'sin conexión');
   document.getElementById('order-complete').classList.add('open');
 }
 function closeOrderCompleteAndShop(){ document.getElementById('order-complete').classList.remove('open'); showHome(); }
@@ -872,19 +878,37 @@ async function sendWhatsApp(){
   if (notas) resumen.push('NOTA CLIENTE: '+notas);
 
   btn.disabled=true; btn.textContent='Enviando...';
-  var orderId=makeOrderId(), errGuardar=null;
+  var orderId='';
+  try { orderId=localStorage.getItem(ORDER_REQUEST_KEY)||''; } catch(e){}
+  if(!orderId){ orderId=makeOrderId(); try{ localStorage.setItem(ORDER_REQUEST_KEY,orderId); }catch(e){} }
+  var errGuardar=null;
   try {
-    var r = await window.bv.from('orders').insert({
-      id: orderId, customer_name: nombre, customer_phone: fono,
-      delivery_type: tipo, delivery_detail: detalle || null, payment_method: 'efectivo',
-      notes: resumen.join('\n'), subtotal: calcTotal(), status: 'nuevo' });
-    if (r.error) throw r.error;
-    var filas = items.map(function(it){ return Object.assign({order_id: orderId}, it); });
-    var ri = await window.bv.from('order_items').insert(filas);
-    if (ri.error && String(ri.error.message||'').indexOf('product_unit')!==-1) {
-      ri = await window.bv.from('order_items').insert(filas.map(function(f){ var c=Object.assign({},f); delete c.product_unit; return c; }));
+    var rpcItems=items.map(function(it){return {
+      product_sku:it.product_sku, quantity:it.quantity
+    };});
+    var r = await window.bv.rpc('create_public_order_v2', {
+      p_client_request_id:orderId, p_customer_name:nombre, p_customer_phone:fono,
+      p_delivery_type:tipo, p_delivery_detail:detalle||'', p_payment_method:'efectivo',
+      p_notes:resumen.join('\n'), p_items:rpcItems
+    });
+    if (r.error) {
+      // Ventana de compatibilidad: sólo mientras FASE A aún no se aplicó. Cualquier
+      // otro error se conserva y jamás se maquilla como pedido exitoso.
+      var missing = r.error.code==='PGRST202' || /create_public_order_v2/i.test(String(r.error.message||'')) && /not find|schema cache/i.test(String(r.error.message||''));
+      if(!missing) throw r.error;
+      var legacyId=makeOrderId();
+      var rh = await window.bv.from('orders').insert({
+        id:legacyId, customer_name:nombre, customer_phone:fono,
+        delivery_type:tipo, delivery_detail:detalle||null, payment_method:'efectivo',
+        notes:resumen.join('\n'), subtotal:calcTotal(), status:'nuevo' });
+      if(rh.error) throw rh.error;
+      var filas=items.map(function(it){return Object.assign({order_id:legacyId},it);});
+      var ri=await window.bv.from('order_items').insert(filas);
+      if(ri.error && String(ri.error.message||'').indexOf('product_unit')!==-1){
+        ri=await window.bv.from('order_items').insert(filas.map(function(f){var c=Object.assign({},f);delete c.product_unit;return c;}));
+      }
+      if(ri.error) throw ri.error;
     }
-    if (ri.error) console.warn('Detalle del pedido no guardado:', ri.error);
   } catch(e){ errGuardar = e; console.warn('Pedido no registrado:', e); }
 
   var msg = '*PEDIDO MINIMARKET BELLAVISTA*\n' + 'Nombre: '+nombre+'\nWhatsApp: '+showPhone(fono)+'\n\n';
@@ -902,13 +926,16 @@ async function sendWhatsApp(){
   lastWhatsAppUrl = 'https://wa.me/'+WA+'?text='+encodeURIComponent(msg);
   if (errGuardar) window.open(lastWhatsAppUrl, 'whatsapp_bellavista');
 
-  cart={}; saveCart();
-  ['cart-notes','delivery-detail'].forEach(function(k){ var el=document.getElementById(k); if(el) el.value=''; });
-  document.getElementById('cart-panel').classList.remove('open');
-  document.getElementById('cart-overlay').classList.remove('open');
-  calcularLista(); renderLista(true); updateCartUI();
+  if(!errGuardar){
+    cart={}; saveCart();
+    try{localStorage.removeItem(ORDER_REQUEST_KEY);}catch(e){}
+    ['cart-notes','delivery-detail'].forEach(function(k){ var el=document.getElementById(k); if(el) el.value=''; });
+    document.getElementById('cart-panel').classList.remove('open');
+    document.getElementById('cart-overlay').classList.remove('open');
+    calcularLista(); renderLista(true); updateCartUI();
+  }
   showOrderComplete(!errGuardar, errGuardar ? (errGuardar.message||errGuardar) : '');
-  btn.disabled=true; btn.textContent='Enviar pedido';
+  btn.disabled=!!errGuardar ? false : true; btn.textContent=errGuardar?'Reintentar pedido':'Enviar pedido';
 }
 
 /* ---------- Datos del cliente ---------- */
