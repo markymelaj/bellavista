@@ -59,10 +59,33 @@
     /* ===== HEADER ===== */
     .site-header { background: var(--espresso); padding: 1.1rem 2rem; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--amber); box-shadow: 0 2px 20px rgba(0,0,0,0.3); }
     .header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-    .header-brand { text-decoration: none; }
+
+    /* El sello va como marca, no como adorno: alineado al nombre y con un alto
+       fijo para que no mueva la altura del encabezado ni tape el carrito.
+       En móvil se achica y el subtítulo se calla, que es lo primero que sobra. */
+    .header-brand { text-decoration: none; display: flex; align-items: center; gap: 0.7rem; min-width: 0; flex: 1 1 auto; overflow: hidden; }
+    .header-logo { width: 54px; height: 54px; flex: 0 0 auto; border-radius: 50%;
+                   background: var(--cream); box-shadow: 0 2px 8px rgba(0,0,0,0.35); }
+    .header-brand-txt { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+    @media (max-width: 640px) {
+      .header-brand { gap: 0.5rem; }
+      .header-logo { width: 38px; height: 38px; }
+      /* Una sola línea para no estirar el encabezado (en móvil eso es catálogo
+         perdido), pero el bloque puede encogerse: si no cabe, el nombre se
+         recorta con puntos suspensivos antes que empujar la página a lo ancho. */
+      /* El sello ya dice "Minimarket Bellavista", así que en móvil el nombre
+         escrito se queda solo con "Bellavista": entra completo, en una línea,
+         sin recortes ni desborde. */
+      .wm-largo { display: none; }
+      .header-wordmark { font-size: 1.12rem; letter-spacing: 0.05em; white-space: nowrap; }
+      .header-sub { display: none; }
+    }
+    @media (max-width: 380px) {
+      .header-wordmark { font-size: 1rem; }
+    }
     .header-wordmark { font-family: var(--f-d); font-weight: 400; font-size: 1.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--cream); line-height: 1; }
     .header-sub { font-size: 0.55rem; font-weight: 300; letter-spacing: 0.28em; text-transform: uppercase; color: var(--honey); margin-top: 0.15rem; }
-    .header-right { display: flex; align-items: center; gap: 1rem; }
+    .header-right { display: flex; align-items: center; gap: 1rem; flex: 0 0 auto; }
     .header-status { display: flex; align-items: center; gap: 0.45rem; font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(245,240,232,0.55); }
     .status-dot { width: 7px; height: 7px; border-radius: 50%; }
     .status-dot.open  { background: var(--wa); }
@@ -277,10 +300,29 @@
       .info-sep { display: none; }
       .site-footer { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
     }
+  
+    .instalar{position:fixed;left:10px;right:10px;bottom:10px;z-index:60;display:flex;align-items:center;gap:11px;
+      padding:11px 12px;border-radius:16px;background:#2d1505;color:#f7f2e8;box-shadow:0 14px 34px rgba(0,0,0,.34)}
+    .instalar img{width:42px;height:42px;border-radius:11px;flex-shrink:0}
+    .instalar-txt{flex:1;min-width:0;line-height:1.3}
+    .instalar-txt b{display:block;font-size:.92rem}
+    .instalar-txt span{font-size:.76rem;opacity:.78}
+    .instalar button{border:0;border-radius:11px;padding:11px 15px;font-weight:700;font-size:.9rem;
+      background:#e8b96a;color:#2d1505;cursor:pointer}
+    .instalar .instalar-x{background:none;color:#f7f2e8;opacity:.6;font-size:1.3rem;padding:4px 6px}
+    @media (min-width:760px){ .instalar{left:auto;right:18px;bottom:18px;max-width:390px} }
+
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
   <script src="/config.js"></script>
+  <link rel="manifest" href="/minimarket.webmanifest">
+  <meta name="theme-color" content="#2d1505">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Bellavista">
+  <link rel="apple-touch-icon" href="/icons/bellavista-192.png">
 </head>
 <body>
 
@@ -298,8 +340,12 @@
   <header class="site-header">
     <div class="header-inner">
       <a href="minimarket.html" class="header-brand">
-        <div class="header-wordmark">Minimarket Bellavista</div>
-        <div class="header-sub">A la entrada del camping</div>
+        <img class="header-logo" src="/logo-bellavista-128.png"
+             alt="Minimarket Bellavista" width="128" height="128" decoding="async">
+        <span class="header-brand-txt">
+          <span class="header-wordmark"><span class="wm-largo">Minimarket </span>Bellavista</span>
+          <span class="header-sub">A la entrada del camping</span>
+        </span>
       </a>
       <div class="header-right">
         <div class="header-status" id="header-status"></div>
@@ -1054,6 +1100,57 @@ document.getElementById('tel-text').textContent = telNum;
 document.getElementById('tel-link').href = 'https://wa.me/' + WA;
 
 loadCart(); loadCustomer(); updateCartUI(); updateStatus(); boot();
+</script>
+
+  <div id="instalar" class="instalar" hidden>
+    <img src="/logo-bellavista-128.png" alt="">
+    <div class="instalar-txt">
+      <b>Tener el almacén en el teléfono</b>
+      <span id="instalar-como">Se instala como una app, sin ocupar espacio.</span>
+    </div>
+    <button id="instalar-btn" type="button">Instalar</button>
+    <button id="instalar-no" type="button" class="instalar-x" aria-label="Cerrar">×</button>
+  </div>
+
+<script>
+/* Instalación sin tiendas: en Android el navegador nos da el permiso de instalar;
+   en iPhone Apple no lo permite, así que se explican los dos toques exactos.
+   La tira no vuelve a aparecer si el visitante la cierra o si ya está instalada. */
+(function(){
+  var tira=document.getElementById('instalar'), btn=document.getElementById('instalar-btn'),
+      no=document.getElementById('instalar-no'), como=document.getElementById('instalar-como'), evento=null;
+  var YA='bv_instalar_oculto';
+  function instalada(){
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+  function ocultar(recordar){ tira.hidden=true; if(recordar){ try{localStorage.setItem(YA,'1');}catch(e){} } }
+  function mostrar(){ if(instalada())return; try{ if(localStorage.getItem(YA))return; }catch(e){} tira.hidden=false; }
+  no.addEventListener('click', function(){ ocultar(true); });
+
+  var esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+              (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault(); evento=e;
+    como.textContent='Un toque y queda en tu pantalla de inicio.';
+    btn.textContent='Instalar'; btn.hidden=false;
+    setTimeout(mostrar, 1200);
+  });
+
+  btn.addEventListener('click', async function(){
+    if(evento){ evento.prompt(); var r=await evento.userChoice; evento=null; ocultar(r&&r.outcome==='accepted'); return; }
+    /* iPhone: no hay permiso de instalación, se muestran los dos toques */
+    como.innerHTML='Toca <b>Compartir</b> abajo y elige <b>Añadir a pantalla de inicio</b>.';
+    btn.hidden=true;
+  });
+
+  if(esIOS && !instalada()){
+    como.textContent='Toca Instalar y te muestro cómo (son dos toques).';
+    setTimeout(mostrar, 2500);
+  }
+  /* Si llegan escaneando el QR del ticket, la invitación va sin esperar. */
+  if(/[?&]fuente=(app|ticket)/.test(location.search)) setTimeout(mostrar, 600);
+})();
 </script>
 </body>
 </html>

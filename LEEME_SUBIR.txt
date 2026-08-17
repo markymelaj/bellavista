@@ -1,0 +1,28 @@
+ARCHIVOS DEL SITIO BELLAVISTA - QUE SUBIR
+=========================================
+
+Estos archivos van a la RAIZ del repositorio del sitio (donde ya esta
+minimarket.html). Reemplazan a los actuales y agregan los nuevos.
+
+CAMBIADOS
+  minimarket.html          logo en el encabezado + se puede instalar como app
+
+NUEVOS
+  minimarket.webmanifest   datos de la app (nombre, color, iconos)
+  logo-bellavista-128.png  sello para el encabezado
+  logo-bellavista-256.png  sello para otros usos
+  icons/bellavista-192.png icono de la app
+  icons/bellavista-512.png icono de la app
+  logo-original.png        el logo tal como lo enviaste, por si se necesita
+
+IGUALES QUE ANTES (van solo si el repositorio no los tiene)
+  config.js  gondola.html  gondola-sw.js  gondola.webmanifest
+  vercel.json  icons/gondola-192.png  icons/gondola-512.png  vendor/
+
+NO SUBIR NINGUNA CARPETA "web" DEL PROGRAMA: esas son las pantallas
+internas de la caja y no tienen nada que hacer en el sitio.
+
+DESPUES DE SUBIR
+  Abrir la pagina en el telefono. Abajo aparece la tira "Tener el almacen
+  en el telefono": en Android instala en un toque; en iPhone muestra los
+  dos pasos (Compartir > Anadir a pantalla de inicio).

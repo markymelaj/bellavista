@@ -2,7 +2,7 @@
   "name": "Góndola móvil Bellavista",
   "short_name": "Góndola BV",
   "id": "./gondola.html",
-  "start_url": "./gondola.html?v=5.2.0-rc1",
+  "start_url": "./gondola.html?v=5.2.0-rc2",
   "display": "standalone",
   "background_color": "#170b04",
   "theme_color": "#1b0c04",
