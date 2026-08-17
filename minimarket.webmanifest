@@ -3,7 +3,7 @@
   "short_name": "Bellavista",
   "description": "Pedí desde el camping. Precios del local, sin comisión.",
   "id": "/minimarket",
-  "start_url": "/minimarket?fuente=app",
+  "start_url": "/minimarket",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",

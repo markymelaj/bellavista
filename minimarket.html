@@ -8,7 +8,7 @@
 
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Minimarket Bellavista · Cercano a Saltos del Laja" />
-  <meta property="og:description" content="Pan recién horneado y todo lo que necesitas. Abierto 9-20h. Te lo acercamos al camping." />
+  <meta property="og:description" content="Pan recién horneado y todo lo que necesitas. Armá tu pedido y lo preparamos para que pases a buscarlo." />
   <meta property="og:image" content="https://bellavista-topaz.vercel.app/img/laja.jpg" />
   <meta property="og:url" content="https://bellavista-topaz.vercel.app/minimarket" />
   <meta property="og:locale" content="es_CL" />
@@ -255,6 +255,7 @@
     .cart-text-input:focus, .cart-delivery-detail:focus, .cart-notes:focus { outline: none; border-color: var(--amber); }
     .cart-delivery-title { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(26,14,6,0.48); margin-bottom: 0.55rem; }
     .cart-choice-row { display: grid; gap: 0.42rem; }
+    .cart-choice-pronto { opacity: 0.5; cursor: default; }
     .cart-choice { display: flex; align-items: flex-start; gap: 0.55rem; padding: 0.58rem 0.65rem; border: 1px solid rgba(26,14,6,0.12); border-radius: 4px; cursor: pointer; background: rgba(245,240,232,0.35); }
     .cart-choice strong { display: block; font-size: 0.8rem; color: var(--espresso); margin-bottom: 0.12rem; }
     .cart-choice span { display: block; font-size: 0.7rem; color: rgba(26,14,6,0.58); line-height: 1.35; }
@@ -309,7 +310,8 @@
     .instalar-txt span{font-size:.76rem;opacity:.78}
     .instalar button{border:0;border-radius:11px;padding:11px 15px;font-weight:700;font-size:.9rem;
       background:#e8b96a;color:#2d1505;cursor:pointer}
-    .instalar .instalar-x{background:none;color:#f7f2e8;opacity:.6;font-size:1.3rem;padding:4px 6px}
+    .instalar .instalar-x{background:none;color:#f7f2e8;opacity:.85;font-size:1.5rem;line-height:1;
+      min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
     @media (min-width:760px){ .instalar{left:auto;right:18px;bottom:18px;max-width:390px} }
 
   </style>
@@ -408,9 +410,9 @@
 
   <div class="delivery-strip">
     <div class="delivery-strip-inner">
-      <span>🛒 Arma tu pedido y el minimarket lo prepara</span>
+      <span>🛒 Arma tu pedido desde el teléfono</span>
       <span class="ds-sep">·</span>
-      <span>🏕️ Te lo acercamos al sitio del camping</span>
+      <span>🛍️ Lo preparamos para que pases a buscarlo</span>
       <span class="ds-sep">·</span>
       <span>💳 Efectivo · Tarjetas · Caja Vecina</span>
     </div>
@@ -442,7 +444,6 @@
       <div class="section-head">
         <div>
           <h2 class="section-title">Más vendidos</h2>
-          <p class="section-note">Lo que más se lleva la gente del camping</p>
         </div>
       </div>
       <div class="products-grid" id="featured-grid"></div>
@@ -496,10 +497,10 @@
 
       <div class="cart-customer-box">
         <label class="cart-input-label" for="customer-name">Nombre del pedido</label>
-        <input class="cart-text-input" id="customer-name" placeholder="Ej: Camila / Cabaña 4 / Sitio 12" autocomplete="name" oninput="saveCustomer()">
+        <input class="cart-text-input" id="customer-name" placeholder="Ej: Camila Rojas" autocomplete="name" oninput="saveCustomer()">
         <label class="cart-input-label" for="customer-phone" style="margin-top:0.75rem">WhatsApp de contacto</label>
         <input class="cart-text-input" id="customer-phone" placeholder="Ej: 9 1234 5678" inputmode="tel" autocomplete="tel" oninput="saveCustomer()">
-        <div class="cart-inline-hint">Lo usamos para confirmarte faltantes, despacho o retiro.</div>
+        <div class="cart-inline-hint">Lo usamos para avisarte cuando el pedido esté listo.</div>
       </div>
 
       <div class="cart-delivery-box">
@@ -507,17 +508,14 @@
         <div class="cart-choice-row">
           <label class="cart-choice">
             <input type="radio" name="delivery-type" value="retiro" checked onchange="toggleDeliveryFields()">
-            <span><strong>Retiro en el minimarket</strong><span>Te avisamos cuando esté listo.</span></span>
+            <span><strong>Retiro en el minimarket</strong><span>Lo preparamos y te avisamos cuando esté listo.</span></span>
           </label>
-          <label class="cart-choice">
-            <input type="radio" name="delivery-type" value="envio_confirmar" onchange="toggleDeliveryFields()">
-            <span><strong>Envío a confirmar</strong><span>Confirmamos reparto y costo antes de despachar.</span></span>
-          </label>
+          <div class="cart-choice cart-choice-pronto" aria-disabled="true">
+            <span><strong>Envíos · próximamente</strong><span>Por ahora todos los pedidos son para retirar en el local.</span></span>
+          </div>
         </div>
         <div id="delivery-extra" style="display:none">
           <input class="cart-delivery-detail" id="delivery-detail" placeholder="Dirección, sitio, cabaña o referencia">
-          <button class="btn-location" type="button" onclick="useCurrentLocation()">Enviar mi ubicación actual</button>
-          <div class="cart-inline-hint">Si no hay reparto disponible, el pedido queda tomado para retiro.</div>
         </div>
       </div>
 
@@ -1113,43 +1111,61 @@ loadCart(); loadCustomer(); updateCartUI(); updateStatus(); boot();
   </div>
 
 <script>
-/* Instalación sin tiendas: en Android el navegador nos da el permiso de instalar;
-   en iPhone Apple no lo permite, así que se explican los dos toques exactos.
-   La tira no vuelve a aparecer si el visitante la cierra o si ya está instalada. */
+/* Instalación sin tiendas.
+   Reglas duras, aprendidas de la prueba en Android:
+   - La tira se muestra SOLO si realmente se puede instalar: en Android cuando el
+     navegador nos entrega el permiso (beforeinstallprompt), y en iPhone cuando es
+     Safari fuera de la app. Si no, no aparece: no se ofrece lo que no se puede dar.
+   - Adentro de la app instalada nunca se muestra. Antes el start_url traía
+     ?fuente=app y eso la hacía aparecer justamente ahí.
+   - Se cierra y no vuelve. La cruz es un botón grande y de verdad.  */
 (function(){
   var tira=document.getElementById('instalar'), btn=document.getElementById('instalar-btn'),
-      no=document.getElementById('instalar-no'), como=document.getElementById('instalar-como'), evento=null;
-  var YA='bv_instalar_oculto';
-  function instalada(){
-    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      no=document.getElementById('instalar-no'), como=document.getElementById('instalar-como'),
+      evento=null, YA='bv_instalar_oculto_v2';
+
+  function enLaApp(){
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.matchMedia('(display-mode: minimal-ui)').matches ||
+           window.navigator.standalone === true ||
+           /[?&]fuente=app/.test(location.search);
   }
-  function ocultar(recordar){ tira.hidden=true; if(recordar){ try{localStorage.setItem(YA,'1');}catch(e){} } }
-  function mostrar(){ if(instalada())return; try{ if(localStorage.getItem(YA))return; }catch(e){} tira.hidden=false; }
-  no.addEventListener('click', function(){ ocultar(true); });
+  function cerrada(){ try { return localStorage.getItem(YA)==='1'; } catch(e){ return false; } }
+  function ocultar(recordar){
+    tira.hidden=true;
+    if(recordar){ try{ localStorage.setItem(YA,'1'); }catch(e){} }
+  }
+  function mostrar(){ if(enLaApp()||cerrada())return; tira.hidden=false; }
+
+  no.addEventListener('click', function(ev){ ev.preventDefault(); ev.stopPropagation(); ocultar(true); });
 
   var esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
               (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  var esSafari = /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
 
+  /* --- Android y escritorio: el navegador avisa que se puede instalar --- */
   window.addEventListener('beforeinstallprompt', function(e){
     e.preventDefault(); evento=e;
     como.textContent='Un toque y queda en tu pantalla de inicio.';
     btn.textContent='Instalar'; btn.hidden=false;
     setTimeout(mostrar, 1200);
   });
-
   btn.addEventListener('click', async function(){
-    if(evento){ evento.prompt(); var r=await evento.userChoice; evento=null; ocultar(r&&r.outcome==='accepted'); return; }
-    /* iPhone: no hay permiso de instalación, se muestran los dos toques */
-    como.innerHTML='Toca <b>Compartir</b> abajo y elige <b>Añadir a pantalla de inicio</b>.';
-    btn.hidden=true;
+    if(!evento) { ocultar(true); return; }   /* sin permiso vivo no se insiste */
+    evento.prompt();
+    var r=await evento.userChoice; evento=null;
+    ocultar(true);                            /* aceptó o no, la tira no vuelve */
   });
 
-  if(esIOS && !instalada()){
-    como.textContent='Toca Instalar y te muestro cómo (son dos toques).';
-    setTimeout(mostrar, 2500);
+  /* Si ya quedó instalada mientras la página estaba abierta, se retira sola. */
+  window.addEventListener('appinstalled', function(){ ocultar(true); });
+
+  /* --- iPhone: Apple no da permiso de instalación, se explican los dos toques --- */
+  if(esIOS && esSafari && !enLaApp()){
+    btn.hidden=true;
+    como.innerHTML='Toca <b>Compartir</b> y elige <b>Añadir a pantalla de inicio</b>.';
+    setTimeout(mostrar, 2200);
   }
-  /* Si llegan escaneando el QR del ticket, la invitación va sin esperar. */
-  if(/[?&]fuente=(app|ticket)/.test(location.search)) setTimeout(mostrar, 600);
 })();
 </script>
 </body>
