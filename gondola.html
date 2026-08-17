@@ -28,7 +28,7 @@
 </head>
 <body>
 <main>
-  <div class="head"><div class="brand">Bellavista · Góndola</div><div id="state">Conectando…</div></div>
+  <div class="head"><div class="brand">Bellavista · Góndola <small style="font-size:.55em;opacity:.6">v5.1</small></div><div id="state">Conectando…</div></div>
   <div class="camera"><video id="video" playsinline muted></video><div class="guide"></div><div class="hint" id="hint">Apunta al código de barras</div></div>
   <div class="mode">
     <button id="lookupMode" class="active" type="button">Ver precio</button>
@@ -152,7 +152,10 @@
     }catch(e){feedback(false);msg.textContent=e.message||'No se pudo mandar la foto';}
   };
   window.addEventListener('pagehide',function(){if(controls)controls.stop();});
-  if('serviceWorker' in navigator)navigator.serviceWorker.register('gondola-sw.js').catch(function(){});
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});}).catch(function(){});
+    if(window.caches&&caches.keys)caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}).catch(function(){});
+  }
 })();
 </script>
 </body></html>

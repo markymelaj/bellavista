@@ -1,9 +1,15 @@
-const CACHE='bv-gondola-v3';
-const SHELL=['./gondola.html','./gondola.webmanifest','./vendor/supabase.min.js','./vendor/zxing-browser.min.js'];
-self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL))));
-self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
-self.addEventListener('fetch',event=>{
-  const url=new URL(event.request.url);
-  if(url.pathname.endsWith('/config.js'))return;
-  if(event.request.method==='GET')event.respondWith(fetch(event.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(event.request,copy));return r;}).catch(()=>caches.match(event.request)));
+/* Góndola 5.1 — este service worker se retira a propósito.
+   La versión anterior guardaba la página y seguía mostrándola aunque el sitio ya
+   estuviera actualizado. Este borra todo lo guardado, se da de baja y deja que la
+   góndola cargue siempre desde la red (que es lo correcto: sin señal no sirve igual,
+   porque necesita hablar con la caja). */
+self.addEventListener('install', function(e){ self.skipWaiting(); });
+self.addEventListener('activate', function(e){
+  e.waitUntil((async function(){
+    var keys = await caches.keys();
+    await Promise.all(keys.map(function(k){ return caches.delete(k); }));
+    await self.registration.unregister();
+    var cs = await self.clients.matchAll({type:'window'});
+    cs.forEach(function(c){ c.navigate(c.url); });
+  })());
 });
