@@ -665,10 +665,16 @@ function buscar(consulta){
 /* ---------- Filtro y render ---------- */
 function calcularLista(){
   if (searchTerm.trim()) {
+    // Buscando manda la relevancia: lo que más se parece a lo escrito va primero.
     var r = buscar(searchTerm) || [];
     filtered = (activeCat === 'all') ? r : r.filter(function(p){ return p.cat === activeCat; });
   } else {
     filtered = (activeCat === 'all') ? PRODUCTS.slice() : PRODUCTS.filter(function(p){ return p.cat === activeCat; });
+    // Navegando por categoría manda el alfabeto: se busca con el ojo, como en la góndola.
+    // (La vitrina "Más vendidos" de la portada NO se toca: esa va por demanda.)
+    filtered.sort(function(a, b){
+      return String(a.n||'').localeCompare(String(b.n||''), 'es', {sensitivity:'base', numeric:true});
+    });
   }
 }
 function filaHTML(p){
