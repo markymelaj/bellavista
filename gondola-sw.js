@@ -1,15 +1,18 @@
-/* Góndola 5.2 RC1 — este service worker se retira a propósito.
-   La versión anterior guardaba la página y seguía mostrándola aunque el sitio ya
-   estuviera actualizado. Este borra todo lo guardado, se da de baja y deja que la
-   góndola cargue siempre desde la red (que es lo correcto: sin señal no sirve igual,
-   porque necesita hablar con la caja). */
-self.addEventListener('install', function(e){ self.skipWaiting(); });
-self.addEventListener('activate', function(e){
-  e.waitUntil((async function(){
-    var keys = await caches.keys();
-    await Promise.all(keys.map(function(k){ return caches.delete(k); }));
-    await self.registration.unregister();
-    var cs = await self.clients.matchAll({type:'window'});
-    cs.forEach(function(c){ c.navigate(c.url); });
+/* Góndola 5.2 RC2 · service worker de red.
+   Se mantiene activo para que Android permita instalar la aplicación, pero no guarda
+   HTML, credenciales ni resultados. La Góndola requiere internet para hablar con la
+   caja; servir una copia antigua sin red sería engañoso y riesgoso. */
+self.addEventListener('install', function(){ self.skipWaiting(); });
+self.addEventListener('activate', function(event){
+  event.waitUntil((async function(){
+    var keys=await caches.keys();
+    await Promise.all(keys.map(function(key){return caches.delete(key);}));
+    await self.clients.claim();
   })());
+});
+self.addEventListener('fetch', function(event){
+  if(event.request.method!=='GET')return;
+  var url=new URL(event.request.url);
+  if(url.origin!==self.location.origin)return;
+  event.respondWith(fetch(event.request,{cache:event.request.mode==='navigate'?'no-store':'default'}));
 });
