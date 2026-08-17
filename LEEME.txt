@@ -1,0 +1,40 @@
+GONDOLA - QUEDA INSTALADA Y LA CAMARA SOBREVIVE AL BLOQUEO
+==========================================================
+
+QUE SUBIR
+  Estos dos archivos van al repositorio del sitio, junto a los demas:
+    gondola.html
+    gondola.webmanifest
+  Nada mas. El POS no se toca.
+
+LOS DOS PROBLEMAS Y COMO QUEDARON
+
+1) La camara moria al bloquear el telefono
+   Al bloquear, el sistema corta la pista de video. El lector quedaba muerto y
+   habia que recargar la pagina. Ahora la gondola suelta la camara cuando el
+   telefono se va a dormir y la vuelve a abrir sola al volver. Si el navegador
+   exige un toque para reabrirla, aparece el boton "Reanudar camara" en vez de
+   una pantalla congelada. Ademas, mientras se escanea, se pide que la pantalla
+   no se apague sola (en los telefonos que lo permiten).
+
+2) Instalarla y que siga vinculada
+   En iPhone la app instalada tiene su PROPIA memoria, separada de Safari: el
+   emparejamiento hecho en el navegador no viaja a la app. Por eso al abrirla
+   pedia vincular de nuevo y no se podia seguir.
+   Ahora la app se empareja sola LEYENDO EL QR con su propia camara:
+     - Abrir la app desde el icono.
+     - Toca "Escanear el QR de la caja".
+     - Apuntar al QR que muestra la caja en el menu Gondola movil.
+     - Queda vinculada. Si el QR se creo con "Hasta revocarlo", es para siempre.
+
+COMO DEJARLA INSTALADA
+  iPhone : Compartir > Anadir a pantalla de inicio. Abrir desde el icono y
+           escanear el QR de la caja una vez.
+  Android: menu del navegador > Instalar aplicacion (o el boton verde
+           "Instalar aplicacion" que aparece solo). Ahi la vinculacion se
+           mantiene sola, sin volver a escanear.
+
+RECOMENDACION AL CREAR EL QR EN LA CAJA
+  En Gondola movil, elegir duracion "Hasta revocarlo" para el telefono del
+  negocio. Asi no hay que emparejar de nuevo cada dia. Si el telefono se
+  pierde, se revoca desde la misma pantalla.

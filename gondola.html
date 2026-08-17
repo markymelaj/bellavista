@@ -95,7 +95,14 @@
   <section id="helpView" class="card hidden">
     <h2>Teléfono del negocio</h2>
     <div id="sessionInfo" class="notice">Comprobando sesión…</div>
-    <p><b>iPhone:</b> Safari → Compartir → Añadir a pantalla de inicio.</p><p><b>Android:</b> menú del navegador → Instalar aplicación.</p>
+    <div id="installHelp" class="notice hidden">
+      <b>Dejarla instalada en este teléfono</b>
+      <p><b>iPhone:</b> Compartir → Añadir a pantalla de inicio. Después ábrela desde el
+      ícono y toca <b>Escanear el QR de la caja</b> una vez: la app tiene su propia
+      memoria y necesita vincularse por su cuenta. Queda vinculada para siempre.</p>
+      <p><b>Android:</b> menú del navegador → Instalar aplicación. Ahí la vinculación se
+      mantiene sola.</p>
+    </div>
     <button id="installBtn" class="btn green hidden" type="button">Instalar aplicación</button>
     <p class="muted">Este teléfono seguirá vinculado hasta que lo revoques desde la caja.</p>
     <p class="muted">Si el equipo se pierde, revoca el acceso antes de autorizar otro.</p>
@@ -111,6 +118,7 @@
   var DEMO=new URLSearchParams(location.search).get('demo')==='1';
   var KEY='bv_gondola_pair_v1',DEMO_KEY='bv_gondola_demo_products_rc4';
   var pair={},permissions=[],action='lookup',reader=null,controls=null,track=null,busy=false,controlledTest=false;
+  var camaraViva=false,reanudarPendiente=false,modoEmparejar=false,wakeLock=null;
   var scanPhase='booting',latchedCode='',blankSince=0,currentProduct=null,pendingPhoto=null,originalStock=null,deferredInstall=null,audioCtx=null,toastTimer=null;
   var state=el('state'),result=el('result'),hint=el('hint'),video=el('video'),cameraBox=el('cameraBox');
 
@@ -191,12 +199,74 @@
   }
   function showError(e){errorFeedback();setPhase('error','Sin respuesta');result.innerHTML='<h2>No se pudo completar</h2><div class="message">'+esc(friendlyError(e))+'</div>';hint.textContent='La lectura quedó detenida';showNext(true,'Reintentar / escanear otro');pausePreview();}
   function noteBlankFrame(){if(scanPhase!=='arming')return;if(!blankSince)blankSince=Date.now();if(Date.now()-blankSince>=420){setPhase('idle','Lector listo');hint.textContent=action==='lookup'?'Apunta al próximo código':'Apunta al producto para agregarlo a Caja';}}
-  function decoderFrame(found){if(found){var code=String(found.getText?found.getText():found.text||found||'').trim();blankSince=0;if(!code)return;if(scanPhase==='arming'&&code===latchedCode){hint.textContent='Aparta el código anterior o apunta a otro';return;}beginScan(code,false);}else{noteBlankFrame();}}
+  function datosDeEmparejamiento(texto){
+    // El QR de la caja es una direccion con #s=<sesion>&t=<token>
+    try{
+      var h=String(texto||'');
+      var i=h.indexOf('#');
+      if(i<0)return null;
+      var p=new URLSearchParams(h.slice(i+1));
+      if(p.get('s')&&p.get('t'))return {s:p.get('s'),t:p.get('t')};
+    }catch(e){}
+    return null;
+  }
+  async function emparejarCon(datos){
+    modoEmparejar=false;
+    pair=datos;
+    try{localStorage.setItem(KEY,JSON.stringify(pair));}catch(e){}
+    beepOnce();
+    setPhase('waiting','Vinculando…');
+    result.innerHTML='<div class="message">Vinculando este teléfono con la caja…</div>';
+    try{
+      await verify();
+      showToast('Teléfono vinculado');
+      nextScan('Listo. Apunta al código de barras.');
+      pedirInstalar();
+    }catch(e){
+      setPhase('error','Vinculación');
+      result.innerHTML='<h2>No se pudo vincular</h2><div class="message">'+esc(friendlyError(e))+
+        '</div><button class="btn" type="button" onclick="window._gEmparejar()">Escanear el QR otra vez</button>';
+    }
+  }
+  function decoderFrame(found){if(found){var code=String(found.getText?found.getText():found.text||found||'').trim();blankSince=0;if(!code)return;
+    if(modoEmparejar){var d=datosDeEmparejamiento(code);if(d){emparejarCon(d);}else{hint.textContent='Ese no es el QR de la caja. Apunta al que muestra la pantalla de la caja.';}return;}if(scanPhase==='arming'&&code===latchedCode){hint.textContent='Aparta el código anterior o apunta a otro';return;}beginScan(code,false);}else{noteBlankFrame();}}
   function nextScan(message){currentProduct=null;pendingPhoto=null;showView('scan');showNext(false);el('searchResults').innerHTML='';el('manual').value='';result.innerHTML='<div class="message">'+esc(message||'Lector preparado. Aparta el código anterior y apunta al siguiente.')+'</div>';setPhase('arming','Listo para el próximo');hint.textContent='Aparta el código anterior o apunta a uno diferente';blankSince=0;resumePreview();}
   function setMode(next){action=next;el('lookupMode').classList.toggle('active',next==='lookup');el('cartMode').classList.toggle('active',next==='add_cart');el('qtyRow').classList.toggle('hidden',next!=='add_cart');if(scanPhase==='idle')hint.textContent=next==='lookup'?'Apunta al código para ver precio':'Cada lectura se agregará una sola vez a Caja';}
-  async function startCamera(){
+  function detenerCamara(){
+    camaraViva=false;
+    try{if(controls&&controls.stop)controls.stop();}catch(e){}
+    try{if(track&&track.stop)track.stop();}catch(e){}
+    try{if(reader&&reader.reset)reader.reset();}catch(e){}
+    controls=null;track=null;
+    soltarPantalla();
+  }
+  async function tomarPantalla(){
+    // Mientras se escanea conviene que la pantalla no se apague sola.
+    try{ if('wakeLock' in navigator && !wakeLock) wakeLock=await navigator.wakeLock.request('screen'); }catch(e){}
+  }
+  function soltarPantalla(){ try{ if(wakeLock){wakeLock.release();wakeLock=null;} }catch(e){} }
+  function ofrecerReanudar(texto){
+    var b=el('cameraStart');
+    b.disabled=false;b.textContent=texto||'Reanudar cámara';b.classList.remove('hidden');
+    setPhase('booting','Toca reanudar');
+    hint.textContent='El teléfono se bloqueó y la cámara se apagó. Toca para volver.';
+  }
+  async function reanudarCamara(){
+    if(!reanudarPendiente||camaraViva||document.hidden)return;
+    reanudarPendiente=false;
+    try{ await startCamera(true); }
+    catch(e){ reanudarPendiente=true; ofrecerReanudar(); }
+  }
+  async function startCamera(silencioso){
     unlockAudio();el('cameraStart').disabled=true;el('cameraStart').textContent='Abriendo cámara…';setPhase('booting','Abriendo cámara…');
-    try{if(controls)controls.stop();if(!window.ZXingBrowser)throw new Error('No se cargó el lector de códigos.');reader=new ZXingBrowser.BrowserMultiFormatReader();controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}},video,function(found){decoderFrame(found||null);});track=controls&&controls.stream&&controls.stream.getVideoTracks?controls.stream.getVideoTracks()[0]:null;el('cameraStart').classList.add('hidden');el('restartCam').classList.remove('hidden');setPhase('idle','Lector listo');hint.textContent='Apunta al código de barras';if(track&&track.getCapabilities&&track.getCapabilities().torch){el('torch').classList.remove('hidden');el('torch').onclick=function(){var on=el('torch').dataset.on!=='1';track.applyConstraints({advanced:[{torch:on}]}).then(function(){el('torch').dataset.on=on?'1':'0';el('torch').textContent=on?'Apagar luz':'Luz';}).catch(function(){showToast('Este teléfono no pudo encender la luz',true);});};}}
+    try{if(controls)controls.stop();if(!window.ZXingBrowser)throw new Error('No se cargó el lector de códigos.');reader=new ZXingBrowser.BrowserMultiFormatReader();controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}},video,function(found){decoderFrame(found||null);});track=controls&&controls.stream&&controls.stream.getVideoTracks?controls.stream.getVideoTracks()[0]:null;camaraViva=true;reanudarPendiente=false;tomarPantalla();
+      if(track){
+        // iOS corta la pista al bloquear: si eso pasa, se reabre al volver a la app.
+        track.addEventListener('ended',function(){camaraViva=false;reanudarPendiente=true;if(!document.hidden)reanudarCamara();});
+        track.addEventListener('mute',function(){camaraViva=false;reanudarPendiente=true;});
+      }
+      el('cameraStart').classList.add('hidden');el('restartCam').classList.remove('hidden');setPhase('idle','Lector listo');
+      hint.textContent=modoEmparejar?'Apunta al QR que muestra la caja':'Apunta al código de barras';if(track&&track.getCapabilities&&track.getCapabilities().torch){el('torch').classList.remove('hidden');el('torch').onclick=function(){var on=el('torch').dataset.on!=='1';track.applyConstraints({advanced:[{torch:on}]}).then(function(){el('torch').dataset.on=on?'1':'0';el('torch').textContent=on?'Apagar luz':'Luz';}).catch(function(){showToast('Este teléfono no pudo encender la luz',true);});};}}
     catch(e){el('cameraStart').disabled=false;el('cameraStart').textContent='Reintentar cámara';el('cameraStart').classList.remove('hidden');setPhase('error','Cámara no disponible');result.innerHTML='<h2>Cámara no disponible</h2><div class="message">Revisa el permiso de cámara del navegador. También puedes escribir el código manualmente.</div>';}
   }
 
@@ -241,8 +311,47 @@
   el('lookupMode').onclick=function(){unlockAudio();setMode('lookup');};el('cartMode').onclick=function(){unlockAudio();setMode('add_cart');};el('sendManual').onclick=function(){unlockAudio();beginScan(el('manual').value,true);};el('manual').onkeydown=function(e){if(e.key==='Enter'){unlockAudio();beginScan(e.target.value,true);}};el('searchBtn').onclick=search;el('searchText').onkeydown=function(e){if(e.key==='Enter')search();};
   el('cameraStart').onclick=startCamera;el('restartCam').onclick=startCamera;el('nextScan').onclick=function(){nextScan();};el('saveStay').onclick=function(){saveProduct(false);};el('saveContinue').onclick=function(){saveProduct(true);};el('takePhoto').onclick=function(){el('photoInput').click();};el('photoInput').onchange=function(e){photoChosen(e.target.files&&e.target.files[0]);};
   el('fFeatured').onchange=function(){if(this.checked)el('fVisible').checked=true;};el('editorBack').onclick=function(){if(currentProduct&&currentProduct._new)unknownCard(currentProduct.barcode||'');else productCard(currentProduct||{},'',{});showView('scan');};el('tabScan').onclick=function(){if(scanPhase==='editing'){if(currentProduct&&currentProduct.id){productCard(currentProduct,'',{});showView('scan');}else nextScan();}else if(scanPhase==='result'&&!currentProduct){nextScan('Lector listo. Apunta al próximo código.');}else showView('scan');};el('tabEdit').onclick=function(){if(currentProduct)openEditor(currentProduct,!!currentProduct._new,false);else{showView('scan');el('manualTools').open=true;setTimeout(function(){el('manual').focus();},80);showToast('Escanea o escribe el código del producto',true);}};el('tabHelp').onclick=function(){showView('help');setPhase('result','Equipo');pausePreview();};
-  document.addEventListener('pointerdown',unlockAudio,{passive:true});window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstall=e;el('installBtn').classList.remove('hidden');});el('installBtn').onclick=async function(){if(deferredInstall){deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;el('installBtn').classList.add('hidden');}};
-  loadPair();verify().then(function(){setPhase('booting','Toca iniciar');hint.textContent='Activa cámara y sonido una sola vez';}).catch(function(e){setPhase('error','Vinculación');result.innerHTML='<h2>Vincula este teléfono</h2><div class="message">'+esc(friendlyError(e))+'</div>';el('cameraStart').classList.add('hidden');});window.addEventListener('pagehide',function(){if(controls)controls.stop();});if(!DEMO&&'serviceWorker' in navigator)navigator.serviceWorker.register('gondola-sw.js?v=5.2.0-rc2').catch(function(){});
+  document.addEventListener('pointerdown',unlockAudio,{passive:true});
+  function enLaApp(){try{return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}catch(e){return false;}}
+  function pedirInstalar(){
+    if(enLaApp())return;                       // ya está instalada: nada que ofrecer
+    if(deferredInstall)el('installBtn').classList.remove('hidden');
+    // En iPhone no hay permiso de instalación: se explica, y una vez instalada la app
+    // se empareja escaneando el QR otra vez (su almacenamiento es aparte).
+    var ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    if(ios)el('installHelp').classList.remove('hidden');
+  }
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstall=e;if(!enLaApp())el('installBtn').classList.remove('hidden');});
+  window.addEventListener('appinstalled',function(){el('installBtn').classList.add('hidden');showToast('Instalada. Ábrela desde el ícono y escanea el QR una vez.');});el('installBtn').onclick=async function(){if(deferredInstall){deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;el('installBtn').classList.add('hidden');}};
+  loadPair();
+  window._gEmparejar=async function(){
+    modoEmparejar=true;
+    result.innerHTML='<div class="message">Apunta al QR que muestra la caja en <b>Góndola móvil</b>.</div>';
+    setPhase('booting','Buscando el QR');
+    try{ await startCamera(); hint.textContent='Apunta al QR que muestra la caja'; }
+    catch(e){ ofrecerReanudar('Activar cámara'); }
+  };
+  verify().then(function(){
+    setPhase('booting','Toca iniciar');hint.textContent='Activa cámara y sonido una sola vez';
+    pedirInstalar();
+  }).catch(function(e){
+    // Sin vinculación válida: en vez de dejar el teléfono inútil, se ofrece
+    // emparejarlo leyendo el QR de la caja con la propia cámara. Es lo que hace
+    // que la app instalada funcione en iPhone, donde no hereda el emparejamiento
+    // hecho en Safari.
+    setPhase('error','Vinculación');
+    result.innerHTML='<h2>Vincula este teléfono</h2>'+
+      '<div class="message">'+esc(friendlyError(e))+'</div>'+
+      '<button class="btn green" type="button" onclick="window._gEmparejar()">Escanear el QR de la caja</button>'+
+      '<div class="message">En la caja: menú <b>Góndola móvil</b> → crear el QR.</div>';
+    el('cameraStart').classList.add('hidden');
+  });document.addEventListener('visibilitychange',function(){
+    if(document.hidden){ if(camaraViva){reanudarPendiente=true;detenerCamara();} }
+    else { reanudarCamara(); }
+  });
+  window.addEventListener('pageshow',function(ev){ if(ev.persisted)reanudarCamara(); });
+  window.addEventListener('focus',function(){ reanudarCamara(); });
+  window.addEventListener('pagehide',function(){ if(camaraViva)reanudarPendiente=true; detenerCamara(); });if(!DEMO&&'serviceWorker' in navigator)navigator.serviceWorker.register('gondola-sw.js?v=5.2.0-rc2').catch(function(){});
 })();
 </script>
 </body></html>

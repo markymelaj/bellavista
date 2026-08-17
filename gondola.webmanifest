@@ -1,8 +1,8 @@
 {
-  "name": "Góndola móvil Bellavista",
-  "short_name": "Góndola BV",
+  "name": "Góndola Bellavista",
+  "short_name": "Góndola",
   "id": "./gondola.html",
-  "start_url": "./gondola.html?v=5.2.0-rc2",
+  "start_url": "./gondola.html",
   "display": "standalone",
   "background_color": "#170b04",
   "theme_color": "#1b0c04",
@@ -19,5 +19,6 @@
       "type": "image/png",
       "purpose": "any"
     }
-  ]
+  ],
+  "description": "Consultar precios, mandar a la caja, contar stock y dar de alta productos escaneando."
 }
