@@ -22,7 +22,19 @@ IGUALES QUE ANTES (van solo si el repositorio no los tiene)
 NO SUBIR NINGUNA CARPETA "web" DEL PROGRAMA: esas son las pantallas
 internas de la caja y no tienen nada que hacer en el sitio.
 
+IMPORTANTE SI YA HABIAS INSTALADO LA APP EN EL TELEFONO
+  La version anterior se quedaba guardada en el telefono y seguia mostrando
+  el aviso viejo. Este vercel.json obliga a revalidar el HTML en cada carga,
+  asi que con subirlo se arregla solo. Si tu telefono insiste:
+    1. Borra la app instalada (mantener el icono > desinstalar).
+    2. Chrome > Configuracion > Privacidad > Borrar datos de navegacion
+       > solo "Imagenes y archivos en cache".
+    3. Abrir la pagina de nuevo e instalar.
+  Para saber que version esta publicada: en la pagina, el <body> tiene
+  data-build="2026-08-17-v3".
+
 DESPUES DE SUBIR
-  Abrir la pagina en el telefono. Abajo aparece la tira "Tener el almacen
-  en el telefono": en Android instala en un toque; en iPhone muestra los
-  dos pasos (Compartir > Anadir a pantalla de inicio).
+  Abrir la pagina en el telefono. Arriba del buscador aparece la fila
+  "Tener el almacen en el telefono": en Android instala en un toque; en
+  iPhone muestra los dos pasos (Compartir > Anadir a pantalla de inicio).
+  Si ya la tienes instalada, la fila NO aparece: es la conducta correcta.
