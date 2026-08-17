@@ -1,161 +1,244 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-mobile-bridge-version="rc4">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-  <meta name="theme-color" content="#241106">
+  <meta name="theme-color" content="#1b0c04">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Góndola BV">
-  <link rel="manifest" href="gondola.webmanifest">
+  <link rel="manifest" href="gondola.webmanifest?v=5.2.0-rc1">
   <title>Góndola móvil · Bellavista</title>
   <style>
-    :root{color-scheme:dark;--c:#f5efe4;--gold:#e7b768;--green:#2f8d55;--red:#d85b4b}
-    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#170b04;color:var(--c);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    body{min-height:100dvh;padding:calc(env(safe-area-inset-top) + 14px) 14px calc(env(safe-area-inset-bottom) + 18px)}
-    main{max-width:620px;margin:auto}.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.brand{font-family:Georgia,serif;font-size:1.28rem;color:var(--gold)}
-    #state{font-size:.78rem;padding:7px 10px;border-radius:999px;background:#49301f}.ok{background:#183e29!important;color:#b7f4ca}.bad{background:#54231d!important;color:#ffd1ca}
-    .camera{position:relative;overflow:hidden;border-radius:20px;background:#050302;min-height:52dvh;border:1px solid #4b2f1c;box-shadow:0 14px 40px #0008}
-    video{display:block;width:100%;height:52dvh;object-fit:cover;background:#000}.guide{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}.guide:after{content:"";width:82%;height:28%;border:3px solid var(--gold);border-radius:18px;box-shadow:0 0 0 999px #0005}.hint{position:absolute;bottom:16px;left:16px;right:16px;text-align:center;font-size:.86rem;text-shadow:0 2px 5px #000}
-    .mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.mode button,.actions button{min-height:50px;border:0;border-radius:14px;font-size:16px;font-weight:700;color:var(--c);background:#442817}.mode button.active{background:var(--green)}
-    .result{min-height:110px;background:#28150b;border:1px solid #4b2f1c;border-radius:18px;padding:16px;margin:10px 0}.result h2{font-family:Georgia,serif;margin:0 0 8px;font-size:1.35rem}.price{font-size:2rem;font-weight:800;color:var(--gold)}.stock{opacity:.8}.message{line-height:1.45}
-    .actions{display:grid;grid-template-columns:1fr auto;gap:8px}.actions input{width:100%;min-width:0;border:1px solid #65452f;border-radius:14px;background:#fff;color:#19100a;padding:0 14px;font-size:16px}.actions button{padding:0 18px;background:#885426}.small{font-size:.76rem;opacity:.65;text-align:center;margin-top:12px}.hidden{display:none!important}
-  .nuevoBox{margin-top:14px;display:flex;flex-direction:column;gap:9px}.nuevoBox input{padding:13px;font-size:1.05rem;border:1px solid #cbbfae;border-radius:10px}.nvOk{padding:14px;border:0;border-radius:12px;background:#7a3f10;color:#fff;font-size:1.05rem}#nvMsg{text-align:center}.fotoBtn{display:block;text-align:center;margin-top:14px;padding:13px;border-radius:12px;background:#2d1505;color:#f5f0e8;cursor:pointer}#fotoMsg{margin-top:8px;text-align:center}
-</style>
+    :root{color-scheme:dark;--bg:#170b04;--card:#28150b;--line:#654229;--text:#f9f3e8;--muted:#cdbdad;--gold:#f3bf68;--green:#267d4a;--red:#bb4438;--blue:#356f9f;--amber:#9a671e}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{min-height:100dvh;padding:calc(env(safe-area-inset-top) + 10px) 12px calc(env(safe-area-inset-bottom) + 84px)}
+    button,input,select{font:inherit}button{touch-action:manipulation}.hidden{display:none!important}main{max-width:680px;margin:auto}.head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.brand{font-family:Georgia,serif;font-size:1.25rem;color:var(--gold)}
+    #state{font-size:.77rem;padding:7px 10px;border-radius:999px;background:#49301f;white-space:nowrap}#state[data-phase="idle"]{background:#183e29;color:#b7f4ca}#state[data-phase="waiting"],#state[data-phase="arming"]{background:#68471d;color:#fff0bd}#state[data-phase="error"]{background:#54231d;color:#ffd1ca}
+    .camera{position:relative;overflow:hidden;border-radius:20px;background:#050302;min-height:40dvh;border:1px solid var(--line);box-shadow:0 14px 40px #0008}.camera.paused:before{content:"";position:absolute;inset:0;background:#0005;z-index:2;pointer-events:none}video{display:block;width:100%;height:43dvh;object-fit:cover;background:#000}.guide{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:1}.guide:after{content:"";width:84%;height:24%;border:3px solid var(--gold);border-radius:18px;box-shadow:0 0 0 999px #0004}.hint{position:absolute;bottom:14px;left:14px;right:14px;text-align:center;font-size:.9rem;font-weight:700;text-shadow:0 2px 5px #000;z-index:3}.cam-actions{position:absolute;top:10px;right:10px;display:flex;gap:7px;z-index:4}.cam-actions button{border:0;border-radius:999px;background:#17100ddd;color:#fff;padding:9px 11px;font-weight:750}.camera-start{position:absolute;z-index:5;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:min(82%,330px);min-height:58px;border:0;border-radius:16px;background:var(--green);color:#fff;font-weight:850;box-shadow:0 8px 24px #0009}
+    .mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:11px 0}.mode button,.btn{min-height:48px;border:0;border-radius:14px;font-weight:780;color:var(--text);background:#4a2d1c;padding:10px 15px}.mode button.active{background:var(--green)}.btn.green{background:var(--green)}.btn.red{background:var(--red)}.btn.blue{background:var(--blue)}.btn.amber{background:var(--amber)}.btn:disabled{opacity:.45}.btn.wide{width:100%}.qty-row{display:flex;align-items:center;gap:8px;margin:-3px 0 10px}.qty-row input{width:88px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px;margin:10px 0}.result{min-height:116px}.result h2{font-family:Georgia,serif;margin:0 0 7px;font-size:1.35rem}.price{font-size:2rem;font-weight:850;color:var(--gold)}.stock,.muted{color:var(--muted)}.message{line-height:1.45}.product-photo{width:96px;height:96px;border-radius:14px;object-fit:cover;background:#120904;border:1px solid var(--line);float:right;margin:0 0 10px 10px}.result-buttons{display:flex;gap:7px;flex-wrap:wrap;clear:both;padding-top:12px}.result-buttons button{min-height:43px}.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.chip{font-size:.74rem;padding:5px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted)}.chip.good{border-color:#267d4a;color:#b7f4ca}.chip.bad{border-color:#bb4438;color:#ffd1ca}.next{position:sticky;bottom:76px;z-index:7;width:100%;min-height:58px;border:0;border-radius:16px;background:var(--green);color:#fff;font-size:1.05rem;font-weight:900;box-shadow:0 10px 24px #000b;margin:10px 0}
+    details.tools,details.advanced{border:1px solid var(--line);border-radius:14px;background:#211108;margin:10px 0;padding:0 12px}details summary{padding:13px 0;font-weight:760;color:var(--muted);cursor:pointer}.manual{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px}.manual input,.field input,.field select{width:100%;min-width:0;border:1px solid #76533b;border-radius:12px;background:#fff;color:#19100a;padding:12px;font-size:16px}.manual button{min-height:48px}.search-results{display:grid;gap:7px;margin:8px 0 12px}.search-item{display:flex;justify-content:space-between;gap:8px;text-align:left;border:1px solid var(--line);background:#321b0f;color:var(--text);border-radius:12px;padding:11px}.search-item span:last-child{color:var(--gold);font-weight:800}.search-item:disabled{opacity:.45}
+    .tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 8px);z-index:10;background:#170b04ed;padding:7px;max-width:680px;margin:auto;border-radius:16px;border:1px solid #4c2d1c}.tabs button{min-height:47px;border:1px solid var(--line);border-radius:13px;background:#2d190e;color:var(--text);font-weight:760}.tabs button.active{background:var(--green)}
+    .editor h2{margin:0 0 4px}.editor-lead{margin:0 0 12px;color:var(--muted)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{display:grid;gap:5px;color:var(--muted);font-size:.88rem}.field.wide{grid-column:1/-1}.field small{line-height:1.3}.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}.checks label{display:flex;gap:8px;align-items:center;padding:11px;border:1px solid var(--line);border-radius:12px;background:#211108}.checks input{width:21px;height:21px}.editor-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.photo-box{display:grid;grid-template-columns:112px 1fr;gap:12px;align-items:center;margin:12px 0}.photo-preview{width:112px;height:112px;object-fit:cover;border-radius:15px;background:#0a0503;border:1px solid var(--line)}.photo-placeholder{width:112px;height:112px;display:grid;place-items:center;text-align:center;border:1px dashed #8c674d;border-radius:15px;color:var(--muted);font-size:.8rem}.notice{padding:12px;border-radius:13px;background:#3f2718;line-height:1.45}.notice.good{background:#183e29}.notice.bad{background:#54231d}.quick-note{font-size:.82rem;color:var(--muted);margin-top:6px}.top-back{border:0;background:transparent;color:var(--gold);padding:4px 0 12px;font-weight:760}.small{font-size:.76rem;color:var(--muted);text-align:center;margin:12px 4px}.spinner{display:inline-block;width:16px;height:16px;border:2px solid #fff5;border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-3px}@keyframes spin{to{transform:rotate(360deg)}}
+    .toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 12px);transform:translateX(-50%);z-index:20;max-width:min(90%,560px);padding:11px 15px;border-radius:13px;background:#183e29;color:#fff;box-shadow:0 8px 30px #000b;font-weight:750}.toast.bad{background:#54231d}
+    @media(max-width:440px){.form-grid{grid-template-columns:1fr}.field.wide{grid-column:auto}.editor-actions{grid-template-columns:1fr}.checks{grid-template-columns:1fr}.camera,video{height:41dvh;min-height:41dvh}.photo-box{grid-template-columns:96px 1fr}.photo-preview,.photo-placeholder{width:96px;height:96px}}
+  </style>
   <script src="vendor/supabase.min.js"></script>
   <script src="config.js"></script>
   <script src="vendor/zxing-browser.min.js"></script>
 </head>
 <body>
 <main>
-  <div class="head"><div class="brand">Bellavista · Góndola <small style="font-size:.55em;opacity:.6">v5.1</small></div><div id="state">Conectando…</div></div>
-  <div class="camera"><video id="video" playsinline muted></video><div class="guide"></div><div class="hint" id="hint">Apunta al código de barras</div></div>
-  <div class="mode">
-    <button id="lookupMode" class="active" type="button">Ver precio</button>
-    <button id="cartMode" type="button">Agregar a Caja</button>
-  </div>
-  <section class="result" id="result"><div class="message">Escanea un producto. El precio y el stock vienen directamente del POS.</div></section>
-  <div class="actions"><input id="manual" inputmode="numeric" autocomplete="off" placeholder="Código manual"><button id="sendManual" type="button">Consultar</button></div>
-  <div class="small">Sesión temporal cifrada · no contiene la clave administrativa · puedes revocarla desde Configuración</div>
+  <div class="head"><div class="brand">Bellavista · Góndola</div><div id="state" data-phase="booting">Conectando…</div></div>
+
+  <section id="scanView">
+    <div class="camera" id="cameraBox">
+      <video id="video" playsinline muted></video>
+      <div class="guide"></div><div class="hint" id="hint">Inicia el lector</div>
+      <button id="cameraStart" class="camera-start" type="button">Iniciar lector y BIP</button>
+      <div class="cam-actions"><button id="restartCam" class="hidden" type="button">Reiniciar</button><button id="torch" class="hidden" type="button">Luz</button></div>
+    </div>
+    <div class="mode"><button id="lookupMode" class="active" type="button">Ver precio</button><button id="cartMode" type="button">Agregar a Caja</button></div>
+    <div class="qty-row hidden" id="qtyRow"><label for="cartQty">Cantidad</label><input id="cartQty" inputmode="decimal" value="1"><span class="muted">por lectura</span></div>
+    <section class="card result" id="result"><div class="message">Un código por vez: BIP, espera la respuesta y luego toca <b>Escanear otro</b>.<br><span class="muted">Para una novedad, escanea su código nuevo y aparecerá el alta completa.</span></div></section>
+    <button id="nextScan" class="next hidden" type="button">Escanear otro</button>
+    <details class="tools" id="manualTools">
+      <summary>Escribir código o buscar por nombre</summary>
+      <div class="manual"><input id="manual" autocomplete="off" inputmode="numeric" placeholder="Código manual"><button class="btn" id="sendManual" type="button">Consultar</button></div>
+      <div class="manual"><input id="searchText" autocomplete="off" placeholder="Nombre del producto"><button class="btn blue" id="searchBtn" type="button">Buscar</button></div>
+      <div id="searchResults" class="search-results"></div>
+    </details>
+  </section>
+
+  <section id="editView" class="card editor hidden">
+    <button class="top-back" id="editorBack" type="button">‹ Volver al resultado</button>
+    <h2 id="editorTitle">Editar producto</h2>
+    <p class="editor-lead" id="editorLead">Los cambios quedan primero en el POS y se publica sólo este producto.</p>
+    <div id="editorMessage" class="notice hidden"></div>
+    <div class="photo-box">
+      <div id="photoPlaceholder" class="photo-placeholder">Sin foto</div><img id="photoPreview" class="photo-preview hidden" alt="Foto del producto">
+      <div><button class="btn blue wide" id="takePhoto" type="button">Sacar o elegir foto</button><div class="quick-note">En iPhone puedes usar la cámara o elegir una imagen. Se comprime antes de enviarla.</div></div>
+    </div>
+    <input id="photoInput" class="hidden" type="file" accept="image/*" capture="environment">
+    <div class="form-grid">
+      <label class="field wide">Código de barras<input id="fBarcode" readonly></label>
+      <label class="field wide">Nombre *<input id="fName" maxlength="180" autocomplete="off"></label>
+      <label class="field">Precio normal *<input id="fPrice" inputmode="numeric" placeholder="Ej. 1990"></label>
+      <label class="field" id="stockField">Stock físico<input id="countedStock" inputmode="decimal" placeholder="Ej. 12"></label>
+      <div class="field wide checks">
+        <label><input id="fVisible" type="checkbox"> Publicar en tienda web</label>
+        <label><input id="fFeatured" type="checkbox"> Mostrar en portada / ofertas</label>
+        <label><input id="fActive" type="checkbox" checked> Producto activo</label>
+      </div>
+    </div>
+    <div class="quick-note">“Portada” también deja el producto visible. Si la red falla, el POS conserva el alta y reintenta únicamente este SKU.</div>
+    <details class="advanced">
+      <summary>Oferta y datos opcionales</summary>
+      <div class="form-grid">
+        <label class="field">Precio oferta<input id="fPromoPrice" inputmode="numeric" placeholder="Vacío = sin oferta"></label>
+        <label class="field">Texto oferta<input id="fPromoLabel" maxlength="80" placeholder="Ej. Oferta de la semana"></label>
+        <label class="field">Oferta desde<input id="fPromoFrom" type="date"></label>
+        <label class="field">Oferta hasta<input id="fPromoTo" type="date"></label>
+        <label class="field">Costo<input id="fCost" inputmode="numeric"></label>
+        <label class="field">Unidad<select id="fUnit"><option value="unidad">Unidad</option><option value="kg">Kilogramo</option><option value="litro">Litro</option><option value="pack">Pack</option><option value="caja">Caja</option></select></label>
+        <label class="field">Stock mínimo<input id="fStockMin" inputmode="decimal"></label>
+        <label class="field">Categoría<input id="fCategory" maxlength="100"></label>
+        <label class="field">Marca<input id="fBrand" maxlength="100"></label>
+        <label class="field wide">Ubicación en góndola<input id="fLocation" maxlength="120" placeholder="Ej. Pasillo 2 · nivel medio"></label>
+      </div>
+    </details>
+    <div class="editor-actions"><button class="btn" id="saveStay" type="button">Guardar sin salir</button><button class="btn green" id="saveContinue" type="button">Guardar y escanear otro</button></div>
+  </section>
+
+  <section id="helpView" class="card hidden">
+    <h2>Teléfono del negocio</h2>
+    <div id="sessionInfo" class="notice">Comprobando sesión…</div>
+    <p><b>iPhone:</b> Safari → Compartir → Añadir a pantalla de inicio.</p><p><b>Android:</b> menú del navegador → Instalar aplicación.</p>
+    <button id="installBtn" class="btn green hidden" type="button">Instalar aplicación</button>
+    <p class="muted">La credencial queda guardada en este teléfono. Si se pierde, revócala desde Góndola móvil en el POS.</p>
+    <p class="muted">La Góndola no contiene la llave administrativa de Supabase. Cada acción viaja al POS asignado y se registra allí.</p>
+  </section>
+
+  <nav class="tabs"><button id="tabScan" class="active" type="button">Escanear</button><button id="tabEdit" type="button">Producto</button><button id="tabHelp" type="button">Equipo</button></nav>
+  <div class="small" id="securityNote">HTTPS · llave administrativa sólo en el POS · RC4 / 5.2</div>
 </main>
+<div id="toast" class="toast hidden"></div>
 <script>
 (function(){
   'use strict';
-  var KEY='bv_gondola_pair_v1', pair={}, action='lookup', reader=null, controls=null, busy=false, lastCode='', lastAt=0, lastFound='';
-  var state=document.getElementById('state'), result=document.getElementById('result'), hint=document.getElementById('hint');
+  var DEMO=new URLSearchParams(location.search).get('demo')==='1';
+  var KEY='bv_gondola_pair_v1',DEMO_KEY='bv_gondola_demo_products_rc4';
+  var pair={},permissions=[],action='lookup',reader=null,controls=null,track=null,busy=false;
+  var scanPhase='booting',latchedCode='',blankSince=0,currentProduct=null,pendingPhoto=null,originalStock=null,deferredInstall=null,audioCtx=null,toastTimer=null;
+  var state=el('state'),result=el('result'),hint=el('hint'),video=el('video'),cameraBox=el('cameraBox');
+
+  function el(id){return document.getElementById(id);}
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function money(n){return '$'+Math.round(Number(n)||0).toLocaleString('es-CL');}
+  function qty(n){return Number(n||0).toLocaleString('es-CL',{maximumFractionDigits:3});}
+  function numberValue(v){var n=Number(String(v==null?'':v).replace(/\./g,'').replace(',','.'));return Number.isFinite(n)?n:null;}
+  function decimalValue(v){var n=Number(String(v==null?'':v).replace(',','.'));return Number.isFinite(n)?n:null;}
   function uuid(){return crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0,v=c==='x'?r:(r&3|8);return v.toString(16);});}
-  function loadPair(){
-    var h=new URLSearchParams(location.hash.slice(1));
-    if(h.get('s')&&h.get('t')){pair={s:h.get('s'),t:h.get('t')};localStorage.setItem(KEY,JSON.stringify(pair));history.replaceState(null,'',location.pathname+location.search);}
-    else{try{pair=JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){pair={};}}
+  function has(p){return permissions.indexOf(p)>=0;}
+  function wait(ms){return new Promise(function(resolve){setTimeout(resolve,ms);});}
+  function showToast(text,bad){clearTimeout(toastTimer);el('toast').textContent=text;el('toast').className='toast'+(bad?' bad':'');toastTimer=setTimeout(function(){el('toast').classList.add('hidden');},4200);}
+  function setPhase(next,label){scanPhase=next;state.dataset.phase=next;state.textContent=label||({booting:'Preparando…',idle:'Lector listo',arming:'Listo para el próximo',waiting:'Esperando al POS…',result:'Resultado listo',editing:'Editando',error:'Revisar'}[next]||next);cameraBox.classList.toggle('paused',next==='waiting'||next==='result'||next==='editing'||next==='error');}
+  function showNext(show,label){el('nextScan').classList.toggle('hidden',!show);if(label)el('nextScan').textContent=label;}
+  function unlockAudio(){try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;if(!audioCtx)audioCtx=new C();if(audioCtx.state==='suspended')audioCtx.resume();}catch(e){}}
+  function beepOnce(){try{unlockAudio();if(!audioCtx)return;var o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='square';o.frequency.value=1040;g.gain.setValueAtTime(.0001,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.075,audioCtx.currentTime+.008);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.105);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.11);}catch(e){}try{navigator.vibrate&&navigator.vibrate(45);}catch(e){}}
+  function errorFeedback(){try{navigator.vibrate&&navigator.vibrate([75,45,75]);}catch(e){}}
+  function pausePreview(){try{video.pause();}catch(e){}}
+  function resumePreview(){try{var p=video.play();if(p&&p.catch)p.catch(function(){});}catch(e){}}
+
+  function demoDefaults(){return [
+    {id:'demo_aceite',barcode:'7801234500001',name:'Aceite Maravilla 900 ml',price:2790,cost:2100,stock:25,stock_min:6,unit:'unidad',category_name:'Abarrotes',brand:'Demo',gondola_location:'Pasillo 1 · nivel medio',active:true,visible_web:true,featured_web:false},
+    {id:'demo_leche',barcode:'7801234500008',name:'Leche Entera 1 L',price:1190,cost:890,stock:45,stock_min:10,unit:'unidad',category_name:'Lácteos',brand:'Demo',gondola_location:'Refrigerador 1',active:true,visible_web:true,featured_web:true},
+    {id:'demo_bebida',barcode:'7801234500012',name:'Bebida Cola 1,5 L',price:1990,cost:1500,stock:60,stock_min:12,unit:'unidad',category_name:'Bebidas',brand:'Demo',gondola_location:'Pasillo 3 · nivel bajo',active:true,visible_web:true,featured_web:false}
+  ];}
+  function demoLoad(){try{var p=JSON.parse(localStorage.getItem(DEMO_KEY)||'[]');return Array.isArray(p)&&p.length?p:demoDefaults();}catch(e){return demoDefaults();}}
+  var demoProducts=demoLoad();
+  function demoSave(){try{localStorage.setItem(DEMO_KEY,JSON.stringify(demoProducts));}catch(e){}}
+  function demoFind(code,payload){var id=payload&&payload.product_id||'';code=String(code||'');if(code.indexOf('id:')===0)id=code.slice(3);return demoProducts.find(function(p){return (id&&p.id===id)||(code&&p.barcode===code);});}
+  function demoApply(p,d){d=d||{};['name','unit','brand','gondola_location','promo_label','promo_from','promo_to'].forEach(function(k){if(d[k]!==undefined)p[k]=d[k];});if(d.price!==undefined&&d.price!=='')p.price=Number(d.price);if(d.cost!==undefined&&d.cost!=='')p.cost=Number(d.cost);if(d.stock_min!==undefined&&d.stock_min!=='')p.stock_min=Number(d.stock_min);if(d.promo_price!==undefined)p.promo_price=d.promo_price===''?null:Number(d.promo_price);if(d.category!==undefined)p.category_name=d.category;['visible_web','featured_web','active'].forEach(function(k){if(d[k]!==undefined)p[k]=!!d[k];});return p;}
+  async function demoCommand(kind,code,payload){
+    await wait(260);payload=payload||{};
+    if(kind==='search'){var q=String(code||'').toLocaleLowerCase('es');return {found:true,products:demoProducts.filter(function(p){return (p.name+' '+(p.barcode||'')).toLocaleLowerCase('es').indexOf(q)>=0;}).slice(0,20)};}
+    var p=demoFind(code,payload);
+    if(kind==='lookup'||kind==='add_cart'){if(!p)return {found:false};var amount=Number(payload.quantity)||1;return {found:true,inactive:!p.active,product:p,quantity:amount,cart_queued:kind==='add_cart'&&p.active,cart_delivered:kind==='add_cart'&&p.active};}
+    if(kind==='product_create'){if(p)throw new Error('Ese código ya existe');p=demoApply({id:'demo_'+uuid().slice(0,8),barcode:String(code||''),stock:Number(payload.initial_stock)||0,active:true,visible_web:true,featured_web:false},payload);demoProducts.unshift(p);demoSave();return {found:true,created:true,product:p,web_published:false,web_pending:false,demo_safe:true};}
+    if(!p)throw new Error('El producto de demostración ya no existe.');
+    if(kind==='product_save'){demoApply(p,payload);demoSave();return {found:true,saved:true,product:p,demo_safe:true};}
+    if(kind==='stock_set'){var before=Number(p.stock)||0;p.stock=Number(payload.counted_stock)||0;demoSave();return {found:true,product:p,stock_before:before,stock_after:p.stock,demo_safe:true};}
+    if(kind==='product_photo'){p.image_url=payload.data_url||'';demoSave();return {found:true,product:p,image_url:p.image_url,demo_safe:true};}
+    throw new Error('Acción no disponible en la demostración.');
   }
-  function setState(txt,ok){state.textContent=txt;state.className=ok===true?'ok':ok===false?'bad':'';}
+
+  function loadPair(){if(DEMO){pair={s:'demo',t:'bloqueado'};return;}var h=new URLSearchParams(location.hash.slice(1));if(h.get('s')&&h.get('t')){pair={s:h.get('s'),t:h.get('t')};localStorage.setItem(KEY,JSON.stringify(pair));history.replaceState(null,'',location.pathname+location.search);}else{try{pair=JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){pair={};}}}
   async function verify(){
-    if(!pair.s||!pair.t){setState('Sin emparejar',false);throw new Error('Abre esta página escaneando el QR que muestra el POS.');}
+    if(DEMO){permissions=['lookup','add_cart','edit_product','adjust_stock'];state.dataset.phase='idle';state.textContent='DEMO AISLADA';el('sessionInfo').innerHTML='<b>Simulador local</b><br>No usa Supabase, pedidos QR ni catálogo de producción.<br>PIN demo del POS: 123456';el('securityNote').textContent='DEMO AISLADA · ningún dato sale de este equipo · RC4';applyPermissions();return;}
+    if(!pair.s||!pair.t){state.dataset.phase='error';state.textContent='Sin emparejar';throw new Error('Abre esta página escaneando el QR que muestra el POS.');}
     var r=await window.bv.rpc('mobile_session_status',{p_session_id:pair.s,p_token:pair.t});
-    if(r.error||!r.data){localStorage.removeItem(KEY);setState('Sesión vencida',false);throw new Error((r.error&&r.error.message)||'Vuelve a emparejar el celular desde el POS.');}
-    setState('Caja '+(r.data.register_id||'conectada'),true);
+    if(r.error||!r.data){localStorage.removeItem(KEY);state.dataset.phase='error';state.textContent='Sesión vencida';throw new Error((r.error&&r.error.message)||'Vuelve a emparejar el teléfono desde el POS.');}
+    permissions=Array.isArray(r.data.permissions)?r.data.permissions:['lookup','add_cart'];state.dataset.phase='idle';state.textContent='Caja '+(r.data.register_id||'conectada');el('sessionInfo').innerHTML='<b>'+esc(r.data.device_label||'Teléfono del negocio')+'</b><br>Caja '+esc(r.data.register_id||'')+' · '+(r.data.persistent?'persiste hasta revocación':'vence '+new Date(r.data.expires_at).toLocaleString('es-CL'))+'<br>Funciones: '+esc(permissions.join(', '));applyPermissions();
   }
-  function feedback(ok){
-    try{navigator.vibrate&&navigator.vibrate(ok?[45]:[80,50,80]);var C=window.AudioContext||window.webkitAudioContext,c=new C(),o=c.createOscillator(),g=c.createGain();o.frequency.value=ok?920:220;g.gain.value=.08;o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.11);}catch(e){}
+  function applyPermissions(){el('cartMode').classList.toggle('hidden',!has('add_cart'));el('tabEdit').classList.toggle('hidden',!has('edit_product')&&!has('adjust_stock'));el('takePhoto').classList.toggle('hidden',!has('edit_product'));el('saveStay').classList.toggle('hidden',!has('edit_product'));el('saveContinue').classList.toggle('hidden',!has('edit_product'));}
+  async function waitResult(id,max){for(var i=0;i<(max||150);i++){await wait(650);var r=await window.bv.rpc('mobile_command_result',{p_session_id:pair.s,p_token:pair.t,p_command_id:id});if(r.error)throw r.error;if(r.data&&r.data.status==='completed')return r.data.result||{};if(r.data&&r.data.status==='failed')throw new Error((r.data.result||{}).message||'La caja rechazó la operación');}throw new Error('La caja no respondió. Revisa que el POS esté encendido y vuelve a intentar.');}
+  async function command(kind,code,payload,max){if(busy)throw new Error('Espera a que termine la operación anterior');busy=true;try{if(DEMO)return await demoCommand(kind,code,payload);var r=await window.bv.rpc('mobile_send_command',{p_session_id:pair.s,p_token:pair.t,p_request_id:uuid(),p_action:kind,p_barcode:String(code||'').trim(),p_payload:payload||{}});if(r.error)throw r.error;return await waitResult(r.data,max);}finally{busy=false;}}
+
+  function publicationText(out){if(DEMO||out.demo_safe)return 'Guardado sólo en la demostración aislada.';if(out.web_published)return 'Guardado en el POS y publicado en la web (sólo este SKU).';if(out.web_pending)return out.web_message||'Guardado en el POS; publicación web pendiente y en reintento.';return 'Guardado en el POS.';}
+  function productChips(p){var items=[];items.push('<span class="chip '+(p.active?'good':'bad')+'">'+(p.active?'Activo':'Inactivo')+'</span>');items.push('<span class="chip '+(p.visible_web?'good':'')+'">'+(p.visible_web?'Visible web':'Oculto web')+'</span>');if(p.featured_web)items.push('<span class="chip good">Portada</span>');if(p.promo_active||p.promo_price)items.push('<span class="chip good">Oferta '+money(p.promo_price)+'</span>');return '<div class="chips">'+items.join('')+'</div>';}
+  function productCard(p,extra,out){
+    currentProduct=p;var photo=p.image_url?'<img class="product-photo" src="'+esc(p.image_url)+'" alt="">':'';var buttons='<div class="result-buttons">';
+    if(!p.active&&has('edit_product'))buttons+='<button class="btn amber" id="reactivateCurrent" type="button">Reactivar producto</button>';
+    if(has('edit_product'))buttons+='<button class="btn blue" id="editCurrent" type="button">Editar / foto</button>';if(has('adjust_stock'))buttons+='<button class="btn" id="stockCurrent" type="button">Contar stock</button>';buttons+='</div>';
+    var price=p.promo_active&&p.promo_price?money(p.promo_price)+' <small class="muted"><s>'+money(p.price)+'</s></small>':money(p.price);
+    result.innerHTML=photo+'<h2>'+esc(p.name)+'</h2><div class="price">'+price+'</div><div class="stock">Stock: '+esc(qty(p.stock))+' '+esc(p.unit||'')+(p.category_name?' · '+esc(p.category_name):'')+'</div>'+productChips(p)+(extra?'<div class="message">'+esc(extra)+'</div>':'')+buttons;
+    var e=el('editCurrent');if(e)e.onclick=function(){openEditor(p,false,false);};var s=el('stockCurrent');if(s)s.onclick=function(){openEditor(p,false,true);};var a=el('reactivateCurrent');if(a)a.onclick=function(){reactivate(p);};
+    setPhase('result',out&&out.cart_delivered?'Entregado a Caja':'Resultado listo');showNext(true,'Escanear otro');pausePreview();
   }
-  async function waitResult(id){
-    for(var i=0;i<55;i++){
-      await new Promise(function(resolve){setTimeout(resolve,320);});
-      var r=await window.bv.rpc('mobile_command_result',{p_session_id:pair.s,p_token:pair.t,p_command_id:id});
-      if(r.error)throw r.error;
-      if(r.data&&r.data.status==='completed')return r.data.result||{};
-      if(r.data&&r.data.status==='failed')throw new Error((r.data.result||{}).message||'La caja rechazó el escaneo');
-    }
-    throw new Error('La caja no respondió. Revisa que el POS esté encendido y vuelve a intentar.');
-  }
-  async function scan(code){
+  function unknownCard(code){currentProduct={barcode:code,_new:true};var b=has('edit_product')?'<div class="result-buttons"><button class="btn green" id="createUnknown" type="button">Crear esta novedad</button></div>':'<div class="notice">Este teléfono no tiene permiso para crear productos.</div>';result.innerHTML='<h2>No encontrado</h2><div class="message">El código <b>'+esc(code)+'</b> no existe en el POS. Puedes darlo de alta con nombre, precio, stock, foto y publicación web.</div>'+b;var c=el('createUnknown');if(c)c.onclick=function(){openEditor(currentProduct,true,false);};setPhase('result','Código nuevo');showNext(true,'Cancelar y escanear otro');pausePreview();}
+  async function reactivate(p){if(busy)return;setPhase('waiting','Reactivando…');result.innerHTML='<div class="message"><span class="spinner"></span> Reactivando en el POS y publicando sólo este producto…</div>';try{var out=await command('product_save',p.barcode||('id:'+p.id),{product_id:p.id,active:true,visible_web:p.visible_web!==false},100);productCard(out.product,'✓ Reactivado. '+publicationText(out),out);showToast('Producto reactivado');}catch(e){showError(e);}}
+  function cartMessage(out){if(out.cart_delivered)return '✓ '+qty(out.quantity||1)+' ya apareció en la Caja asignada.';if(out.cart_queued)return '✓ '+qty(out.quantity||1)+' quedó en cola local. Abre la pantalla Caja para recibirlo.';return out.message||'No se agregó a Caja.';}
+  async function beginScan(code,manual){
     code=String(code||'').trim();if(!code||busy)return;
-    var now=Date.now();if(code===lastCode&&now-lastAt<2200)return;lastCode=code;lastAt=now;busy=true;
-    hint.textContent='Consultando '+code+'…';result.innerHTML='<div class="message">Consultando el POS…</div>';
+    if(!manual){if(scanPhase!=='idle'&&scanPhase!=='arming')return;if(scanPhase==='arming'&&code===latchedCode)return;}
+    latchedCode=code;blankSince=0;setPhase('waiting','Consultando…');showNext(false);pausePreview();beepOnce();hint.textContent='Código leído · esperando al POS';result.innerHTML='<div class="message"><span class="spinner"></span> Consultando '+esc(code)+'…</div>';
+    try{var payload=action==='add_cart'?{quantity:decimalValue(el('cartQty').value)||1}:{};var out=await command(action,code,payload,80),p=out.product;if(!out.found||!p){unknownCard(code);}else if(out.inactive||!p.active){productCard(p,'Producto inactivo: no se vende ni se agrega hasta reactivarlo.',out);}else{productCard(p,action==='add_cart'?cartMessage(out):'',out);}}
+    catch(e){showError(e);}
+  }
+  function showError(e){errorFeedback();setPhase('error','Sin respuesta');result.innerHTML='<h2>No se pudo completar</h2><div class="message">'+esc(e&&e.message||e)+'</div>';hint.textContent='La lectura quedó detenida';showNext(true,'Reintentar / escanear otro');pausePreview();}
+  function noteBlankFrame(){if(scanPhase!=='arming')return;if(!blankSince)blankSince=Date.now();if(Date.now()-blankSince>=420){setPhase('idle','Lector listo');hint.textContent=action==='lookup'?'Apunta al próximo código':'Apunta al producto para agregarlo a Caja';}}
+  function decoderFrame(found){if(found){var code=String(found.getText?found.getText():found.text||found||'').trim();blankSince=0;if(!code)return;if(scanPhase==='arming'&&code===latchedCode){hint.textContent='Aparta el código anterior o apunta a otro';return;}beginScan(code,false);}else{noteBlankFrame();}}
+  function nextScan(message){currentProduct=null;pendingPhoto=null;showView('scan');showNext(false);el('searchResults').innerHTML='';el('manual').value='';result.innerHTML='<div class="message">'+esc(message||'Lector preparado. Aparta el código anterior y apunta al siguiente.')+'</div>';setPhase('arming','Listo para el próximo');hint.textContent='Aparta el código anterior o apunta a uno diferente';blankSince=0;resumePreview();}
+  function setMode(next){action=next;el('lookupMode').classList.toggle('active',next==='lookup');el('cartMode').classList.toggle('active',next==='add_cart');el('qtyRow').classList.toggle('hidden',next!=='add_cart');if(scanPhase==='idle')hint.textContent=next==='lookup'?'Apunta al código para ver precio':'Cada lectura se agregará una sola vez a Caja';}
+  async function startCamera(){
+    unlockAudio();el('cameraStart').disabled=true;el('cameraStart').textContent='Abriendo cámara…';setPhase('booting','Abriendo cámara…');
+    try{if(controls)controls.stop();if(!window.ZXingBrowser)throw new Error('No se cargó el lector de códigos.');reader=new ZXingBrowser.BrowserMultiFormatReader();controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}},video,function(found){decoderFrame(found||null);});track=controls&&controls.stream&&controls.stream.getVideoTracks?controls.stream.getVideoTracks()[0]:null;el('cameraStart').classList.add('hidden');el('restartCam').classList.remove('hidden');setPhase('idle','Lector listo');hint.textContent='Apunta al código de barras';if(track&&track.getCapabilities&&track.getCapabilities().torch){el('torch').classList.remove('hidden');el('torch').onclick=function(){var on=el('torch').dataset.on!=='1';track.applyConstraints({advanced:[{torch:on}]}).then(function(){el('torch').dataset.on=on?'1':'0';el('torch').textContent=on?'Apagar luz':'Luz';}).catch(function(){showToast('Este teléfono no pudo encender la luz',true);});};}}
+    catch(e){el('cameraStart').disabled=false;el('cameraStart').textContent='Reintentar cámara';el('cameraStart').classList.remove('hidden');setPhase('error','Cámara no disponible');result.innerHTML='<h2>Cámara no disponible</h2><div class="message">'+esc(e.message||e)+' Puedes escribir el código manualmente.</div>';}
+  }
+
+  function showView(name){['scan','edit','help'].forEach(function(n){el(n+'View').classList.toggle('hidden',n!==name);el('tab'+n[0].toUpperCase()+n.slice(1)).classList.toggle('active',n===name);});}
+  function setVal(id,v){el(id).value=v==null?'':v;}function setChecked(id,v){el(id).checked=!!v;}
+  function transportCode(){return el('fBarcode').value.trim()||('id:'+(currentProduct&&currentProduct.id||'producto'));}
+  function setEditDisabled(disabled){['fName','fPrice','fVisible','fFeatured','fActive','fPromoPrice','fPromoLabel','fPromoFrom','fPromoTo','fCost','fUnit','fStockMin','fCategory','fBrand','fLocation'].forEach(function(id){el(id).disabled=disabled;});el('countedStock').disabled=!has('adjust_stock')&&!(currentProduct&&currentProduct._new&&has('edit_product'));}
+  function openEditor(p,isNew,focusStock){
+    p=p||{};currentProduct=Object.assign({},p,{_new:!!isNew});pendingPhoto=null;originalStock=isNew?null:Number(p.stock||0);el('editorTitle').textContent=isNew?'Crear nueva novedad':'Editar producto';el('editorLead').textContent=isNew?'Alta rápida: queda en el POS y, si eliges web, se publica sólo este SKU.':'Los cambios quedan primero en el POS y se publica sólo este SKU.';
+    setVal('fBarcode',p.barcode||'');setVal('fName',p.name||'');setVal('fPrice',p.price);setVal('fCost',p.cost);setVal('fUnit',p.unit||'unidad');setVal('fStockMin',p.stock_min);setVal('fCategory',p.category_name||'');setVal('fBrand',p.brand||'');setVal('fLocation',p.gondola_location||'');setVal('fPromoPrice',p.promo_price);setVal('fPromoLabel',p.promo_label||'');setVal('fPromoFrom',p.promo_from||'');setVal('fPromoTo',p.promo_to||'');setChecked('fVisible',isNew?true:p.visible_web);setChecked('fFeatured',p.featured_web);setChecked('fActive',isNew?true:p.active);setVal('countedStock',isNew?'':p.stock);
+    el('photoPreview').classList.toggle('hidden',!p.image_url);el('photoPlaceholder').classList.toggle('hidden',!!p.image_url);if(p.image_url)el('photoPreview').src=p.image_url;el('editorMessage').classList.add('hidden');setEditDisabled(!has('edit_product'));showView('edit');setPhase('editing','Editando');pausePreview();setTimeout(function(){(focusStock?el('countedStock'):el('fName')).focus();},80);
+  }
+  function productPayload(){var featured=el('fFeatured').checked,visible=el('fVisible').checked||featured;el('fVisible').checked=visible;return {name:el('fName').value.trim(),price:numberValue(el('fPrice').value),cost:numberValue(el('fCost').value),unit:el('fUnit').value,stock_min:decimalValue(el('fStockMin').value),category:el('fCategory').value.trim(),brand:el('fBrand').value.trim(),gondola_location:el('fLocation').value.trim(),visible_web:visible,featured_web:featured,active:el('fActive').checked,promo_price:el('fPromoPrice').value.trim()===''?'':numberValue(el('fPromoPrice').value),promo_label:el('fPromoLabel').value.trim(),promo_from:el('fPromoFrom').value,promo_to:el('fPromoTo').value};}
+  function editorStatus(msg,bad){el('editorMessage').textContent=msg;el('editorMessage').className='notice '+(bad?'bad':'good');}
+  function setSaving(on){el('saveStay').disabled=on;el('saveContinue').disabled=on;el('takePhoto').disabled=on;}
+  async function uploadPendingPhoto(code,product){if(!pendingPhoto)return {};editorStatus('Producto guardado. Enviando foto y actualizando el carrito…');var out=await command('product_photo',code,{data_url:pendingPhoto.data_url,product_id:product.id},180);pendingPhoto=null;return out;}
+  async function saveProduct(continueScanning){
+    if(!has('edit_product')||busy)return;var data=productPayload(),isNew=!!(currentProduct&&currentProduct._new),code=transportCode();if(currentProduct&&currentProduct.id)data.product_id=currentProduct.id;
+    if(!data.name)return editorStatus('Escribe el nombre del producto.',true);if(data.price===null||data.price<0)return editorStatus('Escribe un precio válido.',true);if(data.featured_web&&!data.visible_web)return editorStatus('Un producto de portada debe estar visible en la web.',true);if(isNew){var initial=decimalValue(el('countedStock').value);data.initial_stock=initial===null?0:initial;}
+    setSaving(true);editorStatus(isNew?'Creando en el POS…':'Guardando en el POS…');
     try{
-      var r=await window.bv.rpc('mobile_send_scan',{p_session_id:pair.s,p_token:pair.t,p_request_id:uuid(),p_action:action,p_barcode:code});
-      if(r.error)throw r.error;
-      var out=await waitResult(r.data),p=out.product;
-      if(out.pos_version)setState('Caja '+out.pos_version,true);
-      if(!out.found||!p){feedback(false);lastFound='';result.innerHTML='<h2>No encontrado</h2>'+
-        '<div class="message">El código '+esc(code)+' no está en el POS. Puedes crearlo ahora:</div>'+
-        '<div class="nuevoBox">'+
-          '<input id="nvNombre" placeholder="Nombre del producto" autocomplete="off">'+
-          '<input id="nvPrecio" placeholder="Precio ($)" inputmode="numeric">'+
-          '<label class="fotoBtn" id="nvFotoBtn">📷 Sacarle la foto (opcional)'+
-            '<input type="file" accept="image/*" capture="environment" style="display:none" onchange="window._nvFoto(this)"></label>'+
-          '<button class="nvOk" onclick="window._crearProducto(\''+esc(code)+'\')">Crear y publicar</button>'+
-          '<div id="nvMsg"></div>'+
-        '</div>';}
-      else{feedback(true);lastFound=code;result.innerHTML='<h2>'+esc(p.name)+'</h2><div class="price">'+money(p.price)+'</div><div class="stock">Stock: '+esc(p.stock==null?'sin dato':p.stock)+' '+esc(p.unit||'')+'</div>'+(action==='add_cart'?'<div class="message">✓ Enviado al carrito de la caja</div>':'')+'<label class="fotoBtn">📷 Sacarle la foto para la web<input type="file" accept="image/*" capture="environment" style="display:none" onchange="window._gFoto(this)"></label><div id="fotoMsg"></div>';}
-    }catch(e){feedback(false);setState('Sin respuesta',false);result.innerHTML='<h2>No se pudo consultar</h2><div class="message">'+esc(e.message||e)+'</div>';}
-    finally{busy=false;hint.textContent='Apunta al próximo código de barras';}
+      var out=await command(isNew?'product_create':'product_save',code,data,110);var product=out.product;var notes=[publicationText(out)];
+      if(!isNew&&has('adjust_stock')){var counted=decimalValue(el('countedStock').value);if(counted!==null&&Math.abs(counted-Number(originalStock||0))>.000001){editorStatus('Producto guardado. Aplicando conteo físico…');var stockOut=await command('stock_set',code,{counted_stock:counted,product_id:product.id},100);product=stockOut.product;originalStock=Number(stockOut.stock_after);notes.push('Stock '+qty(stockOut.stock_before)+' → '+qty(stockOut.stock_after)+'.');if(stockOut.web_pending)notes.push(publicationText(stockOut));}}
+      if(pendingPhoto){var photoOut=await uploadPendingPhoto(code,product);product=photoOut.product||product;notes.push(DEMO?'Foto guardada sólo en la demo.':publicationText(photoOut));}
+      currentProduct=Object.assign({},product,{_new:false});beepOnce();
+      if(continueScanning){nextScan((isNew?'Producto creado. ':'Producto actualizado. ')+notes.join(' '));showToast(isNew?'Novedad lista':'Producto actualizado');}
+      else{openEditor(currentProduct,false,false);editorStatus(notes.join(' '));showToast('Cambios guardados');}
+    }catch(e){editorStatus(e.message||e,true);errorFeedback();}
+    finally{setSaving(false);}
   }
-  function setMode(next){action=next;document.getElementById('lookupMode').classList.toggle('active',next==='lookup');document.getElementById('cartMode').classList.toggle('active',next==='add_cart');hint.textContent=next==='lookup'?'Apunta al código para ver precio':'Cada escaneo se agregará a la Caja';}
-  async function camera(){
-    if(!window.ZXingBrowser)throw new Error('No se cargó el lector de códigos.');
-    reader=new ZXingBrowser.BrowserMultiFormatReader();
-    controls=await reader.decodeFromConstraints({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}},document.getElementById('video'),function(found){if(found)scan(found.getText());});
+  function blobDataUrl(blob){return new Promise(function(resolve,reject){var r=new FileReader();r.onload=function(){resolve(r.result);};r.onerror=reject;r.readAsDataURL(blob);});}
+  function canvasBlob(canvas,q){return new Promise(function(resolve){canvas.toBlob(resolve,'image/jpeg',q);});}
+  async function compressPhoto(file){
+    var bmp,objectUrl='';try{bmp=await createImageBitmap(file,{imageOrientation:'from-image'});}catch(e){bmp=await new Promise(function(resolve,reject){var img=new Image();objectUrl=URL.createObjectURL(file);img.onload=function(){resolve(img);};img.onerror=reject;img.src=objectUrl;});}
+    var max=1280,scale=Math.min(1,max/Math.max(bmp.width,bmp.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bmp.width*scale));canvas.height=Math.max(1,Math.round(bmp.height*scale));canvas.getContext('2d').drawImage(bmp,0,0,canvas.width,canvas.height);if(objectUrl)URL.revokeObjectURL(objectUrl);var blob=await canvasBlob(canvas,.8);
+    if(blob&&blob.size>1200000){var scale2=Math.min(1,1024/Math.max(canvas.width,canvas.height)),c2=document.createElement('canvas');c2.width=Math.max(1,Math.round(canvas.width*scale2));c2.height=Math.max(1,Math.round(canvas.height*scale2));c2.getContext('2d').drawImage(canvas,0,0,c2.width,c2.height);blob=await canvasBlob(c2,.65);}if(!blob)throw new Error('No se pudo comprimir la foto');if(blob.size>1400000)throw new Error('La foto sigue siendo demasiado grande; prueba con otra.');return {blob:blob,data_url:await blobDataUrl(blob)};
   }
-  document.getElementById('lookupMode').onclick=function(){setMode('lookup');};document.getElementById('cartMode').onclick=function(){setMode('add_cart');};
-  document.getElementById('sendManual').onclick=function(){scan(document.getElementById('manual').value);};document.getElementById('manual').onkeydown=function(e){if(e.key==='Enter')scan(e.target.value);};
-  loadPair();verify().then(camera).catch(function(e){result.innerHTML='<h2>Emparejamiento necesario</h2><div class="message">'+esc(e.message||e)+'</div>';});
-  var _nvFotoData='';
-  window._nvFoto=async function(input){
-    var f=input.files&&input.files[0];if(!f)return;
-    _nvFotoData=await comprimir(f);
-    document.getElementById('nvFotoBtn').innerHTML='✓ Foto lista';
-  };
-  window._crearProducto=async function(code){
-    var nombre=(document.getElementById('nvNombre').value||'').trim();
-    var precio=Number(String(document.getElementById('nvPrecio').value||'').replace(/[^0-9]/g,''))||0;
-    var msg=document.getElementById('nvMsg');
-    if(nombre.length<2){msg.textContent='Escribe el nombre';return;}
-    if(precio<=0){msg.textContent='Escribe el precio';return;}
-    msg.textContent='Creando en la caja…';
-    try{
-      var r=await window.bv.rpc('mobile_send_new_product',{p_session_id:pair.s,p_token:pair.t,
-        p_request_id:uuid(),p_barcode:code,p_name:nombre,p_price:precio,p_photo:_nvFotoData});
-      if(r.error)throw r.error;
-      var out=await waitResult(r.data);
-      if(out.created){feedback(true);_nvFotoData='';
-        msg.innerHTML='✓ <b>'+esc(out.product.name)+'</b> creado en la caja y publicado en la web';}
-      else{feedback(false);msg.textContent=out.message||'No se pudo crear';}
-    }catch(e){feedback(false);msg.textContent=e.message||'No se pudo crear';}
-  };
-  async function comprimir(f){
-    return await new Promise(function(res,rej){
-      var img=new Image(),fr=new FileReader();
-      fr.onload=function(){img.onload=function(){
-        var m=1000,w=img.width,h=img.height,k=Math.min(1,m/Math.max(w,h));
-        var c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
-        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-        res(c.toDataURL('image/jpeg',0.8));};img.onerror=rej;img.src=fr.result;};
-      fr.onerror=rej;fr.readAsDataURL(f);});
-  }
-  window._gFoto=async function(input){
-    var f=input.files&&input.files[0];var msg=document.getElementById('fotoMsg');
-    if(!f||!lastFound){return;}
-    msg.textContent='Subiendo la foto…';
-    try{
-      var dataUrl=await comprimir(f);
-      var r=await window.bv.rpc('mobile_send_photo',{p_session_id:pair.s,p_token:pair.t,p_request_id:uuid(),p_barcode:lastFound,p_photo:dataUrl});
-      if(r.error)throw r.error;
-      var out=await waitResult(r.data);
-      if(out.photo_ok){feedback(true);msg.innerHTML='✓ Foto publicada en la página';}
-      else if(!out.pos_version){feedback(false);
-        msg.innerHTML='La caja que contestó es una <b>versión anterior</b> y no sabe recibir fotos.<br>En el computador de la caja: abrir <b>ABRIR_POS.bat</b> de la carpeta nueva y reintentar.';}
-      else{feedback(false);msg.textContent=out.message||'La caja no pudo subir la foto';}
-    }catch(e){feedback(false);msg.textContent=e.message||'No se pudo mandar la foto';}
-  };
-  window.addEventListener('pagehide',function(){if(controls)controls.stop();});
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister();});}).catch(function(){});
-    if(window.caches&&caches.keys)caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k);});}).catch(function(){});
-  }
+  async function photoChosen(file){if(!file||!currentProduct||!has('edit_product'))return;setSaving(true);editorStatus('Comprimiendo foto en el teléfono…');try{pendingPhoto=await compressPhoto(file);el('photoPreview').src=URL.createObjectURL(pendingPhoto.blob);el('photoPreview').classList.remove('hidden');el('photoPlaceholder').classList.add('hidden');editorStatus('Foto lista. Toca Guardar para asociarla al producto.');}catch(e){pendingPhoto=null;editorStatus(e.message||e,true);}finally{setSaving(false);el('photoInput').value='';}}
+  async function search(){var q=el('searchText').value.trim();if(!q||busy)return;setPhase('waiting','Buscando…');pausePreview();showNext(false);el('searchResults').innerHTML='<div class="notice"><span class="spinner"></span> Buscando…</div>';try{var out=await command('search',q,{},80),ps=out.products||[];el('searchResults').innerHTML=ps.length?ps.map(function(p,i){return '<button class="search-item" data-idx="'+i+'" type="button"><span>'+esc(p.name)+'<br><small>Stock '+esc(qty(p.stock))+(p.barcode?' · '+esc(p.barcode):' · sin código')+(p.active?'':' · INACTIVO')+'</small></span><span>'+money(p.price)+'</span></button>';}).join(''):'<div class="notice">No hay coincidencias.</div>';Array.from(el('searchResults').querySelectorAll('button[data-idx]')).forEach(function(b){b.onclick=function(){productCard(ps[Number(b.dataset.idx)],'',{});result.scrollIntoView({behavior:'smooth',block:'center'});};});setPhase('result','Búsqueda lista');showNext(true,'Volver al lector');}catch(e){showError(e);}}
+
+  el('lookupMode').onclick=function(){unlockAudio();setMode('lookup');};el('cartMode').onclick=function(){unlockAudio();setMode('add_cart');};el('sendManual').onclick=function(){unlockAudio();beginScan(el('manual').value,true);};el('manual').onkeydown=function(e){if(e.key==='Enter'){unlockAudio();beginScan(e.target.value,true);}};el('searchBtn').onclick=search;el('searchText').onkeydown=function(e){if(e.key==='Enter')search();};
+  el('cameraStart').onclick=startCamera;el('restartCam').onclick=startCamera;el('nextScan').onclick=function(){nextScan();};el('saveStay').onclick=function(){saveProduct(false);};el('saveContinue').onclick=function(){saveProduct(true);};el('takePhoto').onclick=function(){el('photoInput').click();};el('photoInput').onchange=function(e){photoChosen(e.target.files&&e.target.files[0]);};
+  el('fFeatured').onchange=function(){if(this.checked)el('fVisible').checked=true;};el('editorBack').onclick=function(){if(currentProduct&&currentProduct._new)unknownCard(currentProduct.barcode||'');else productCard(currentProduct||{},'',{});showView('scan');};el('tabScan').onclick=function(){if(scanPhase==='editing'){if(currentProduct&&currentProduct.id){productCard(currentProduct,'',{});showView('scan');}else nextScan();}else showView('scan');};el('tabEdit').onclick=function(){if(currentProduct)openEditor(currentProduct,!!currentProduct._new,false);else{showView('scan');el('manualTools').open=true;setTimeout(function(){el('manual').focus();},80);showToast('Escanea o escribe el código de la novedad',true);}};el('tabHelp').onclick=function(){showView('help');setPhase('result','Equipo');pausePreview();};
+  document.addEventListener('pointerdown',unlockAudio,{passive:true});window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredInstall=e;el('installBtn').classList.remove('hidden');});el('installBtn').onclick=async function(){if(deferredInstall){deferredInstall.prompt();await deferredInstall.userChoice;deferredInstall=null;el('installBtn').classList.add('hidden');}};
+  loadPair();verify().then(function(){setPhase('booting','Toca iniciar');hint.textContent='Activa cámara y sonido una sola vez';}).catch(function(e){setPhase('error','Emparejamiento');result.innerHTML='<h2>Emparejamiento necesario</h2><div class="message">'+esc(e.message||e)+'</div>';el('cameraStart').classList.add('hidden');});window.addEventListener('pagehide',function(){if(controls)controls.stop();});if(!DEMO&&'serviceWorker' in navigator)navigator.serviceWorker.register('gondola-sw.js?v=5.2.0-rc1').catch(function(){});
 })();
 </script>
 </body></html>

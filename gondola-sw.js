@@ -1,4 +1,4 @@
-/* Góndola 5.1 — este service worker se retira a propósito.
+/* Góndola 5.2 RC1 — este service worker se retira a propósito.
    La versión anterior guardaba la página y seguía mostrándola aunque el sitio ya
    estuviera actualizado. Este borra todo lo guardado, se da de baja y deja que la
    góndola cargue siempre desde la red (que es lo correcto: sin señal no sirve igual,
