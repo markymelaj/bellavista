@@ -20,7 +20,8 @@
     .mode{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.mode button,.actions button{min-height:50px;border:0;border-radius:14px;font-size:16px;font-weight:700;color:var(--c);background:#442817}.mode button.active{background:var(--green)}
     .result{min-height:110px;background:#28150b;border:1px solid #4b2f1c;border-radius:18px;padding:16px;margin:10px 0}.result h2{font-family:Georgia,serif;margin:0 0 8px;font-size:1.35rem}.price{font-size:2rem;font-weight:800;color:var(--gold)}.stock{opacity:.8}.message{line-height:1.45}
     .actions{display:grid;grid-template-columns:1fr auto;gap:8px}.actions input{width:100%;min-width:0;border:1px solid #65452f;border-radius:14px;background:#fff;color:#19100a;padding:0 14px;font-size:16px}.actions button{padding:0 18px;background:#885426}.small{font-size:.76rem;opacity:.65;text-align:center;margin-top:12px}.hidden{display:none!important}
-  </style>
+  .fotoBtn{display:block;text-align:center;margin-top:14px;padding:13px;border-radius:12px;background:#2d1505;color:#f5f0e8;cursor:pointer}#fotoMsg{margin-top:8px;text-align:center}
+</style>
   <script src="vendor/supabase.min.js"></script>
   <script src="config.js"></script>
   <script src="vendor/zxing-browser.min.js"></script>
@@ -40,7 +41,7 @@
 <script>
 (function(){
   'use strict';
-  var KEY='bv_gondola_pair_v1', pair={}, action='lookup', reader=null, controls=null, busy=false, lastCode='', lastAt=0;
+  var KEY='bv_gondola_pair_v1', pair={}, action='lookup', reader=null, controls=null, busy=false, lastCode='', lastAt=0, lastFound='';
   var state=document.getElementById('state'), result=document.getElementById('result'), hint=document.getElementById('hint');
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function money(n){return '$'+Math.round(Number(n)||0).toLocaleString('es-CL');}
@@ -54,7 +55,7 @@
   async function verify(){
     if(!pair.s||!pair.t){setState('Sin emparejar',false);throw new Error('Abre esta página escaneando el QR que muestra el POS.');}
     var r=await window.bv.rpc('mobile_session_status',{p_session_id:pair.s,p_token:pair.t});
-    if(r.error||!r.data){localStorage.removeItem(KEY);setState('Sesión vencida',false);throw new Error((r.error&&r.error.message)||'Vuelve a emparejar el iPhone desde el POS.');}
+    if(r.error||!r.data){localStorage.removeItem(KEY);setState('Sesión vencida',false);throw new Error((r.error&&r.error.message)||'Vuelve a emparejar el celular desde el POS.');}
     setState('Caja '+(r.data.register_id||'conectada'),true);
   }
   function feedback(ok){
@@ -62,7 +63,7 @@
   }
   async function waitResult(id){
     for(var i=0;i<55;i++){
-      await new Promise(function(resolve){setTimeout(resolve,550);});
+      await new Promise(function(resolve){setTimeout(resolve,320);});
       var r=await window.bv.rpc('mobile_command_result',{p_session_id:pair.s,p_token:pair.t,p_command_id:id});
       if(r.error)throw r.error;
       if(r.data&&r.data.status==='completed')return r.data.result||{};
@@ -79,7 +80,7 @@
       if(r.error)throw r.error;
       var out=await waitResult(r.data),p=out.product;
       if(!out.found||!p){feedback(false);result.innerHTML='<h2>No encontrado</h2><div class="message">Código '+esc(code)+' no existe en el catálogo del POS.</div>';}
-      else{feedback(true);result.innerHTML='<h2>'+esc(p.name)+'</h2><div class="price">'+money(p.price)+'</div><div class="stock">Stock: '+esc(p.stock==null?'sin dato':p.stock)+' '+esc(p.unit||'')+'</div>'+(action==='add_cart'?'<div class="message">✓ Enviado al carrito de la caja</div>':'');}
+      else{feedback(true);lastFound=code;result.innerHTML='<h2>'+esc(p.name)+'</h2><div class="price">'+money(p.price)+'</div><div class="stock">Stock: '+esc(p.stock==null?'sin dato':p.stock)+' '+esc(p.unit||'')+'</div>'+(action==='add_cart'?'<div class="message">✓ Enviado al carrito de la caja</div>':'')+'<label class="fotoBtn">📷 Sacarle la foto para la web<input type="file" accept="image/*" capture="environment" style="display:none" onchange="window._gFoto(this)"></label><div id="fotoMsg"></div>';}
     }catch(e){feedback(false);setState('Sin respuesta',false);result.innerHTML='<h2>No se pudo consultar</h2><div class="message">'+esc(e.message||e)+'</div>';}
     finally{busy=false;hint.textContent='Apunta al próximo código de barras';}
   }
@@ -92,6 +93,26 @@
   document.getElementById('lookupMode').onclick=function(){setMode('lookup');};document.getElementById('cartMode').onclick=function(){setMode('add_cart');};
   document.getElementById('sendManual').onclick=function(){scan(document.getElementById('manual').value);};document.getElementById('manual').onkeydown=function(e){if(e.key==='Enter')scan(e.target.value);};
   loadPair();verify().then(camera).catch(function(e){result.innerHTML='<h2>Emparejamiento necesario</h2><div class="message">'+esc(e.message||e)+'</div>';});
+  window._gFoto=async function(input){
+    var f=input.files&&input.files[0];var msg=document.getElementById('fotoMsg');
+    if(!f||!lastFound){return;}
+    msg.textContent='Subiendo la foto…';
+    try{
+      var dataUrl=await new Promise(function(res,rej){
+        var img=new Image(),fr=new FileReader();
+        fr.onload=function(){img.onload=function(){
+          var m=1000,w=img.width,h=img.height,k=Math.min(1,m/Math.max(w,h));
+          var c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);
+          c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+          res(c.toDataURL('image/jpeg',0.8));};img.onerror=rej;img.src=fr.result;};
+        fr.onerror=rej;fr.readAsDataURL(f);});
+      var r=await window.bv.rpc('mobile_send_photo',{p_session_id:pair.s,p_token:pair.t,p_request_id:uuid(),p_barcode:lastFound,p_photo:dataUrl});
+      if(r.error)throw r.error;
+      var out=await waitResult(r.data);
+      if(out.photo_ok){feedback(true);msg.innerHTML='✓ Foto publicada en la página';}
+      else{feedback(false);msg.textContent=out.message||'La caja no pudo subir la foto';}
+    }catch(e){feedback(false);msg.textContent=e.message||'No se pudo mandar la foto';}
+  };
   window.addEventListener('pagehide',function(){if(controls)controls.stop();});
   if('serviceWorker' in navigator)navigator.serviceWorker.register('gondola-sw.js').catch(function(){});
 })();
