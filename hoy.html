@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bellavista">
+<meta name="theme-color" content="#0f1e2b">
+<title>Bellavista · Hoy</title>
+<style>
+:root{
+  --tinta:#0f1e2b; --naranja:#e2700a; --azul:#1c6b8c; --verde:#15803d; --rojo:#b23b2e;
+  --papel:#f7f5f2; --linea:#e3ded7; --gris:#6b7885;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--papel)}
+body{
+  color:var(--tinta);
+  font:400 17px/1.45 -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;
+  padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 28px);
+  -webkit-font-smoothing:antialiased;
+}
+.h{max-width:520px;margin:0 auto;padding:0 20px}
+
+header{padding:22px 0 6px}
+.dia{font-size:14px;color:var(--gris)}
+.local{font:700 13px/1 -apple-system,system-ui;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--naranja);margin-bottom:6px}
+
+/* el número grande */
+.hoy{padding:14px 0 20px;border-bottom:1px solid var(--linea)}
+.hoy .n{font:700 clamp(46px,15vw,66px)/1 -apple-system,system-ui;letter-spacing:-.035em;
+  font-variant-numeric:tabular-nums}
+.hoy .q{font-size:15px;color:var(--gris);margin-top:4px}
+.comp{display:inline-flex;align-items:center;gap:7px;margin-top:14px;
+  padding:8px 13px;border-radius:9px;font-size:15px;font-weight:500}
+.comp.up{background:#e4f3ea;color:var(--verde)}
+.comp.down{background:#fbeae7;color:var(--rojo)}
+.comp.flat{background:#eeeae4;color:var(--gris)}
+
+/* bloques */
+section{padding:20px 0;border-bottom:1px solid var(--linea)}
+h2{font:600 13px/1 -apple-system,system-ui;letter-spacing:.09em;
+  text-transform:uppercase;color:var(--gris);margin-bottom:13px}
+
+.fila{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0}
+.fila+.fila{border-top:1px solid #efebe5}
+.fila .k{font-size:16.5px}
+.fila .v{font:600 17px -apple-system,system-ui;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fila .p{font-size:14px;color:var(--gris);margin-left:9px;font-weight:400}
+
+/* barras de pago */
+.pg{margin:3px 0 11px}
+.pg .lb{display:flex;justify-content:space-between;font-size:15.5px;margin-bottom:5px}
+.pg .lb b{font-weight:600;font-variant-numeric:tabular-nums}
+.pg .br{height:9px;background:#e8e3dc;border-radius:5px;overflow:hidden}
+.pg .br i{display:block;height:9px;border-radius:5px}
+
+/* fiado */
+.fiado{background:#fff;border:1px solid var(--linea);border-radius:13px;padding:17px 19px}
+.fiado .n{font:700 30px/1 -apple-system,system-ui;font-variant-numeric:tabular-nums}
+.fiado .q{font-size:15px;color:var(--gris);margin-top:5px}
+
+.top .fila .k{font-size:16px}
+.turno{display:flex;align-items:center;gap:9px;font-size:15.5px;color:var(--gris)}
+.pt{width:9px;height:9px;border-radius:50%;flex:none}
+.pt.on{background:var(--verde)} .pt.off{background:#b9b2a8}
+
+.pie{padding:18px 0 0;font-size:13.5px;color:var(--gris);text-align:center}
+.cargando{padding:60px 20px;text-align:center;color:var(--gris)}
+.err{margin:22px 0;padding:17px;background:#fff;border:1px solid var(--linea);
+  border-radius:13px;color:var(--gris);font-size:15.5px}
+@media (prefers-color-scheme: dark){
+  :root{--papel:#131a20;--tinta:#f2efea;--linea:#28323b;--gris:#93a1ad}
+  .fiado,.err{background:#1b242c}
+  .pg .br{background:#28323b}
+  .fila+.fila{border-top-color:#222b33}
+  .comp.up{background:#173026}.comp.down{background:#32201d}.comp.flat{background:#222b33}
+}
+</style>
+</head>
+<body>
+<div class="h" id="app">
+  <div class="cargando">Cargando…</div>
+</div>
+
+<script>
+const LLAVE = new URLSearchParams(location.search).get('k') || '';
+const URL_API = 'https://wtqxyclosajruswjjcbm.supabase.co/rest/v1/rpc/panel_ver';
+const CLAVE = 'sb_publishable_fQCKEOnegXsJBNiB_aBFyQ_CZiRLVn8';
+
+const app = document.getElementById('app');
+const pesos = n => '$' + (Math.round(n||0)).toLocaleString('es-CL');
+
+function diaDeHoy(){
+  // Se arma a mano: capitalize deja "Miércoles, 30 De Septiembre".
+  const d = new Date();
+  const t = d.toLocaleDateString('es-CL', {weekday:'long', day:'numeric', month:'long'});
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+function comparacion(hoy, hace7){
+  // Un número suelto no dice nada. Lo que sirve es "¿vamos mejor o peor que
+  // el mismo día la semana pasada?", dicho en palabras.
+  if(!hace7) return {cls:'flat', txt:'Primera vez que se compara este día'};
+  const dif = hoy - hace7;
+  const pc = Math.round(dif * 100 / hace7);
+  const dia = new Date(Date.now() - 7*86400000)
+                .toLocaleDateString('es-CL', {weekday:'long'});
+  if(Math.abs(pc) < 6) return {cls:'flat', txt:'Parecido al ' + dia + ' pasado'};
+  if(dif > 0) return {cls:'up', txt:'↑ ' + pc + '% más que el ' + dia + ' pasado'};
+  return {cls:'down', txt:'↓ ' + Math.abs(pc) + '% menos que el ' + dia + ' pasado'};
+}
+
+function barrasPago(d){
+  const tot = d.total || 1;
+  const filas = [
+    ['Efectivo', d.efectivo, '#15803d'],
+    ['Tarjeta',  d.tarjeta,  '#1c6b8c'],
+    ['Fiado',    d.fiado,    '#e2700a'],
+    ['Transferencia', d.transferencia, '#6b7885'],
+  ].filter(f => f[1] > 0);
+  if(!filas.length) return '<p style="color:var(--gris);font-size:15.5px">Sin ventas todavía.</p>';
+  return filas.map(([n,v,c]) =>
+    '<div class="pg"><div class="lb"><span>' + n + '</span><b>' + pesos(v) + '</b></div>' +
+    '<div class="br"><i style="width:' + Math.max(2, v*100/tot) + '%;background:' + c + '"></i></div></div>'
+  ).join('');
+}
+
+function pintar(d){
+  if(d.sin_datos){
+    app.innerHTML = '<div class="err">Todavía no llegan datos de la caja. ' +
+      'Aparecen cuando el punto de venta esté encendido.</div>';
+    return;
+  }
+  const c = comparacion(d.total, (d.detalle||{}).hace7);
+  const top = ((d.detalle||{}).top || []).slice(0,5);
+
+  app.innerHTML =
+    '<header><div class="local">Minimarket Bellavista</div>' +
+    '<div class="dia">' + diaDeHoy() + '</div></header>' +
+
+    '<div class="hoy">' +
+      '<div class="n">' + pesos(d.total) + '</div>' +
+      '<div class="q">' + (d.ventas||0) + ' venta' + (d.ventas===1?'':'s') +
+        (d.ticket ? ' · ticket promedio ' + pesos(d.ticket) : '') + '</div>' +
+      '<div class="comp ' + c.cls + '">' + c.txt + '</div>' +
+    '</div>' +
+
+    '<section><h2>Cómo pagaron</h2>' + barrasPago(d) + '</section>' +
+
+    (top.length ? '<section class="top"><h2>Lo más vendido hoy</h2>' +
+      top.map(t => '<div class="fila"><span class="k">' + t.p + '</span>' +
+                   '<span class="v">' + pesos(t.v) + '</span></div>').join('') +
+      '</section>' : '') +
+
+    '<section><h2>Fiado por cobrar</h2>' +
+      '<div class="fiado"><div class="n">' + pesos(d.fiado_total) + '</div>' +
+      '<div class="q">' + d.fiado_clientes + ' personas con cuenta abierta' +
+      (d.fiado ? ' · hoy se fiaron ' + pesos(d.fiado) : '') + '</div></div>' +
+    '</section>' +
+
+    '<section><h2>La caja</h2><div class="turno">' +
+      '<span class="pt ' + (d.turno_abierto ? 'on' : 'off') + '"></span>' +
+      (d.turno_abierto ? 'Turno abierto' : 'Turno cerrado') +
+    '</div></section>' +
+
+    '<div class="pie">Actualizado hace ' +
+      (d.minutos < 1 ? 'un momento' : Math.round(d.minutos) + ' min') + '</div>';
+}
+
+async function cargar(){
+  if(!LLAVE){
+    app.innerHTML = '<div class="err">Falta el enlace completo. ' +
+      'Abre el que te pasaron, con su código al final.</div>';
+    return;
+  }
+  try{
+    const r = await fetch(URL_API, {
+      method:'POST',
+      headers:{'apikey':CLAVE,'Authorization':'Bearer '+CLAVE,'Content-Type':'application/json'},
+      body: JSON.stringify({p_llave: LLAVE}), cache:'no-store'
+    });
+    const d = await r.json();
+    if(!d || !d.ok){
+      app.innerHTML = '<div class="err">Este enlace no es válido. ' +
+        'Pídele a Marky que te mande el correcto.</div>';
+      return;
+    }
+    pintar(d);
+  }catch(e){
+    app.innerHTML = '<div class="err">No se pudo conectar. ' +
+      'Revisa que tengas internet y vuelve a intentar.</div>';
+  }
+}
+
+cargar();
+setInterval(cargar, 120000);                       // cada 2 minutos
+document.addEventListener('visibilitychange', () => { // y al volver a mirar
+  if(!document.hidden) cargar();
+});
+</script>
+</body>
+</html>
