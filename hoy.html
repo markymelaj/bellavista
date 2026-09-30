@@ -7,50 +7,46 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bellavista">
 <meta name="theme-color" content="#0f1e2b">
-<title>Bellavista · Hoy</title>
+<title>Bellavista</title>
 <style>
 :root{
   --tinta:#0f1e2b; --naranja:#e2700a; --azul:#1c6b8c; --verde:#15803d; --rojo:#b23b2e;
-  --papel:#f7f5f2; --linea:#e3ded7; --gris:#6b7885;
+  --papel:#f7f5f2; --tarjeta:#fff; --linea:#e3ded7; --gris:#6b7885;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--papel)}
 body{
   color:var(--tinta);
-  font:400 17px/1.45 -apple-system,BlinkMacSystemFont,'SF Pro Text',system-ui,sans-serif;
-  padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 28px);
+  font:400 17px/1.45 -apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  padding:env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 30px);
   -webkit-font-smoothing:antialiased;
 }
 .h{max-width:520px;margin:0 auto;padding:0 20px}
 
-header{padding:22px 0 6px}
-.dia{font-size:14px;color:var(--gris)}
+header{padding:22px 0 4px}
 .local{font:700 13px/1 -apple-system,system-ui;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--naranja);margin-bottom:6px}
+  text-transform:uppercase;color:var(--naranja);margin-bottom:5px}
+.dia{font-size:14px;color:var(--gris)}
 
-/* el número grande */
-.hoy{padding:14px 0 20px;border-bottom:1px solid var(--linea)}
-.hoy .n{font:700 clamp(46px,15vw,66px)/1 -apple-system,system-ui;letter-spacing:-.035em;
-  font-variant-numeric:tabular-nums}
+.hoy{padding:12px 0 20px;border-bottom:1px solid var(--linea)}
+.hoy .n{font:700 clamp(44px,14vw,62px)/1 -apple-system,system-ui;
+  letter-spacing:-.035em;font-variant-numeric:tabular-nums}
 .hoy .q{font-size:15px;color:var(--gris);margin-top:4px}
-.comp{display:inline-flex;align-items:center;gap:7px;margin-top:14px;
-  padding:8px 13px;border-radius:9px;font-size:15px;font-weight:500}
+.comp{display:inline-flex;align-items:center;margin-top:13px;padding:8px 13px;
+  border-radius:9px;font-size:15px;font-weight:500}
 .comp.up{background:#e4f3ea;color:var(--verde)}
 .comp.down{background:#fbeae7;color:var(--rojo)}
 .comp.flat{background:#eeeae4;color:var(--gris)}
 
-/* bloques */
 section{padding:20px 0;border-bottom:1px solid var(--linea)}
 h2{font:600 13px/1 -apple-system,system-ui;letter-spacing:.09em;
   text-transform:uppercase;color:var(--gris);margin-bottom:13px}
 
 .fila{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0}
 .fila+.fila{border-top:1px solid #efebe5}
-.fila .k{font-size:16.5px}
+.fila .k{font-size:16px}
 .fila .v{font:600 17px -apple-system,system-ui;font-variant-numeric:tabular-nums;white-space:nowrap}
-.fila .p{font-size:14px;color:var(--gris);margin-left:9px;font-weight:400}
 
-/* barras de pago */
 .pg{margin:3px 0 11px}
 .pg .lb{display:flex;justify-content:space-between;font-size:15.5px;margin-bottom:5px}
 .pg .lb b{font-weight:600;font-variant-numeric:tabular-nums}
@@ -58,147 +54,375 @@ h2{font:600 13px/1 -apple-system,system-ui;letter-spacing:.09em;
 .pg .br i{display:block;height:9px;border-radius:5px}
 
 /* fiado */
-.fiado{background:#fff;border:1px solid var(--linea);border-radius:13px;padding:17px 19px}
-.fiado .n{font:700 30px/1 -apple-system,system-ui;font-variant-numeric:tabular-nums}
-.fiado .q{font-size:15px;color:var(--gris);margin-top:5px}
+.tapa{background:var(--tarjeta);border:1px solid var(--linea);border-radius:13px;
+  padding:16px 18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.tapa .mostrar{color:var(--naranja);font-weight:600;font-size:15px}
+.deuda{background:var(--tarjeta);border:1px solid var(--linea);border-radius:13px;padding:16px 18px}
+.deuda .n{font:700 29px/1 -apple-system,system-ui;font-variant-numeric:tabular-nums}
+.deuda .q{font-size:15px;color:var(--gris);margin-top:4px}
+.cli{display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer}
+.cli+.cli{border-top:1px solid #efebe5}
+.cli .nm{font-size:16px}
+.cli .sub{font-size:13px;color:var(--gris);margin-top:2px}
+.cli .mn{font:600 16px -apple-system,system-ui;font-variant-numeric:tabular-nums;white-space:nowrap}
 
-.top .fila .k{font-size:16px}
+/* cobrar */
+.cobro{margin-top:12px;background:var(--tarjeta);border:1px solid var(--linea);
+  border-radius:13px;padding:17px 18px}
+.cobro label{display:block;font-size:14px;color:var(--gris);margin-bottom:6px}
+.cobro input{width:100%;font:600 24px -apple-system,system-ui;padding:11px 13px;
+  border:1px solid var(--linea);border-radius:10px;background:var(--papel);
+  color:var(--tinta);font-variant-numeric:tabular-nums}
+.cobro .bts{display:flex;gap:9px;margin-top:13px}
+.cobro button{flex:1;padding:13px;border:0;border-radius:10px;
+  font:600 16px -apple-system,system-ui;cursor:pointer}
+.bt-ok{background:var(--verde);color:#fff}
+.bt-no{background:#e8e3dc;color:var(--tinta)}
+.nota{font-size:13.5px;color:var(--gris);margin-top:10px;line-height:1.4}
+
+.aviso{margin:12px 0;padding:14px 16px;border-radius:11px;font-size:15.5px}
+.aviso.ok{background:#e4f3ea;color:var(--verde)}
+.aviso.mal{background:#fbeae7;color:var(--rojo)}
+.aviso.esp{background:#eeeae4;color:var(--gris)}
+
+/* stock */
+.it{display:flex;justify-content:space-between;align-items:center;padding:11px 0;gap:14px}
+.it+.it{border-top:1px solid #efebe5}
+.it .nm{font-size:16px;line-height:1.3}
+.it .sub{font-size:13px;color:var(--gris);margin-top:2px}
+.it .der{text-align:right;white-space:nowrap}
+.it .mn{font:600 16px -apple-system,system-ui;font-variant-numeric:tabular-nums}
+.chip{display:inline-block;font-size:12.5px;font-weight:600;padding:3px 9px;border-radius:20px}
+.chip.cero{background:#fbeae7;color:var(--rojo)}
+.chip.poco{background:#fdf0e2;color:var(--naranja)}
+.resumen{display:flex;gap:26px;padding:14px 18px;background:var(--tarjeta);
+  border:1px solid var(--linea);border-radius:13px;margin-bottom:13px;flex-wrap:wrap}
+.resumen div b{display:block;font:700 23px/1 -apple-system,system-ui;font-variant-numeric:tabular-nums}
+.resumen div span{font-size:13px;color:var(--gris)}
+
 .turno{display:flex;align-items:center;gap:9px;font-size:15.5px;color:var(--gris)}
 .pt{width:9px;height:9px;border-radius:50%;flex:none}
 .pt.on{background:var(--verde)} .pt.off{background:#b9b2a8}
 
 .pie{padding:18px 0 0;font-size:13.5px;color:var(--gris);text-align:center}
 .cargando{padding:60px 20px;text-align:center;color:var(--gris)}
-.err{margin:22px 0;padding:17px;background:#fff;border:1px solid var(--linea);
+.err{margin:22px 0;padding:17px;background:var(--tarjeta);border:1px solid var(--linea);
   border-radius:13px;color:var(--gris);font-size:15.5px}
+
 @media (prefers-color-scheme: dark){
-  :root{--papel:#131a20;--tinta:#f2efea;--linea:#28323b;--gris:#93a1ad}
-  .fiado,.err{background:#1b242c}
+  :root{--papel:#131a20;--tinta:#f2efea;--tarjeta:#1b242c;--linea:#28323b;--gris:#93a1ad}
   .pg .br{background:#28323b}
-  .fila+.fila{border-top-color:#222b33}
+  .fila+.fila,.cli+.cli{border-top-color:#222b33}
   .comp.up{background:#173026}.comp.down{background:#32201d}.comp.flat{background:#222b33}
+  .aviso.ok{background:#173026}.aviso.mal{background:#32201d}.aviso.esp{background:#222b33}
+  .bt-no{background:#28323b;color:var(--tinta)}
 }
 </style>
 </head>
 <body>
-<div class="h" id="app">
-  <div class="cargando">Cargando…</div>
-</div>
+<div class="h" id="app"><div class="cargando">Cargando…</div></div>
 
 <script>
 const LLAVE = new URLSearchParams(location.search).get('k') || '';
-const URL_API = 'https://wtqxyclosajruswjjcbm.supabase.co/rest/v1/rpc/panel_ver';
+const API = 'https://wtqxyclosajruswjjcbm.supabase.co/rest/v1/rpc/';
 const CLAVE = 'sb_publishable_fQCKEOnegXsJBNiB_aBFyQ_CZiRLVn8';
-
 const app = document.getElementById('app');
-const pesos = n => '$' + (Math.round(n||0)).toLocaleString('es-CL');
+const pesos = n => '$' + (Math.round(n || 0)).toLocaleString('es-CL');
+
+let DATOS = null, DEUDORES = null, COBRANDO = null;
+let STOCK = null, QUIETO = null;
+
+async function rpc(fn, cuerpo){
+  const r = await fetch(API + fn, {
+    method:'POST',
+    headers:{'apikey':CLAVE,'Authorization':'Bearer '+CLAVE,'Content-Type':'application/json'},
+    body: JSON.stringify(cuerpo), cache:'no-store'
+  });
+  return await r.json();
+}
+
+// Pedir algo a la caja y esperar la respuesta. La caja revisa cada minuto,
+// asi que puede demorar: se avisa en pantalla en vez de dejar la espera muda.
+async function ordenar(tipo, datos, motivo, alPaso){
+  const r = await rpc('panel_ordenar',
+    {p_llave: LLAVE, p_tipo: tipo, p_datos: datos || {}, p_motivo: motivo || null});
+  if(!r || !r.ok) return {ok:false, error:(r && r.error) || 'no se pudo pedir'};
+  for(let i = 0; i < 40; i++){
+    await new Promise(s => setTimeout(s, 3000));
+    if(alPaso) alPaso(i);
+    const q = await rpc('panel_resultado', {p_llave: LLAVE, p_tarea: r.tarea});
+    if(q && q.ok && (q.estado === 'lista' || q.estado === 'error')){
+      return {ok: q.estado === 'lista', datos: q.resultado};
+    }
+  }
+  return {ok:false, error:'la caja no respondió a tiempo'};
+}
 
 function diaDeHoy(){
-  // Se arma a mano: capitalize deja "Miércoles, 30 De Septiembre".
-  const d = new Date();
-  const t = d.toLocaleDateString('es-CL', {weekday:'long', day:'numeric', month:'long'});
+  const t = new Date().toLocaleDateString('es-CL',
+    {weekday:'long', day:'numeric', month:'long'});
   return t.charAt(0).toUpperCase() + t.slice(1);
 }
 
-function comparacion(hoy, hace7){
-  // Un número suelto no dice nada. Lo que sirve es "¿vamos mejor o peor que
-  // el mismo día la semana pasada?", dicho en palabras.
+function comparar(hoy, hace7){
   if(!hace7) return {cls:'flat', txt:'Primera vez que se compara este día'};
-  const dif = hoy - hace7;
-  const pc = Math.round(dif * 100 / hace7);
-  const dia = new Date(Date.now() - 7*86400000)
-                .toLocaleDateString('es-CL', {weekday:'long'});
+  const pc = Math.round((hoy - hace7) * 100 / hace7);
+  const dia = new Date(Date.now() - 7*86400000).toLocaleDateString('es-CL', {weekday:'long'});
   if(Math.abs(pc) < 6) return {cls:'flat', txt:'Parecido al ' + dia + ' pasado'};
-  if(dif > 0) return {cls:'up', txt:'↑ ' + pc + '% más que el ' + dia + ' pasado'};
+  if(pc > 0) return {cls:'up', txt:'↑ ' + pc + '% más que el ' + dia + ' pasado'};
   return {cls:'down', txt:'↓ ' + Math.abs(pc) + '% menos que el ' + dia + ' pasado'};
 }
 
-function barrasPago(d){
+function barras(d){
   const tot = d.total || 1;
-  const filas = [
-    ['Efectivo', d.efectivo, '#15803d'],
-    ['Tarjeta',  d.tarjeta,  '#1c6b8c'],
-    ['Fiado',    d.fiado,    '#e2700a'],
-    ['Transferencia', d.transferencia, '#6b7885'],
-  ].filter(f => f[1] > 0);
-  if(!filas.length) return '<p style="color:var(--gris);font-size:15.5px">Sin ventas todavía.</p>';
-  return filas.map(([n,v,c]) =>
-    '<div class="pg"><div class="lb"><span>' + n + '</span><b>' + pesos(v) + '</b></div>' +
-    '<div class="br"><i style="width:' + Math.max(2, v*100/tot) + '%;background:' + c + '"></i></div></div>'
+  const f = [['Efectivo',d.efectivo,'#15803d'],['Tarjeta',d.tarjeta,'#1c6b8c'],
+             ['Fiado',d.fiado,'#e2700a'],['Transferencia',d.transferencia,'#6b7885']]
+            .filter(x => x[1] > 0);
+  if(!f.length) return '<p style="color:var(--gris);font-size:15.5px">Sin ventas todavía.</p>';
+  return f.map(([n,v,c]) =>
+    '<div class="pg"><div class="lb"><span>'+n+'</span><b>'+pesos(v)+'</b></div>'+
+    '<div class="br"><i style="width:'+Math.max(2,v*100/tot)+'%;background:'+c+'"></i></div></div>'
   ).join('');
 }
 
-function pintar(d){
-  if(d.sin_datos){
-    app.innerHTML = '<div class="err">Todavía no llegan datos de la caja. ' +
+function pintar(){
+  const d = DATOS;
+  if(!d || d.sin_datos){
+    app.innerHTML = '<div class="err">Todavía no llegan datos de la caja. '+
       'Aparecen cuando el punto de venta esté encendido.</div>';
     return;
   }
-  const c = comparacion(d.total, (d.detalle||{}).hace7);
+  const c = comparar(d.total, (d.detalle||{}).hace7);
   const top = ((d.detalle||{}).top || []).slice(0,5);
+  const m = Math.round(d.minutos || 0);
 
   app.innerHTML =
-    '<header><div class="local">Minimarket Bellavista</div>' +
-    '<div class="dia">' + diaDeHoy() + '</div></header>' +
+    '<header><div class="local">Minimarket Bellavista</div>'+
+    '<div class="dia">'+diaDeHoy()+'</div></header>'+
 
-    '<div class="hoy">' +
-      '<div class="n">' + pesos(d.total) + '</div>' +
-      '<div class="q">' + (d.ventas||0) + ' venta' + (d.ventas===1?'':'s') +
-        (d.ticket ? ' · ticket promedio ' + pesos(d.ticket) : '') + '</div>' +
-      '<div class="comp ' + c.cls + '">' + c.txt + '</div>' +
-    '</div>' +
+    '<div class="hoy"><div class="n">'+pesos(d.total)+'</div>'+
+    '<div class="q">'+(d.ventas||0)+' venta'+(d.ventas===1?'':'s')+
+      (d.ticket ? ' &middot; ticket promedio '+pesos(d.ticket) : '')+'</div>'+
+    '<div class="comp '+c.cls+'">'+c.txt+'</div></div>'+
 
-    '<section><h2>Cómo pagaron</h2>' + barrasPago(d) + '</section>' +
+    '<section><h2>Cómo pagaron</h2>'+barras(d)+'</section>'+
 
-    (top.length ? '<section class="top"><h2>Lo más vendido hoy</h2>' +
-      top.map(t => '<div class="fila"><span class="k">' + t.p + '</span>' +
-                   '<span class="v">' + pesos(t.v) + '</span></div>').join('') +
-      '</section>' : '') +
+    (top.length ? '<section><h2>Lo más vendido hoy</h2>'+
+      top.map(t => '<div class="fila"><span class="k">'+t.p+'</span>'+
+        '<span class="v">'+pesos(t.v)+'</span></div>').join('')+'</section>' : '')+
 
-    '<section><h2>Fiado por cobrar</h2>' +
-      '<div class="fiado"><div class="n">' + pesos(d.fiado_total) + '</div>' +
-      '<div class="q">' + d.fiado_clientes + ' personas con cuenta abierta' +
-      (d.fiado ? ' · hoy se fiaron ' + pesos(d.fiado) : '') + '</div></div>' +
-    '</section>' +
+    bloqueFiado(d)+
 
-    '<section><h2>La caja</h2><div class="turno">' +
-      '<span class="pt ' + (d.turno_abierto ? 'on' : 'off') + '"></span>' +
-      (d.turno_abierto ? 'Turno abierto' : 'Turno cerrado') +
-    '</div></section>' +
+    bloqueStock()+
+    bloqueQuieto()+
 
-    '<div class="pie">Actualizado hace ' +
-      (d.minutos < 1 ? 'un momento' : Math.round(d.minutos) + ' min') + '</div>';
+    '<section><h2>La caja</h2><div class="turno">'+
+    '<span class="pt '+(d.turno_abierto?'on':'off')+'"></span>'+
+    (d.turno_abierto?'Turno abierto':'Turno cerrado')+'</div></section>'+
+
+    (m > 45
+      ? '<div class="pie" style="color:var(--rojo)">Este dato es de hace '+
+        (m<120 ? m+' minutos' : Math.round(m/60)+' horas')+
+        '.<br>Puede que la caja esté apagada.</div>'
+      : '<div class="pie">Actualizado hace '+(m<1?'un momento':m+' min')+'</div>');
+}
+
+// ---- fiado ----
+function bloqueFiado(d){
+  // Cerrado de entrada: son nombres y plata de vecinos, y el teléfono se mira
+  // en el mesón con gente al lado. Se abre a propósito.
+  if(!DEUDORES){
+    return '<section><h2>Fiado</h2>'+
+      '<div class="tapa" onclick="verFiado()">'+
+      '<span>Ver fiado por cobrar</span><span class="mostrar">Mostrar</span></div>'+
+      '<div id="avisoF"></div></section>';
+  }
+  const l = DEUDORES.lista || [];
+  return '<section><h2>Fiado por cobrar</h2>'+
+    '<div class="deuda"><div class="n">'+pesos(DEUDORES.total)+'</div>'+
+    '<div class="q">'+DEUDORES.deudores+' personas con cuenta abierta</div></div>'+
+    '<div style="margin-top:14px">'+
+    l.map((x,i) => '<div class="cli" onclick="cobrar('+i+')">'+
+      '<div><div class="nm">'+x.nombre+'</div>'+
+      '<div class="sub">último abono: '+(x.ultimo_abono || 'nunca')+'</div></div>'+
+      '<div class="mn">'+pesos(x.debe)+'</div></div>'+
+      '<div id="caja'+i+'"></div>').join('')+
+    '</div><div id="avisoF"></div></section>';
+}
+
+async function verFiado(){
+  const a = document.getElementById('avisoF');
+  a.innerHTML = '<div class="aviso esp">Pidiéndole la lista a la caja… '+
+    'puede tardar hasta un minuto.</div>';
+  const r = await ordenar('deudores', {limite:25}, 'Ver quién debe');
+  if(!r.ok){
+    a.innerHTML = '<div class="aviso mal">'+(r.error || 'No se pudo')+'</div>';
+    return;
+  }
+  DEUDORES = r.datos;
+  pintar();
+}
+
+function cobrar(i){
+  COBRANDO = (DEUDORES.lista || [])[i];
+  if(!COBRANDO) return;
+  // Se abre debajo del cliente tocado: asi se ve a quien se le esta cobrando
+  // sin tener que recordar en cual se apreto.
+  (DEUDORES.lista || []).forEach((_, j) => {
+    const c = document.getElementById('caja'+j);
+    if(c) c.innerHTML = '';
+  });
+  const a = document.getElementById('caja'+i) || document.getElementById('avisoF');
+  COBRANDO._caja = i;
+  a.innerHTML =
+    '<div class="cobro">'+
+    '<label>Abono de <b>'+COBRANDO.nombre+'</b> &middot; debe '+pesos(COBRANDO.debe)+'</label>'+
+    '<input id="monto" type="number" inputmode="numeric" placeholder="0" value="'+COBRANDO.debe+'">'+
+    '<div class="bts"><button class="bt-no" onclick="cerrarCobro()">Cancelar</button>'+
+    '<button class="bt-ok" onclick="registrar()">Registrar abono</button></div>'+
+    '<p class="nota">Se registra como <b>transferencia</b>. El efectivo se cobra '+
+    'y se anota en el mostrador: entra al arqueo de quien lo recibe.</p></div>';
+  a.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function cerrarCobro(){
+  const i = COBRANDO && COBRANDO._caja;
+  COBRANDO = null;
+  const c = (i !== undefined && document.getElementById('caja'+i))
+            || document.getElementById('avisoF');
+  if(c) c.innerHTML = '';
+}
+
+async function registrar(){
+  const monto = parseInt(document.getElementById('monto').value || '0', 10);
+  const a = (COBRANDO && document.getElementById('caja'+COBRANDO._caja))
+            || document.getElementById('avisoF');
+  if(!monto || monto <= 0){
+    a.innerHTML = '<div class="aviso mal">Escribe cuánto abonó.</div>';
+    return;
+  }
+  const quien = COBRANDO;
+  a.innerHTML = '<div class="aviso esp">Registrando '+pesos(monto)+' de '+
+    quien.nombre+'…</div>';
+  const r = await ordenar('fiado', {
+      accion: 'abono',
+      items: [{customer_id: quien.id, monto: monto, metodo: 'transferencia',
+               nota: 'abono por transferencia, registrado por la dueña'}]
+    }, 'Abono de ' + quien.nombre);
+
+  if(!r.ok){
+    a.innerHTML = '<div class="aviso mal">'+(r.error || 'No se pudo registrar')+'</div>';
+    return;
+  }
+  const d = r.datos || {};
+  if(d.fallos && d.fallos.length){
+    a.innerHTML = '<div class="aviso mal">'+d.fallos[0].error+'</div>';
+    return;
+  }
+  const det = (d.detalle || [])[0] || {};
+  a.innerHTML = '<div class="aviso ok">Registrado. '+quien.nombre+
+    ' queda debiendo '+pesos(Math.max(0, det.ahora || 0))+'.</div>';
+  COBRANDO = null;
+  setTimeout(async () => {
+    const q = await ordenar('deudores', {limite:25}, 'Actualizar la lista');
+    if(q.ok){ DEUDORES = q.datos; pintar(); }
+  }, 1500);
+}
+
+function bloqueStock(){
+  if(!STOCK){
+    return '<section><h2>Stock</h2>'+
+      '<div class="tapa" onclick="verStock()">'+
+      '<span>Ver qué hay que reponer</span><span class="mostrar">Mostrar</span></div>'+
+      '<div id="avisoS"></div></section>';
+  }
+  const l = STOCK.lista || [];
+  return '<section><h2>Hay que reponer</h2>'+
+    '<div class="resumen">'+
+      '<div><b>'+(STOCK.urgentes||0)+'</b><span>lo piden y no hay</span></div>'+
+      '<div><b>'+STOCK.agotados+'</b><span>agotados</span></div>'+
+    '</div>'+
+    l.map(x => '<div class="it"><div><div class="nm">'+x.nombre+'</div>'+
+      '<div class="sub">'+
+        (x.pedidos > 0
+          ? 'lo pidieron ' + x.pedidos + ' ' + (x.pedidos===1?'vez':'veces') + ' este mes'
+          : (x.categoria || 'sin movimiento este mes'))+
+      '</div></div>'+
+      '<div class="der"><span class="chip '+(x.stock<=0?'cero':'poco')+'">'+
+      (x.stock<=0 ? 'agotado' : 'quedan '+x.stock)+'</span></div></div>').join('')+
+    '<p class="nota" style="margin-top:12px">Ordenado por lo que más pide la '+
+    'gente. Lo de arriba es lo que urge comprar.</p>'+
+    '<div id="avisoS"></div></section>';
+}
+
+function bloqueQuieto(){
+  if(!QUIETO){
+    return '<section><h2>Mercadería quieta</h2>'+
+      '<div class="tapa" onclick="verQuieto()">'+
+      '<span>Ver lo que no se vende</span><span class="mostrar">Mostrar</span></div>'+
+      '<div id="avisoQ"></div></section>';
+  }
+  const l = QUIETO.lista || [];
+  return '<section><h2>Lo que no se vende</h2>'+
+    '<div class="resumen">'+
+      '<div><b>'+pesos(QUIETO.plata_detenida)+'</b><span>plata detenida</span></div>'+
+      '<div><b>'+QUIETO.no_se_vende+'</b><span>productos</span></div>'+
+    '</div>'+
+    l.map(x => '<div class="it"><div><div class="nm">'+x.nombre+'</div>'+
+      '<div class="sub">'+x.stock+' en estante &middot; última venta '+
+      (x.ultima || 'nunca')+'</div></div>'+
+      '<div class="der"><div class="mn">'+pesos(x.plata)+'</div></div></div>').join('')+
+    '<p class="nota" style="margin-top:12px">Sin vender hace '+QUIETO.dias+
+    ' días o más. Es plata comprada que sigue en el estante.</p>'+
+    '<div id="avisoQ"></div></section>';
+}
+
+async function verStock(){
+  const a = document.getElementById('avisoS');
+  a.innerHTML = '<div class="aviso esp">Preguntándole a la caja… '+
+    'puede tardar hasta un minuto.</div>';
+  const r = await ordenar('inventario', {informe:'stock_bajo', limite:30},
+                          'Ver qué hay que reponer');
+  if(!r.ok){ a.innerHTML = '<div class="aviso mal">'+(r.error||'No se pudo')+'</div>'; return; }
+  STOCK = r.datos; pintar();
+}
+
+async function verQuieto(){
+  const a = document.getElementById('avisoQ');
+  a.innerHTML = '<div class="aviso esp">Preguntándole a la caja… '+
+    'puede tardar hasta un minuto.</div>';
+  const r = await ordenar('inventario', {informe:'no_se_vende', limite:25, dias:60},
+                          'Ver mercadería quieta');
+  if(!r.ok){ a.innerHTML = '<div class="aviso mal">'+(r.error||'No se pudo')+'</div>'; return; }
+  QUIETO = r.datos; pintar();
 }
 
 async function cargar(){
   if(!LLAVE){
-    app.innerHTML = '<div class="err">Falta el enlace completo. ' +
+    app.innerHTML = '<div class="err">Falta el enlace completo. '+
       'Abre el que te pasaron, con su código al final.</div>';
     return;
   }
   try{
-    const r = await fetch(URL_API, {
-      method:'POST',
-      headers:{'apikey':CLAVE,'Authorization':'Bearer '+CLAVE,'Content-Type':'application/json'},
-      body: JSON.stringify({p_llave: LLAVE}), cache:'no-store'
-    });
-    const d = await r.json();
+    const d = await rpc('panel_ver', {p_llave: LLAVE});
     if(!d || !d.ok){
-      app.innerHTML = '<div class="err">Este enlace no es válido. ' +
+      app.innerHTML = '<div class="err">Este enlace no es válido. '+
         'Pídele a Marky que te mande el correcto.</div>';
       return;
     }
-    pintar(d);
+    DATOS = d;
+    pintar();
   }catch(e){
-    app.innerHTML = '<div class="err">No se pudo conectar. ' +
+    app.innerHTML = '<div class="err">No se pudo conectar. '+
       'Revisa que tengas internet y vuelve a intentar.</div>';
   }
 }
 
 cargar();
-setInterval(cargar, 120000);                       // cada 2 minutos
-document.addEventListener('visibilitychange', () => { // y al volver a mirar
-  if(!document.hidden) cargar();
+// No se refresca si hay un cobro a medias: seria borrarle lo que esta escribiendo.
+setInterval(() => { if(!COBRANDO) cargar(); }, 120000);
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden && !COBRANDO) cargar();
 });
 </script>
 </body>
