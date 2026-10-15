@@ -1008,9 +1008,9 @@ function loadCustomer(){ try{ var d=JSON.parse(localStorage.getItem(CUST_KEY)||'
 
 /* ---------- Estado del local ---------- */
 function updateStatus(){
-  var h=new Date().getHours(), abierto = h>=9 && h<20;
+  var h=new Date().getHours(), abierto = h>=9 && h<21;
   document.getElementById('header-status').innerHTML =
-    '<span class="status-dot '+(abierto?'open':'closed')+'"></span><span>'+(abierto?'Abierto hasta las 20:00':'Cerrado · abre a las 9:00')+'</span>';
+    '<span class="status-dot '+(abierto?'open':'closed')+'"></span><span>'+(abierto?'Abierto hasta las 21:00':'Cerrado · abre a las 9:00')+'</span>';
 }
 
 /* ---------- Slider ---------- */
